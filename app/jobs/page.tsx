@@ -1,9 +1,9 @@
-// app/page.tsx
+// app/jobs/page.tsx
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import Link from "next/link";
 
-export default async function HomePage() {
+export default async function JobListingsPage() {
   const supabase = createServerComponentClient({ cookies });
 
   const { data: jobListings } = await supabase
@@ -14,63 +14,44 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-white">
-        <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">DisñoJobs</h1>
-            <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-              La mejor plataforma de empleos para diseñadores de producto en español
-            </p>
-            <div className="mt-5 max-w-md mx-auto flex justify-center gap-3">
-              <Link
-                href="/jobs"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Ver Empleos
-              </Link>
-              <Link
-                href="/jobs/create"
-                className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Publicar Empleo
-              </Link>
-            </div>
+      {/* Header */}
+      <div className="bg-white shadow">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-gray-900">Trabajos de Diseño de Producto</h1>
+            <Link
+              href="/jobs/create"
+              className="inline-flex items-center px-4 py-2 border border-transparent 
+                       text-sm font-medium rounded-md text-white bg-blue-600 
+                       hover:bg-blue-700"
+            >
+              Publicar Trabajo
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Featured Jobs Section */}
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900">Empleos Destacados</h2>
-          <p className="mt-3 text-xl text-gray-500">Las últimas oportunidades para diseñadores de producto</p>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {/* Job Count */}
+        <div className="px-4 sm:px-0">
+          <p className="text-gray-600">{jobListings?.length || 0} trabajos disponibles</p>
         </div>
 
         {/* Job Listings */}
-        <div className="mt-12 space-y-6">
+        <div className="mt-6 space-y-6 px-4 sm:px-0">
           {jobListings?.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg shadow">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No hay trabajos publicados aún</h3>
-              <p className="text-gray-500 mb-6">Sé el primero en publicar una oferta de trabajo</p>
-              <Link
-                href="/jobs/create"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Publicar Empleo
-              </Link>
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No hay trabajos publicados</h3>
+              <p className="text-gray-500">Sé el primero en publicar una oferta de trabajo</p>
             </div>
           ) : (
-            jobListings?.slice(0, 5).map((job) => (
+            jobListings?.map((job) => (
               <div key={job.id} className="bg-white shadow rounded-lg overflow-hidden hover:shadow-md transition">
                 <div className="p-6">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        <Link href={`/jobs/${job.id}`} className="hover:text-blue-600">
-                          {job.title}
-                        </Link>
-                      </h3>
+                      <h2 className="text-xl font-semibold text-gray-900">{job.title}</h2>
                       <p className="mt-1 text-base text-gray-600">{job.company}</p>
                     </div>
                     <span
@@ -123,7 +104,7 @@ export default async function HomePage() {
                   )}
 
                   <div className="mt-4">
-                    <p className="text-gray-600 line-clamp-2">{job.description}</p>
+                    <p className="text-gray-600 line-clamp-3">{job.description}</p>
                   </div>
 
                   <div className="mt-6">
@@ -140,21 +121,8 @@ export default async function HomePage() {
               </div>
             ))
           )}
-
-          {jobListings && jobListings.length > 5 && (
-            <div className="text-center mt-8">
-              <Link
-                href="/jobs"
-                className="inline-flex items-center px-6 py-3 border border-gray-300 
-                         text-base font-medium rounded-md text-gray-700 bg-white 
-                         hover:bg-gray-50"
-              >
-                Ver Todos los Empleos
-              </Link>
-            </div>
-          )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
