@@ -1,126 +1,137 @@
-// app/jobs/[id]/page.tsx
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
-import Link from "next/link";
+"use client";
 
-export default async function JobDetailPage({ params: { id } }: { params: { id: string } }) {
-  const supabase = createServerComponentClient({ cookies });
+import { useState, useEffect } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useParams } from "next/navigation";
 
-  const { data: job } = await supabase.from("job_listings").select("*").eq("id", id).single();
+interface Job {
+  id: number;
+  title: string;
+  company: string;
+  location: string;
+  job_type: "remote" | "onsite" | "hybrid";
+  description: string;
+  requirements: string[];
+  salary_min?: number;
+  salary_max?: number;
+  created_at: string;
+}
+
+export default function JobDetailsPage() {
+  const [job, setJob] = useState<Job | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const params = useParams();
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const fetchJob = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase.from("job_listings").select("*").eq("id", params.id).single();
+
+        if (error) throw error;
+        setJob(data);
+      } catch (error) {
+        console.error("Error fetching job:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (params.id) {
+      fetchJob();
+    }
+  }, [params.id, supabase]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="text-center py-12">Cargando...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!job) {
-    notFound();
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="text-center py-12 text-red-600">No se encontró el empleo solicitado.</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center">
-            <Link href="/jobs" className="text-blue-600 hover:text-blue-800 mr-4">
-              ← Volver a Empleos
-            </Link>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-100">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">{job.title}</h1>
+
+            <div className="flex flex-wrap items-center gap-2 text-gray-600">
+              <span className="font-medium text-gray-900">{job.company}</span>
+              <span className="text-gray-300">•</span>
+              <span>{job.location}</span>
+              <span className="text-gray-300">•</span>
+              <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                {job.job_type === "remote" ? "Remoto" : job.job_type === "onsite" ? "Presencial" : "Híbrido"}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Salary Range */}
+            {(job.salary_min || job.salary_max) && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">Rango Salarial</h2>
+                <div className="text-gray-900 font-medium">
+                  {job.salary_min && job.salary_max
+                    ? `€${job.salary_min.toLocaleString()} - €${job.salary_max.toLocaleString()}`
+                    : job.salary_min
+                    ? `Desde €${job.salary_min.toLocaleString()}`
+                    : `Hasta €${job.salary_max?.toLocaleString()}`}
+                </div>
+              </div>
+            )}
+
+            {/* Description */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-3">Descripción</h2>
+              <div className="text-gray-700 prose max-w-none">{job.description}</div>
+            </div>
+
+            {/* Requirements */}
+            {job.requirements && job.requirements.length > 0 && (
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-3">Requisitos</h2>
+                <ul className="space-y-2">
+                  {job.requirements.map((req, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span className="text-gray-700">{req}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Published Date */}
+            <div className="pt-4 mt-6 border-t border-gray-100">
+              <div className="text-sm text-gray-500">
+                Publicado el{" "}
+                {new Date(job.created_at).toLocaleDateString("es-ES", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Main Content */}
-      <main className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="p-6">
-            {/* Header Section */}
-            <div className="border-b border-gray-200 pb-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{job.title}</h1>
-                  <p className="mt-1 text-lg text-gray-600">{job.company}</p>
-                </div>
-                <span
-                  className={`
-                  px-3 py-1 rounded-full text-sm font-medium
-                  ${
-                    job.job_type === "remote"
-                      ? "bg-green-100 text-green-800"
-                      : job.job_type === "hybrid"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-blue-100 text-blue-800"
-                  }
-                `}
-                >
-                  {job.job_type === "remote" ? "Remoto" : job.job_type === "hybrid" ? "Híbrido" : "Presencial"}
-                </span>
-              </div>
-
-              <div className="mt-4 flex items-center text-sm text-gray-500">
-                <svg
-                  className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                {job.location || "Ubicación no especificada"}
-              </div>
-
-              {(job.salary_min || job.salary_max) && (
-                <div className="mt-2 text-sm text-gray-500">
-                  Salario: {job.salary_min && `${job.salary_min.toLocaleString()}€`}
-                  {job.salary_min && job.salary_max && " - "}
-                  {job.salary_max && `${job.salary_max.toLocaleString()}€`}
-                </div>
-              )}
-            </div>
-
-            {/* Description Section */}
-            <div className="py-6 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Descripción del Puesto</h2>
-              <div className="prose max-w-none text-gray-600">
-                {job.description.split("\n").map((paragraph, index) => (
-                  <p key={index} className="mb-4">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-            </div>
-
-            {/* Requirements Section */}
-            <div className="py-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Requisitos</h2>
-              <ul className="list-disc pl-5 space-y-2 text-gray-600">
-                {job.requirements.map((requirement: string, index: number) => (
-                  <li key={index}>{requirement}</li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Apply Section */}
-            <div className="mt-6 flex justify-center">
-              <button
-                className="inline-flex items-center px-6 py-3 border border-transparent 
-                         text-base font-medium rounded-md shadow-sm text-white 
-                         bg-blue-600 hover:bg-blue-700 focus:outline-none 
-                         focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Aplicar a este trabajo
-              </button>
-            </div>
-          </div>
-        </div>
-      </main>
     </div>
   );
 }
