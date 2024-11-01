@@ -1,8 +1,6 @@
 // app/components/JobFilters.tsx
 "use client";
 
-import { useState } from "react";
-
 interface JobFiltersProps {
   onSearch: (value: string) => void;
   onFilterChange: (filterType: string, value: string) => void;

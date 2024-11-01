@@ -1,5 +1,5 @@
 // app/jobs/create/page.tsx
-import CreateJobForm from "../../components/jobs/create-job-form";
+import CreateJobForm from "@/components/jobs/create-job-form";
 
 export default function CreateJobPage() {
   return (

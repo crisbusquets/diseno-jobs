@@ -1,7 +1,7 @@
 // app/page.tsx
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import JobListingsClient from "./components/JobListingsClient";
+import JobListingsClient from "@/components/job-listings-client";
 
 export default async function HomePage() {
   const supabase = createServerComponentClient({ cookies });
