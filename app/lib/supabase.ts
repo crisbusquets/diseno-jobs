@@ -1,20 +1,13 @@
-import { createBrowserClient, createServerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+// app/lib/supabase.ts
+import { createClient as supabaseClient } from "@supabase/supabase-js";
 
-// Server-side client
-export function createClient() {
-  const cookieStore = cookies();
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value;
-      },
+export function getSupabase() {
+  return supabaseClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: false,
     },
   });
-}
-
-// Browser-side client
-export function createBrowserSupabaseClient() {
-  return createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 }

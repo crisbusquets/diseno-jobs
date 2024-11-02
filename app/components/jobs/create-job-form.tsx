@@ -1,21 +1,54 @@
+// app/components/jobs/create-job-form.tsx
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { createJob } from "@/actions/jobs";
+
+const BENEFITS_OPTIONS = [
+  "Seguro médico",
+  "Gimnasio gratuito",
+  "Formación continua",
+  "Horario flexible",
+  "Teletrabajo",
+  "Plan de pensiones",
+  "Bonus anual",
+  "Stock options",
+];
 
 export default function CreateJobForm() {
+  const [selectedBenefits, setSelectedBenefits] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null); // Clear any previous errors
+
+    const formData = new FormData(e.currentTarget);
+
+    // Add benefits to form data
+    formData.append("benefits", JSON.stringify(selectedBenefits));
+
+    try {
+      const result = await createJob(formData);
+      console.log("Job creation result:", result);
+
+      if (!result.success) {
+        setError(result.error || "Unknown error occurred");
+      }
+    } catch (error) {
+      console.error("Full error details:", error);
+      setError(error instanceof Error ? error.message : "Failed to create job");
+    }
+  };
+
   return (
     <div className="max-w-[600px] mx-auto bg-white rounded-2xl p-8">
       <h1 className="text-2xl font-normal text-gray-900 mb-8">Publicar Oferta de Diseño</h1>
 
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          const formData = new FormData(e.currentTarget);
-          const data = Object.fromEntries(formData);
-          console.log("Formulario enviado:", data);
-        }}
-        className="space-y-6"
-      >
+      {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">{error}</div>}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Company Information */}
         <div>
           <label className="block text-sm font-normal text-gray-600 mb-1">Nombre de la Empresa *</label>
           <input
@@ -31,13 +64,25 @@ export default function CreateJobForm() {
           <label className="block text-sm font-normal text-gray-600 mb-1">Email de la Empresa *</label>
           <input
             type="email"
-            name="email"
+            name="company_email"
             required
             placeholder="ej., contratacion@empresa.com"
             className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
           />
         </div>
 
+        {/* Logo Upload */}
+        <div>
+          <label className="block text-sm font-normal text-gray-600 mb-1">Logo de la Empresa</label>
+          <input
+            type="file"
+            name="company_logo"
+            accept="image/*"
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-400 focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        {/* Job Details */}
         <div>
           <label className="block text-sm font-normal text-gray-600 mb-1">Título del Puesto *</label>
           <input
@@ -54,7 +99,7 @@ export default function CreateJobForm() {
           <select
             name="job_type"
             defaultValue="remote"
-            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:border-blue-500 appearance-none"
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:border-blue-500"
           >
             <option value="remote">Remoto</option>
             <option value="hybrid">Híbrido</option>
@@ -63,15 +108,62 @@ export default function CreateJobForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-normal text-gray-600 mb-1">Rango Salarial</label>
+          <label className="block text-sm font-normal text-gray-600 mb-1">Ubicación</label>
           <input
             type="text"
-            name="salary_range"
-            placeholder="ej., 45K-60K €/año"
+            name="location"
+            placeholder="ej., Madrid, Barcelona, etc."
             className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
           />
         </div>
 
+        {/* Salary Range */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-normal text-gray-600 mb-1">Salario Mínimo (€)</label>
+            <input
+              type="number"
+              name="salary_min"
+              placeholder="ej., 35000"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-normal text-gray-600 mb-1">Salario Máximo (€)</label>
+            <input
+              type="number"
+              name="salary_max"
+              placeholder="ej., 45000"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        {/* Benefits */}
+        <div>
+          <label className="block text-sm font-normal text-gray-600 mb-2">Beneficios</label>
+          <div className="grid grid-cols-2 gap-2">
+            {BENEFITS_OPTIONS.map((benefit) => (
+              <label key={benefit} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={selectedBenefits.includes(benefit)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedBenefits([...selectedBenefits, benefit]);
+                    } else {
+                      setSelectedBenefits(selectedBenefits.filter((b) => b !== benefit));
+                    }
+                  }}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">{benefit}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Job Description */}
         <div>
           <label className="block text-sm font-normal text-gray-600 mb-1">Descripción del Puesto *</label>
           <textarea
