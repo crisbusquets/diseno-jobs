@@ -3,6 +3,7 @@ import { getSupabase } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import CopyLinkButton from "@/components/copy-link-button";
+import JobDetails from "@/components/jobs/job-details";
 
 export default async function SuccessPage({ searchParams }: { searchParams: { session_id: string } }) {
   if (!searchParams.session_id) {
@@ -29,7 +30,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { se
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-xl mx-auto px-4">
+      <div className="max-w-3xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow p-6 md:p-8">
           {/* Success Icon */}
           <div className="mb-6">
@@ -54,12 +55,8 @@ export default async function SuccessPage({ searchParams }: { searchParams: { se
           <p className="text-gray-600 text-center mb-8">Tu oferta ya está disponible en DisñoJobs</p>
 
           {/* Job Details */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <h2 className="font-medium text-gray-900 mb-2">{job.title}</h2>
-            <p className="text-gray-600 text-sm mb-2">{job.company}</p>
-            <div className="text-sm text-gray-500">
-              {job.job_type === "remote" ? "Remoto" : job.job_type === "hybrid" ? "Híbrido" : "Presencial"}
-            </div>
+          <div className="mb-6">
+            <JobDetails job={job} variant="full" />
           </div>
 
           {/* Management Link Section */}
