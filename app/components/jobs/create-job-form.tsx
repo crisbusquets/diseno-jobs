@@ -1,8 +1,13 @@
 // app/components/jobs/create-job-form.tsx
+// app/components/jobs/create-job-form.tsx
 "use client";
 
 import React, { useState } from "react";
 import { createJob } from "@/actions/jobs";
+import { loadStripe } from "@stripe/stripe-js";
+import { createPaymentSession } from "@/actions/stripe";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 const BENEFITS_OPTIONS = [
   "Seguro médico",
@@ -18,28 +23,46 @@ const BENEFITS_OPTIONS = [
 export default function CreateJobForm() {
   const [selectedBenefits, setSelectedBenefits] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null); // Clear any previous errors
-
-    const formData = new FormData(e.currentTarget);
-
-    // Add benefits to form data
-    formData.append("benefits", JSON.stringify(selectedBenefits));
+    setError(null);
+    setIsSubmitting(true);
 
     try {
+      const formData = new FormData(e.currentTarget);
+      formData.append("benefits", JSON.stringify(selectedBenefits));
+
+      // Create the job
       const result = await createJob(formData);
-      console.log("Job creation result:", result);
 
       if (!result.success) {
         setError(result.error || "Unknown error occurred");
+        return;
+      }
+
+      // Initialize Stripe
+      const stripe = await stripePromise;
+      if (!stripe) {
+        setError("Could not initialize payment system");
+        return;
+      }
+
+      // Get Stripe session
+      const { sessionId, url } = await createPaymentSession(result.jobId);
+
+      // Redirect to Stripe Checkout
+      if (url) {
+        window.location.href = url;
       }
     } catch (error) {
-      console.error("Full error details:", error);
-      setError(error instanceof Error ? error.message : "Failed to create job");
+      console.error("Error:", error);
+      setError(error instanceof Error ? error.message : "Failed to process request");
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }
 
   return (
     <div className="max-w-[600px] mx-auto bg-white rounded-2xl p-8">
@@ -47,7 +70,7 @@ export default function CreateJobForm() {
 
       {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6">
         {/* Company Information */}
         <div>
           <label className="block text-sm font-normal text-gray-600 mb-1">Nombre de la Empresa *</label>
@@ -177,9 +200,10 @@ export default function CreateJobForm() {
 
         <button
           type="submit"
-          className="w-full py-3 bg-[#2563EB] text-white font-normal rounded-lg hover:bg-blue-600 transition-colors"
+          disabled={isSubmitting}
+          className="w-full py-3 bg-[#2563EB] text-white font-normal rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Continuar al Pago
+          {isSubmitting ? "Procesando..." : "Continuar al Pago"}
         </button>
       </form>
     </div>

@@ -58,3 +58,48 @@ export async function createJob(formData: FormData) {
     };
   }
 }
+
+// Add these functions to app/actions/jobs.ts
+
+export async function updateJob(formData: FormData) {
+  const supabase = getSupabase();
+  const token = formData.get("token");
+
+  const updates = {
+    title: formData.get("title"),
+    description: formData.get("description"),
+    // Add other fields as needed
+  };
+
+  try {
+    const { error } = await supabase.from("job_listings").update(updates).eq("management_token", token);
+
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating job:", error);
+    return {
+      success: false,
+      error: "Failed to update job posting",
+    };
+  }
+}
+
+export async function deactivateJob(token: string) {
+  const supabase = getSupabase();
+
+  try {
+    const { error } = await supabase.from("job_listings").update({ is_active: false }).eq("management_token", token);
+
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deactivating job:", error);
+    return {
+      success: false,
+      error: "Failed to deactivate job posting",
+    };
+  }
+}
