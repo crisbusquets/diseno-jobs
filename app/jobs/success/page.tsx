@@ -63,7 +63,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { se
           </div>
 
           {/* Management Link Section */}
-          <div className="bg-blue-50 rounded-lg p-4 mb-6">
+          <div className="bg-blue-50 rounded-lg p-4 mb-4">
             <h3 className="font-medium text-blue-900 mb-2">Enlace de gestión</h3>
             <p className="text-blue-800 text-sm mb-4">Guarda este enlace para gestionar tu oferta en el futuro:</p>
             <div className="bg-white p-3 rounded border border-blue-200 break-all text-sm text-blue-600 mb-3">
@@ -74,6 +74,28 @@ export default async function SuccessPage({ searchParams }: { searchParams: { se
               <Link href={managementUrl} className="text-sm text-blue-700 hover:text-blue-800 font-medium">
                 Gestionar oferta →
               </Link>
+            </div>
+          </div>
+
+          {/* Email Sent Confirmation - New Section */}
+          <div className="bg-green-50 rounded-lg p-4 mb-6">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-green-800">Email de confirmación enviado</h3>
+                <p className="mt-1 text-sm text-green-600">
+                  Hemos enviado un email a {job.company_email} con el enlace de gestión y los detalles de tu oferta.
+                </p>
+              </div>
             </div>
           </div>
 

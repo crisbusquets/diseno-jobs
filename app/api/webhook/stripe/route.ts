@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import Stripe from "stripe";
 import { getSupabase } from "@/lib/supabase";
+import { sendJobConfirmationEmail } from "@/lib/email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
@@ -22,8 +23,23 @@ export async function POST(req: Request) {
       if (jobId) {
         const supabase = getSupabase();
 
-        // Activate the job listing
-        await supabase.from("job_listings").update({ is_active: true }).eq("id", jobId);
+        // Get job details
+        const { data: job } = await supabase.from("job_listings").select("*").eq("id", jobId).single();
+
+        if (job) {
+          // Activate the job listing
+          await supabase.from("job_listings").update({ is_active: true }).eq("id", jobId);
+
+          // Send confirmation email
+          const managementUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/manage/${job.management_token}`;
+
+          await sendJobConfirmationEmail({
+            to: job.company_email,
+            jobTitle: job.title,
+            companyName: job.company,
+            managementUrl: managementUrl,
+          });
+        }
       }
     }
 
