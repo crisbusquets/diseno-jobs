@@ -103,9 +103,9 @@ export default function JobListingsClient({ initialJobs }) {
 
               {(job.salary_min || job.salary_max) && (
                 <div className="mt-2 text-sm text-gray-500">
-                  Salario: {job.salary_min && `${job.salary_min.toLocaleString()}€`}
+                  Salario: {job.salary_min && `${job.salary_min.toLocaleString('es-ES')}€`}
                   {job.salary_min && job.salary_max && " - "}
-                  {job.salary_max && `${job.salary_max.toLocaleString()}€`}
+                  {job.salary_max && `${job.salary_min.toLocaleString('es-ES')}€`}
                 </div>
               )}
 
