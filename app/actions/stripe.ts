@@ -11,14 +11,16 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export async function createPaymentSession(jobId: number) {
   const supabase = getSupabase();
 
-  // Get the job details
-  const { data: job } = await supabase.from("job_listings").select("*").eq("id", jobId).single();
+  const { data: job } = await supabase
+    .from("job_listings")
+    .select("*")
+    .eq("id", jobId)
+    .single();
 
   if (!job) {
     throw new Error("Job not found");
   }
 
-  // Create a Stripe Checkout Session
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: [
@@ -29,7 +31,7 @@ export async function createPaymentSession(jobId: number) {
             name: "Publicación de Empleo en DisñoJobs",
             description: `Oferta: ${job.title} - ${job.company}`,
           },
-          unit_amount: Number(process.env.JOB_POSTING_PRICE), // Price in cents
+          unit_amount: Number(process.env.JOB_POSTING_PRICE) || 2900, // Price in cents, default to 29€
         },
         quantity: 1,
       },

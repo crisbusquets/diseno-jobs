@@ -22,17 +22,13 @@ export async function POST(req: Request) {
 
       if (jobId) {
         const supabase = getSupabase();
-
-        // Get job details
         const { data: job } = await supabase.from("job_listings").select("*").eq("id", jobId).single();
 
         if (job) {
-          // Activate the job listing
           await supabase.from("job_listings").update({ is_active: true }).eq("id", jobId);
 
-          // Send confirmation email
           const managementUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/manage/${job.management_token}`;
-
+          
           await sendJobConfirmationEmail({
             to: job.company_email,
             jobTitle: job.title,
@@ -45,7 +41,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("Webhook error:", error);
-    return NextResponse.json({ error: "Webhook handler failed" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Webhook handler failed" }, 
+      { status: 400 }
+    );
   }
 }
