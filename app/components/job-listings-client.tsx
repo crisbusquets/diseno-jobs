@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import JobFilters from "@/components/job-filters";
+import JobCard from '@/components/job-card';
 
 export default function JobListingsClient({ initialJobs }) {
   const [filteredJobs, setFilteredJobs] = useState(initialJobs);

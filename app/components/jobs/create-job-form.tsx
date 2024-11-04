@@ -1,77 +1,68 @@
 // app/components/jobs/create-job-form.tsx
-// app/components/jobs/create-job-form.tsx
 "use client";
 
 import React, { useState } from "react";
-import { createJob } from "@/actions/jobs";
-import { loadStripe } from "@stripe/stripe-js";
 import { createPaymentSession } from "@/actions/stripe";
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-
-const BENEFITS_OPTIONS = [
-  "Seguro médico",
-  "Gimnasio gratuito",
-  "Formación continua",
-  "Horario flexible",
-  "Teletrabajo",
-  "Plan de pensiones",
-  "Bonus anual",
-  "Stock options",
-];
+import LogoUpload from "@/components/logo-upload";
 
 export default function CreateJobForm() {
-  const [selectedBenefits, setSelectedBenefits] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [logo, setLogo] = useState("");
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
-
-    try {
-      const formData = new FormData(e.currentTarget);
-      formData.append("benefits", JSON.stringify(selectedBenefits));
-
-      // Create the job
-      const result = await createJob(formData);
-
-      if (!result.success) {
-        setError(result.error || "Unknown error occurred");
-        return;
-      }
-
-      // Initialize Stripe
-      const stripe = await stripePromise;
-      if (!stripe) {
-        setError("Could not initialize payment system");
-        return;
-      }
-
-      // Get Stripe session
-      const { sessionId, url } = await createPaymentSession(result.jobId);
-
-      // Redirect to Stripe Checkout
-      if (url) {
-        window.location.href = url;
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setError(error instanceof Error ? error.message : "Failed to process request");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+  const handleLogoChange = (url: string) => {
+    console.log('Form received new logo URL:', url);
+    setLogo(url);
+  };
 
   return (
     <div className="max-w-[600px] mx-auto bg-white rounded-2xl p-8">
       <h1 className="text-2xl font-normal text-gray-900 mb-8">Publicar Oferta de Diseño</h1>
 
-      {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">{error}</div>}
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setIsSubmitting(true);
+          
+          try {
+            const formData = new FormData(e.currentTarget);
+            const data = {
+              title: formData.get("title"),
+              company: formData.get("company"),
+              email: formData.get("email"),
+              description: formData.get("description"),
+              job_type: formData.get("job_type"),
+              salary_min: formData.get("salary_min"),
+              salary_max: formData.get("salary_max"),
+              company_logo: logo // Include the logo URL
+            };
 
-      <form onSubmit={onSubmit} className="space-y-6">
-        {/* Company Information */}
+            console.log('Submitting data:', data);
+
+            const { url } = await createPaymentSession(data);
+            if (url) {
+              window.location.href = url;
+            } else {
+              throw new Error('No URL received from payment session');
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert('Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo.');
+          } finally {
+            setIsSubmitting(false);
+          }
+        }}
+        className="space-y-6"
+      >
+        {/* Logo Upload */}
+        <div>
+          <label className="block text-sm font-normal text-gray-600 mb-1">Logo de la Empresa</label>
+          <LogoUpload
+            value={logo}
+            onChange={handleLogoChange}
+          />
+        </div>
+
+        {/* Company Name */}
         <div>
           <label className="block text-sm font-normal text-gray-600 mb-1">Nombre de la Empresa *</label>
           <input
@@ -83,29 +74,19 @@ export default function CreateJobForm() {
           />
         </div>
 
+        {/* Company Email */}
         <div>
           <label className="block text-sm font-normal text-gray-600 mb-1">Email de la Empresa *</label>
           <input
             type="email"
-            name="company_email"
+            name="email"
             required
             placeholder="ej., contratacion@empresa.com"
             className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
           />
         </div>
 
-        {/* Logo Upload */}
-        <div>
-          <label className="block text-sm font-normal text-gray-600 mb-1">Logo de la Empresa</label>
-          <input
-            type="file"
-            name="company_logo"
-            accept="image/*"
-            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-400 focus:outline-none focus:border-blue-500"
-          />
-        </div>
-
-        {/* Job Details */}
+        {/* Job Title */}
         <div>
           <label className="block text-sm font-normal text-gray-600 mb-1">Título del Puesto *</label>
           <input
@@ -117,27 +98,18 @@ export default function CreateJobForm() {
           />
         </div>
 
+        {/* Job Type */}
         <div>
           <label className="block text-sm font-normal text-gray-600 mb-1">Modalidad de Trabajo</label>
           <select
             name="job_type"
             defaultValue="remote"
-            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:border-blue-500"
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:border-blue-500 appearance-none"
           >
             <option value="remote">Remoto</option>
             <option value="hybrid">Híbrido</option>
             <option value="onsite">Presencial</option>
           </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-normal text-gray-600 mb-1">Ubicación</label>
-          <input
-            type="text"
-            name="location"
-            placeholder="ej., Madrid, Barcelona, etc."
-            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
-          />
         </div>
 
         {/* Salary Range */}
@@ -147,7 +119,7 @@ export default function CreateJobForm() {
             <input
               type="number"
               name="salary_min"
-              placeholder="ej., 35000"
+              placeholder="ej., 45000"
               className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
             />
           </div>
@@ -156,33 +128,9 @@ export default function CreateJobForm() {
             <input
               type="number"
               name="salary_max"
-              placeholder="ej., 45000"
+              placeholder="ej., 60000"
               className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
             />
-          </div>
-        </div>
-
-        {/* Benefits */}
-        <div>
-          <label className="block text-sm font-normal text-gray-600 mb-2">Beneficios</label>
-          <div className="grid grid-cols-2 gap-2">
-            {BENEFITS_OPTIONS.map((benefit) => (
-              <label key={benefit} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={selectedBenefits.includes(benefit)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedBenefits([...selectedBenefits, benefit]);
-                    } else {
-                      setSelectedBenefits(selectedBenefits.filter((b) => b !== benefit));
-                    }
-                  }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">{benefit}</span>
-              </label>
-            ))}
           </div>
         </div>
 
@@ -198,6 +146,7 @@ export default function CreateJobForm() {
           />
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={isSubmitting}

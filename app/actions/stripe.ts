@@ -8,19 +8,30 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 
-export async function createPaymentSession(jobId: number) {
+export async function createPaymentSession(data: any) {
   const supabase = getSupabase();
 
-  const { data: job } = await supabase
+  // Create job listing first
+  const { data: job, error } = await supabase
     .from("job_listings")
-    .select("*")
-    .eq("id", jobId)
+    .insert({
+      title: data.title,
+      company: data.company,
+      company_email: data.email,
+      company_logo: data.company_logo, // Add this line
+      description: data.description,
+      job_type: data.job_type,
+      salary_min: data.salary_min || null,
+      salary_max: data.salary_max || null,
+      is_active: false,
+      management_token: crypto.randomUUID(),
+    })
+    .select()
     .single();
 
-  if (!job) {
-    throw new Error("Job not found");
-  }
+  if (error) throw error;
 
+  // Create Stripe session
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: [
@@ -29,7 +40,7 @@ export async function createPaymentSession(jobId: number) {
           currency: "eur",
           product_data: {
             name: "Publicación de Empleo en DisñoJobs",
-            description: `Oferta: ${job.title} - ${job.company}`,
+            description: `Oferta: ${data.title} - ${data.company}`,
           },
           unit_amount: Number(process.env.JOB_POSTING_PRICE) || 2900,
         },
