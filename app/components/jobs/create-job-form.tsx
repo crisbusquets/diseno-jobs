@@ -1,5 +1,4 @@
-// app/components/jobs/create-job-form.tsx
-"use client";
+'use client';
 
 import React, { useState } from "react";
 import { createPaymentSession } from "@/actions/stripe";
@@ -33,7 +32,8 @@ export default function CreateJobForm() {
               job_type: formData.get("job_type"),
               salary_min: formData.get("salary_min"),
               salary_max: formData.get("salary_max"),
-              company_logo: logo // Include the logo URL
+              company_logo: logo,
+              how_to_apply: formData.get("how_to_apply") // Add this field
             };
 
             console.log('Submitting data:', data);
@@ -144,6 +144,28 @@ export default function CreateJobForm() {
             placeholder="Describe el rol, requisitos y tu candidato/a ideal..."
             className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
           />
+        </div>
+
+        {/* How to Apply Section */}
+        <div>
+          <label className="block text-sm font-normal text-gray-600 mb-1">
+            ¿Cómo aplicar? *
+          </label>
+          <div className="space-y-4">
+            <textarea
+              name="how_to_apply"
+              required
+              rows={4}
+              placeholder="Explica el proceso de aplicación. Por ejemplo:
+- Envía tu portfolio y CV a jobs@empresa.com
+- Rellena el formulario en www.empresa.com/jobs
+- Contacta por LinkedIn: linkedin.com/in/recruiter"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
+            />
+            <p className="text-sm text-gray-500">
+              Proporciona instrucciones claras sobre cómo los candidatos deben aplicar a esta posición.
+            </p>
+          </div>
         </div>
 
         {/* Submit Button */}
