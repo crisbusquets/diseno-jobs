@@ -31,7 +31,7 @@ export async function createPaymentSession(jobId: number) {
             name: "Publicación de Empleo en DisñoJobs",
             description: `Oferta: ${job.title} - ${job.company}`,
           },
-          unit_amount: Number(process.env.JOB_POSTING_PRICE) || 2900, // Price in cents, default to 29€
+          unit_amount: Number(process.env.JOB_POSTING_PRICE) || 2900,
         },
         quantity: 1,
       },

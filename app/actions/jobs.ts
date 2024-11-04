@@ -7,11 +7,9 @@ import { revalidatePath } from "next/cache";
 export async function createJob(formData: FormData) {
   const supabase = getSupabase();
 
-  // Parse the benefits array from JSON string
   const benefitsString = formData.get("benefits") as string;
   const benefits = benefitsString ? JSON.parse(benefitsString) : [];
 
-  // Get salary values and convert to numbers
   const salaryMin = formData.get("salary_min") ? Number(formData.get("salary_min")) : null;
   const salaryMax = formData.get("salary_max") ? Number(formData.get("salary_max")) : null;
 
@@ -26,19 +24,20 @@ export async function createJob(formData: FormData) {
     salary_max: salaryMax,
     benefits: benefits,
     is_active: false,
+    management_token: crypto.randomUUID(),
   };
 
-  console.log("Attempting to insert job data:", jobData);
-
   try {
-    const { data, error } = await supabase.from("job_listings").insert(jobData).select().single();
+    const { data, error } = await supabase
+      .from("job_listings")
+      .insert(jobData)
+      .select()
+      .single();
 
     if (error) {
-      console.error("Supabase error:", error);
       return {
         success: false,
         error: `Database error: ${error.message}`,
-        details: error,
       };
     }
 
@@ -50,16 +49,12 @@ export async function createJob(formData: FormData) {
       managementToken: data.management_token,
     };
   } catch (error) {
-    console.error("Detailed error:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to create job posting",
-      details: error,
     };
   }
 }
-
-// Add these functions to app/actions/jobs.ts
 
 export async function updateJob(formData: FormData) {
   const supabase = getSupabase();
@@ -68,17 +63,18 @@ export async function updateJob(formData: FormData) {
   const updates = {
     title: formData.get("title"),
     description: formData.get("description"),
-    // Add other fields as needed
   };
 
   try {
-    const { error } = await supabase.from("job_listings").update(updates).eq("management_token", token);
+    const { error } = await supabase
+      .from("job_listings")
+      .update(updates)
+      .eq("management_token", token);
 
     if (error) throw error;
 
     return { success: true };
   } catch (error) {
-    console.error("Error updating job:", error);
     return {
       success: false,
       error: "Failed to update job posting",
@@ -90,13 +86,15 @@ export async function deactivateJob(token: string) {
   const supabase = getSupabase();
 
   try {
-    const { error } = await supabase.from("job_listings").update({ is_active: false }).eq("management_token", token);
+    const { error } = await supabase
+      .from("job_listings")
+      .update({ is_active: false })
+      .eq("management_token", token);
 
     if (error) throw error;
 
     return { success: true };
   } catch (error) {
-    console.error("Error deactivating job:", error);
     return {
       success: false,
       error: "Failed to deactivate job posting",

@@ -22,11 +22,13 @@ export async function POST(req: Request) {
 
       if (jobId) {
         const supabase = getSupabase();
-        const { data: job } = await supabase.from("job_listings").select("*").eq("id", jobId).single();
+        const { data: job } = await supabase
+          .from("job_listings")
+          .select("*")
+          .eq("id", jobId)
+          .single();
 
         if (job) {
-          await supabase.from("job_listings").update({ is_active: true }).eq("id", jobId);
-
           const managementUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/manage/${job.management_token}`;
           
           await sendJobConfirmationEmail({

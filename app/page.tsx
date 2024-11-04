@@ -1,10 +1,11 @@
 // app/page.tsx
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { getSupabase } from "@/lib/supabase";
 import JobListingsClient from "@/components/job-listings-client";
+import { unstable_noStore as noStore } from "next/cache";
 
 export default async function HomePage() {
-  const supabase = createServerComponentClient({ cookies });
+  noStore();
+  const supabase = getSupabase();
 
   const { data: jobListings } = await supabase
     .from("job_listings")
@@ -12,12 +13,16 @@ export default async function HomePage() {
     .eq("is_active", true)
     .order("created_at", { ascending: false });
 
+  // Get current time for debugging
+  const now = new Date().toLocaleTimeString();
+
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Job Count */}
-        <div className="px-4 sm:px-0">
+        {/* Debug timestamp */}
+        <div className="px-4 sm:px-0 flex justify-between items-center">
           <p className="text-gray-600">{jobListings?.length || 0} trabajos disponibles</p>
+          <p className="text-sm text-gray-400">Última actualización: {now}</p>
         </div>
 
         {/* Job Listings with Filters */}
