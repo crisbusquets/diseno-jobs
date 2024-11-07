@@ -8,7 +8,26 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 
-export async function createPaymentSession(data: any) {
+interface Benefit {
+  name: string;
+  isCustom?: boolean;
+}
+
+interface JobData {
+  title: string;
+  company: string;
+  company_email: string;
+  company_logo?: string;
+  description: string;
+  job_type: 'remote' | 'hybrid' | 'onsite';
+  salary_min?: number;
+  salary_max?: number;
+  benefits: Benefit[];
+  application_method_type: 'email' | 'url';
+  application_method_value: string;
+}
+
+export async function createPaymentSession(data: JobData) {
   const supabase = getSupabase();
 
   // Create job listing first
@@ -17,12 +36,14 @@ export async function createPaymentSession(data: any) {
     .insert({
       title: data.title,
       company: data.company,
-      company_email: data.email,
-      company_logo: data.company_logo, // Add this line
+      company_email: data.company_email,
+      company_logo: data.company_logo,
       description: data.description,
       job_type: data.job_type,
       salary_min: data.salary_min || null,
       salary_max: data.salary_max || null,
+      application_method_type: data.application_method_type,
+      application_method_value: data.application_method_value,
       is_active: false,
       management_token: crypto.randomUUID(),
     })
@@ -30,6 +51,21 @@ export async function createPaymentSession(data: any) {
     .single();
 
   if (error) throw error;
+
+  // Insert benefits
+  if (data.benefits?.length > 0) {
+    const { error: benefitsError } = await supabase
+      .from("job_benefits")
+      .insert(
+        data.benefits.map(benefit => ({
+          job_id: job.id,
+          benefit_name: benefit.name,
+          is_custom: benefit.isCustom || false
+        }))
+      );
+
+    if (benefitsError) throw benefitsError;
+  }
 
   // Create Stripe session
   const session = await stripe.checkout.sessions.create({

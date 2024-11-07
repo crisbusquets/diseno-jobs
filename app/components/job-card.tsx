@@ -1,5 +1,6 @@
 import React from 'react';
 import { Building2, MapPin, Clock, BriefcaseIcon } from 'lucide-react';
+import { ApplySection } from "@/components/apply-section";
 
 type JobType = 'remote' | 'hybrid' | 'onsite';
 
@@ -14,6 +15,9 @@ interface Job {
   salary_min?: number;
   salary_max?: number;
   created_at: string;
+  benefits?: string[];
+  application_method_type: 'email' | 'url';
+  application_method_value: string;
 }
 
 interface JobCardProps {
@@ -166,15 +170,31 @@ const JobCard = ({ job, variant = "list" }: JobCardProps) => {
         </div>
       </div>
 
+        {/* Benefits Section */}
+        {job.benefits && job.benefits.length > 0 && (
+        <div className="mt-8 pt-8 border-t border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900">Beneficios</h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+            {job.benefits.map((benefit, index) => (
+                <span
+                key={index}
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 text-gray-700 rounded-full text-sm"
+                >
+                {benefit.icon && <span>{benefit.icon}</span>}
+                {benefit.name}
+                </span>
+            ))}
+            </div>
+        </div>
+        )}
+
       {/* Apply Button */}
-      <div className="mt-8 flex flex-col items-center gap-4">
-        <button className="w-full md:w-auto px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          Aplicar a esta oferta
-        </button>
-        <p className="text-sm text-gray-500">
-          Sé uno de los primeros en aplicar
-        </p>
-      </div>
+      <ApplySection 
+            method={{
+                type: job.application_method_type,
+                value: job.application_method_value
+            }}
+        />
     </div>
   );
 };

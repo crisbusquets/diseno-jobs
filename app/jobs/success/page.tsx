@@ -5,55 +5,75 @@ import Link from "next/link";
 import CopyLinkButton from "@/components/copy-link-button";
 import JobDetails from "@/components/jobs/job-details";
 import Stripe from "stripe";
+import { sendJobConfirmationEmail } from "@/lib/email";
 
-interface PageProps {
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-
-export default async function SuccessPage({ searchParams }: PageProps) {
-  const sessionId = searchParams.session_id;
-  
-  if (!sessionId || typeof sessionId !== 'string') {
-    redirect("/");
-  }
-
+async function getSessionAndJob(sessionId: string) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2023-10-16",
   });
 
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  const jobId = session.metadata?.jobId;
+
+  if (!jobId) {
+    return null;
+  }
+
+  const supabase = getSupabase();
+
+  // Update job status
+  await supabase
+    .from("job_listings")
+    .update({ 
+      is_active: true,
+      stripe_payment_id: session.id,
+      activated_at: new Date().toISOString()
+    })
+    .eq("id", jobId);
+
+  // Get complete job details
+  const { data: job } = await supabase
+    .from("job_listings")
+    .select("*")
+    .eq("id", jobId)
+    .single();
+
+  return job;
+}
+
+export default async function SuccessPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | undefined }
+}) {
+  const sessionId = searchParams.session_id;
+
+  if (!sessionId) {
+    redirect("/");
+  }
+
   try {
-    // Get session from Stripe
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    const jobId = session.metadata?.jobId;
-
-    if (!jobId) {
-      redirect("/");
-    }
-
-    const supabase = getSupabase();
-
-    // Activate the job as a backup if webhook hasn't done it
-    await supabase
-      .from("job_listings")
-      .update({ 
-        is_active: true,
-        stripe_payment_id: session.id,
-        activated_at: new Date().toISOString()
-      })
-      .eq("id", jobId);
-
-    // Get the job details
-    const { data: job } = await supabase
-      .from("job_listings")
-      .select("*")
-      .eq("id", jobId)
-      .single();
+    const job = await getSessionAndJob(sessionId);
 
     if (!job) {
       redirect("/");
     }
 
     const managementUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/manage/${job.management_token}`;
+
+    // Send confirmation email with all job details
+    await sendJobConfirmationEmail({
+      to: job.company_email,
+      jobTitle: job.title,
+      companyName: job.company,
+      managementUrl: managementUrl,
+      jobType: job.job_type,
+      location: job.location,
+      salaryMin: job.salary_min,
+      salaryMax: job.salary_max,
+      description: job.description,
+      benefits: job.benefits
+    });
 
     return (
       <div className="min-h-screen bg-gray-50 py-12">
