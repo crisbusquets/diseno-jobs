@@ -2,7 +2,7 @@
 import { getSupabase } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import CopyLinkButton from "@/components/copy-link-button";
+import CopyLinkButton from "@/components/common/buttons/copy-link-button";
 import JobDetails from "@/components/jobs/job-details";
 import Stripe from "stripe";
 import { sendJobConfirmationEmail } from "@/lib/email";
@@ -24,28 +24,20 @@ async function getSessionAndJob(sessionId: string) {
   // Update job status
   await supabase
     .from("job_listings")
-    .update({ 
+    .update({
       is_active: true,
       stripe_payment_id: session.id,
-      activated_at: new Date().toISOString()
+      activated_at: new Date().toISOString(),
     })
     .eq("id", jobId);
 
   // Get complete job details
-  const { data: job } = await supabase
-    .from("job_listings")
-    .select("*")
-    .eq("id", jobId)
-    .single();
+  const { data: job } = await supabase.from("job_listings").select("*").eq("id", jobId).single();
 
   return job;
 }
 
-export default async function SuccessPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | undefined }
-}) {
+export default async function SuccessPage({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
   const sessionId = searchParams.session_id;
 
   if (!sessionId) {
@@ -72,7 +64,7 @@ export default async function SuccessPage({
       salaryMin: job.salary_min,
       salaryMax: job.salary_max,
       description: job.description,
-      benefits: job.benefits
+      benefits: job.benefits,
     });
 
     return (
@@ -97,13 +89,9 @@ export default async function SuccessPage({
             </div>
 
             {/* Success Message */}
-            <h1 className="text-2xl font-semibold text-center text-gray-900 mb-2">
-              ¡Tu oferta ha sido publicada!
-            </h1>
+            <h1 className="text-2xl font-semibold text-center text-gray-900 mb-2">¡Tu oferta ha sido publicada!</h1>
 
-            <p className="text-gray-600 text-center mb-8">
-              Tu oferta ya está disponible en DisñoJobs
-            </p>
+            <p className="text-gray-600 text-center mb-8">Tu oferta ya está disponible en DisñoJobs</p>
 
             {/* Job Details */}
             <div className="mb-6">
@@ -113,18 +101,13 @@ export default async function SuccessPage({
             {/* Management Link Section */}
             <div className="bg-blue-50 rounded-lg p-4 mb-4">
               <h3 className="font-medium text-blue-900 mb-2">Enlace de gestión</h3>
-              <p className="text-blue-800 text-sm mb-4">
-                Guarda este enlace para gestionar tu oferta en el futuro:
-              </p>
+              <p className="text-blue-800 text-sm mb-4">Guarda este enlace para gestionar tu oferta en el futuro:</p>
               <div className="bg-white p-3 rounded border border-blue-200 break-all text-sm text-blue-600 mb-3">
                 {managementUrl}
               </div>
               <div className="flex space-x-3 items-center">
                 <CopyLinkButton url={managementUrl} />
-                <Link
-                  href={managementUrl}
-                  className="text-sm text-blue-700 hover:text-blue-800 font-medium"
-                >
+                <Link href={managementUrl} className="text-sm text-blue-700 hover:text-blue-800 font-medium">
                   Gestionar oferta →
                 </Link>
               </div>
@@ -134,12 +117,7 @@ export default async function SuccessPage({
             <div className="bg-green-50 rounded-lg p-4 mb-6">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-green-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
+                  <svg className="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -149,9 +127,7 @@ export default async function SuccessPage({
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-green-800">
-                    Email de confirmación enviado
-                  </h3>
+                  <h3 className="text-sm font-medium text-green-800">Email de confirmación enviado</h3>
                   <p className="mt-1 text-sm text-green-600">
                     Hemos enviado un email a {job.company_email} con el enlace de gestión y los detalles de tu oferta.
                   </p>

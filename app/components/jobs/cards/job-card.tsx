@@ -1,57 +1,15 @@
-import React from 'react';
-import { Building2, MapPin, Clock, BriefcaseIcon } from 'lucide-react';
-import { ApplySection } from "@/components/apply-section";
-
-type JobType = 'remote' | 'hybrid' | 'onsite';
-
-interface Job {
-  id: number;
-  title: string;
-  company: string;
-  company_logo?: string;
-  description: string;
-  job_type: JobType;
-  location?: string;
-  salary_min?: number;
-  salary_max?: number;
-  created_at: string;
-  benefits?: string[];
-  application_method_type: 'email' | 'url';
-  application_method_value: string;
-}
+import React from "react";
+import { Building2, MapPin, Clock, BriefcaseIcon } from "lucide-react";
+import { ApplySection } from "@/components/common/forms/apply-section";
+import { Job, JobType } from "@/types";
+import { formatCurrency, formatSalaryRange, getJobTypeLabel, getJobTypeColor } from "@/lib/utils/formatting";
 
 interface JobCardProps {
   job: Job;
-  variant?: 'list' | 'detailed';
+  variant?: "list" | "detailed";
 }
 
-const getJobTypeLabel = (type: JobType): string => {
-  const labels = {
-    remote: "Remoto",
-    hybrid: "Híbrido",
-    onsite: "Presencial"
-  };
-  return labels[type];
-};
-
-const getJobTypeColor = (type: JobType): string => {
-  const colors = {
-    remote: "text-green-700 bg-green-50 border-green-100",
-    hybrid: "text-amber-700 bg-amber-50 border-amber-100",
-    onsite: "text-blue-700 bg-blue-50 border-blue-100"
-  };
-  return colors[type];
-};
-
 const JobCard = ({ job, variant = "list" }: JobCardProps) => {
-  const formatSalary = (amount: number) => {
-    return new Intl.NumberFormat("es-ES", {
-      style: "currency",
-      currency: "EUR",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
   if (variant === "list") {
     return (
       <div className="bg-white rounded-lg border border-gray-200 hover:border-blue-200 transition-colors p-6">
@@ -97,13 +55,7 @@ const JobCard = ({ job, variant = "list" }: JobCardProps) => {
             {(job.salary_min || job.salary_max) && (
               <div className="mt-4 text-sm">
                 <span className="font-medium text-gray-900">Salario: </span>
-                <span className="text-gray-600">
-                  {job.salary_min && job.salary_max
-                    ? `${formatSalary(job.salary_min)} - ${formatSalary(job.salary_max)}`
-                    : job.salary_min
-                    ? `Desde ${formatSalary(job.salary_min)}`
-                    : `Hasta ${formatSalary(job.salary_max!)}`}
-                </span>
+                <span className="text-gray-600">{formatSalaryRange(job.salary_min, job.salary_max)}</span>
               </div>
             )}
           </div>
@@ -112,7 +64,6 @@ const JobCard = ({ job, variant = "list" }: JobCardProps) => {
     );
   }
 
-  // Detailed view (for individual job pages)
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-8">
       <div className="flex items-start justify-between">
@@ -150,13 +101,7 @@ const JobCard = ({ job, variant = "list" }: JobCardProps) => {
             <BriefcaseIcon className="w-5 h-5 text-gray-400 mt-1" />
             <div>
               <h3 className="font-medium text-gray-900">Salario</h3>
-              <p className="text-gray-600 mt-1">
-                {job.salary_min && job.salary_max
-                  ? `${formatSalary(job.salary_min)} - ${formatSalary(job.salary_max)}`
-                  : job.salary_min
-                  ? `Desde ${formatSalary(job.salary_min)}`
-                  : `Hasta ${formatSalary(job.salary_max!)}`}
-              </p>
+              <p className="text-gray-600 mt-1">{formatSalaryRange(job.salary_min, job.salary_max)}</p>
             </div>
           </div>
         )}
@@ -165,36 +110,34 @@ const JobCard = ({ job, variant = "list" }: JobCardProps) => {
       {/* Job Description */}
       <div className="mt-8 pt-8 border-t border-gray-200">
         <h2 className="text-lg font-medium text-gray-900">Descripción del puesto</h2>
-        <div className="mt-4 prose max-w-none text-gray-600">
-          {job.description}
-        </div>
+        <div className="mt-4 prose max-w-none text-gray-600">{job.description}</div>
       </div>
 
-        {/* Benefits Section */}
-        {job.benefits && job.benefits.length > 0 && (
+      {/* Benefits Section */}
+      {job.benefits && job.benefits.length > 0 && (
         <div className="mt-8 pt-8 border-t border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Beneficios</h2>
-            <div className="mt-4 flex flex-wrap gap-2">
+          <h2 className="text-lg font-medium text-gray-900">Beneficios</h2>
+          <div className="mt-4 flex flex-wrap gap-2">
             {job.benefits.map((benefit, index) => (
-                <span
+              <span
                 key={index}
                 className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 text-gray-700 rounded-full text-sm"
-                >
+              >
                 {benefit.icon && <span>{benefit.icon}</span>}
                 {benefit.name}
-                </span>
+              </span>
             ))}
-            </div>
+          </div>
         </div>
-        )}
+      )}
 
       {/* Apply Button */}
-      <ApplySection 
-            method={{
-                type: job.application_method_type,
-                value: job.application_method_value
-            }}
-        />
+      <ApplySection
+        method={{
+          type: job.application_method_type,
+          value: job.application_method_value,
+        }}
+      />
     </div>
   );
 };

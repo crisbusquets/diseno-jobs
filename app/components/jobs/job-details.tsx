@@ -1,46 +1,18 @@
 // app/components/jobs/job-details.tsx
+
 "use client";
 
+import { formatDate } from "@/lib/utils/formatting";
+import { formatSalaryRange, getJobTypeLabel } from "@/lib/utils/formatting";
+import { JOB_TYPES } from "@/lib/config/constants";
+import { Job } from "@/types";
+
 interface JobDetailsProps {
-  job: {
-    title: string;
-    company: string;
-    company_email: string;
-    description: string;
-    job_type: "remote" | "onsite" | "hybrid";
-    location?: string;
-    salary_min?: number;
-    salary_max?: number;
-    benefits?: string[];
-    created_at: string;
-  };
+  job: Job;
   variant?: "card" | "full";
 }
 
-export default function JobDetails({ job, variant = "full" }: JobDetailsProps) {
-  const formatSalary = (amount: number) => {
-    return new Intl.NumberFormat("es-ES", {
-      style: "currency",
-      currency: "EUR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const jobTypeLabels = {
-    remote: "Remoto",
-    hybrid: "Híbrido",
-    onsite: "Presencial",
-  };
-
+const JobDetails = ({ job, variant = "full" }: JobDetailsProps) => {
   if (variant === "card") {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -53,26 +25,22 @@ export default function JobDetails({ job, variant = "full" }: JobDetailsProps) {
             className={`
             px-3 py-1 rounded-full text-sm font-medium
             ${
-              job.job_type === "remote"
+              job.job_type === JOB_TYPES.REMOTE
                 ? "bg-green-100 text-green-800"
-                : job.job_type === "hybrid"
+                : job.job_type === JOB_TYPES.HYBRID
                 ? "bg-yellow-100 text-yellow-800"
                 : "bg-blue-100 text-blue-800"
             }
           `}
           >
-            {jobTypeLabels[job.job_type]}
+            {getJobTypeLabel(job.job_type)}
           </span>
         </div>
 
         {(job.salary_min || job.salary_max) && (
           <div className="mt-4 text-sm text-gray-600">
             <strong>Salario: </strong>
-            {job.salary_min && job.salary_max
-              ? `${formatSalary(job.salary_min)} - ${formatSalary(job.salary_max)}`
-              : job.salary_min
-              ? `Desde ${formatSalary(job.salary_min)}`
-              : `Hasta ${formatSalary(job.salary_max!)}`}
+            {formatSalaryRange(job.salary_min, job.salary_max)}
           </div>
         )}
 
@@ -103,15 +71,15 @@ export default function JobDetails({ job, variant = "full" }: JobDetailsProps) {
             className={`
             px-4 py-2 rounded-full text-sm font-medium
             ${
-              job.job_type === "remote"
+              job.job_type === JOB_TYPES.REMOTE
                 ? "bg-green-100 text-green-800"
-                : job.job_type === "hybrid"
+                : job.job_type === JOB_TYPES.HYBRID
                 ? "bg-yellow-100 text-yellow-800"
                 : "bg-blue-100 text-blue-800"
             }
           `}
           >
-            {jobTypeLabels[job.job_type]}
+            {getJobTypeLabel(job.job_type)}
           </span>
         </div>
 
@@ -126,13 +94,7 @@ export default function JobDetails({ job, variant = "full" }: JobDetailsProps) {
           {(job.salary_min || job.salary_max) && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Salario</h3>
-              <p className="mt-1 text-gray-900">
-                {job.salary_min && job.salary_max
-                  ? `${formatSalary(job.salary_min)} - ${formatSalary(job.salary_max)}`
-                  : job.salary_min
-                  ? `Desde ${formatSalary(job.salary_min)}`
-                  : `Hasta ${formatSalary(job.salary_max!)}`}
-              </p>
+              <p className="mt-1 text-gray-900">{formatSalaryRange(job.salary_min, job.salary_max)}</p>
             </div>
           )}
         </div>
@@ -170,4 +132,6 @@ export default function JobDetails({ job, variant = "full" }: JobDetailsProps) {
       </div>
     </div>
   );
-}
+};
+
+export default JobDetails;

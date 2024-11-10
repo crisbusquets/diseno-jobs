@@ -3,14 +3,18 @@
 
 import { useState } from "react";
 
-export default function CopyLinkButton({ url }: { url: string }) {
+interface CopyLinkButtonProps {
+  url: string;
+}
+
+export default function CopyLinkButton({ url }: CopyLinkButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
     }

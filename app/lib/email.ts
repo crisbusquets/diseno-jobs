@@ -1,5 +1,9 @@
 // app/lib/email.ts
+
 import { Resend } from "resend";
+import { Job } from "@/types";
+import { formatSalaryRange, getJobTypeLabel } from "@/lib/utils/formatting";
+import { SITE_CONFIG } from "@/lib/config/constants";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -8,7 +12,7 @@ interface JobEmailData {
   jobTitle: string;
   companyName: string;
   managementUrl: string;
-  jobType: 'remote' | 'hybrid' | 'onsite';
+  jobType: Job["job_type"];
   location?: string;
   salaryMin?: number;
   salaryMax?: number;
@@ -16,49 +20,12 @@ interface JobEmailData {
   benefits?: { name: string; icon?: string }[];
 }
 
-function getSenderEmail() {
-  if (process.env.NODE_ENV === 'development') {
-    return 'onboarding@resend.dev';
-  }
-  return 'jobs@disnojobs.com';
+function getSenderEmail(): string {
+  return process.env.NODE_ENV === "development" ? "onboarding@resend.dev" : "jobs@disnojobs.com";
 }
 
-function getRecipientEmail(email: string) {
-  if (process.env.NODE_ENV === 'development') {
-    return process.env.TEST_EMAIL || email;
-  }
-  return email;
-}
-
-function getJobTypeLabel(type: 'remote' | 'hybrid' | 'onsite'): string {
-  const types = {
-    remote: 'Remoto',
-    hybrid: 'Híbrido',
-    onsite: 'Presencial'
-  };
-  return types[type] || 'No especificado';
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount);
-}
-
-function formatSalary(jobData: JobEmailData): string {
-  if (jobData.salaryMin && jobData.salaryMax) {
-    return `${formatCurrency(jobData.salaryMin)} - ${formatCurrency(jobData.salaryMax)}`;
-  }
-  if (jobData.salaryMin) {
-    return `Desde ${formatCurrency(jobData.salaryMin)}`;
-  }
-  if (jobData.salaryMax) {
-    return `Hasta ${formatCurrency(jobData.salaryMax)}`;
-  }
-  return 'No especificado';
+function getRecipientEmail(email: string): string {
+  return process.env.NODE_ENV === "development" ? process.env.TEST_EMAIL || email : email;
 }
 
 export async function sendJobConfirmationEmail(jobData: JobEmailData) {
@@ -71,7 +38,7 @@ export async function sendJobConfirmationEmail(jobData: JobEmailData) {
   const recipientEmail = getRecipientEmail(jobData.to);
 
   try {
-    console.log('Sending email with data:', JSON.stringify(jobData, null, 2)); // Debug log
+    console.log("Sending email with data:", JSON.stringify(jobData, null, 2));
 
     const { data, error } = await resend.emails.send({
       from: `DisñoJobs <${senderEmail}>`,
@@ -103,21 +70,32 @@ export async function sendJobConfirmationEmail(jobData: JobEmailData) {
                 <h3 style="color: #4a5568; font-size: 16px; margin-bottom: 8px;">Detalles de la oferta:</h3>
                 <ul style="list-style: none; padding: 0; margin: 0;">
                   <li style="margin-bottom: 8px;">📍 Modalidad: ${getJobTypeLabel(jobData.jobType)}</li>
-                  ${jobData.location ? `<li style="margin-bottom: 8px;">🏢 Ubicación: ${jobData.location}</li>` : ''}
-                  <li style="margin-bottom: 8px;">💰 Salario: ${formatSalary(jobData)}</li>
+                  ${jobData.location ? `<li style="margin-bottom: 8px;">🏢 Ubicación: ${jobData.location}</li>` : ""}
+                  <li style="margin-bottom: 8px;">💰 Salario: ${formatSalaryRange(
+                    jobData.salaryMin,
+                    jobData.salaryMax
+                  )}</li>
                 </ul>
               </div>
 
-              ${jobData.benefits && jobData.benefits.length > 0 ? `
+              ${
+                jobData.benefits && jobData.benefits.length > 0
+                  ? `
                 <div style="margin-bottom: 24px;">
                   <h3 style="color: #4a5568; font-size: 16px; margin-bottom: 8px;">Beneficios:</h3>
                   <ul style="list-style: none; padding: 0; margin: 0;">
-                    ${jobData.benefits.map(benefit => `
+                    ${jobData.benefits
+                      .map(
+                        (benefit) => `
                       <li style="margin-bottom: 4px;">✨ ${benefit.name}</li>
-                    `).join('')}
+                    `
+                      )
+                      .join("")}
                   </ul>
                 </div>
-              ` : ''}
+              `
+                  : ""
+              }
 
               <div style="margin-bottom: 24px;">
                 <h3 style="color: #4a5568; font-size: 16px; margin-bottom: 8px;">Descripción:</h3>
@@ -138,7 +116,7 @@ export async function sendJobConfirmationEmail(jobData: JobEmailData) {
             </div>
 
             <div style="text-align: center; margin-top: 30px; color: #666; font-size: 12px;">
-              <p>© 2024 DisñoJobs. Todos los derechos reservados.</p>
+              <p>© ${new Date().getFullYear()} DisñoJobs. Todos los derechos reservados.</p>
             </div>
           </div>
         </body>

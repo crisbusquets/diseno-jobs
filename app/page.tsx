@@ -1,6 +1,6 @@
 // app/page.tsx
 import { getSupabase } from "@/lib/supabase";
-import JobListingsClient from "@/components/job-listings-client";
+import JobListingsClient from "@/components/jobs/cards/job-listings-client";
 import { unstable_noStore as noStore } from "next/cache";
 
 export default async function HomePage() {
