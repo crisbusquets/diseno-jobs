@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { updateJob, deactivateJob } from "@/actions/jobs";
+import { updateJob, deactivateJob } from "@/api/jobs/actions";
 
 interface ManageJobFormProps {
   job: any; // We'll define proper types later

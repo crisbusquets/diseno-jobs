@@ -5,7 +5,7 @@ import Link from "next/link";
 import CopyLinkButton from "@/components/common/buttons/copy-link-button";
 import JobDetails from "@/components/jobs/job-details";
 import Stripe from "stripe";
-import { sendJobConfirmationEmail } from "@/lib/email";
+import { sendJobConfirmationEmail } from "@/lib/services/email";
 
 async function getSessionAndJob(sessionId: string) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {

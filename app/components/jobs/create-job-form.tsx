@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { createPaymentSession } from "@/actions/stripe";
+import { createPaymentSession } from "@/api/stripe/actions";
 import LogoUpload from "@/components/common/forms/logo-upload";
 import { ApplyMethodSection } from "@/components/common/forms/apply-method-section";
 import { BenefitsSection } from "@/components/common/forms/benefits-section";
