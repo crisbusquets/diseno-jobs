@@ -1,5 +1,4 @@
 // app/jobs/[id]/page.tsx
-
 import { getSupabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import JobCard from "@/components/jobs/cards/job-card";

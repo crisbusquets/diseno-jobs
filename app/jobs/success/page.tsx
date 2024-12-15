@@ -3,7 +3,7 @@ import { getSupabase } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import CopyLinkButton from "@/components/common/buttons/copy-link-button";
-import JobDetails from "@/components/jobs/job-details";
+import JobCard from "@/components/jobs/cards/job-card";
 import Stripe from "stripe";
 import { sendJobConfirmationEmail } from "@/lib/services/email";
 
@@ -95,7 +95,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: { [k
 
             {/* Job Details */}
             <div className="mb-6">
-              <JobDetails job={job} variant="full" />
+              <JobCard job={job} variant="detailed" />
             </div>
 
             {/* Management Link Section */}
