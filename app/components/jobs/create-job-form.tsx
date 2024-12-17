@@ -10,6 +10,7 @@ import { BenefitsSection } from "@/components/common/forms/benefits-section";
 import { JobType, JobFormData, ApplicationMethod, Benefit } from "@/types";
 import { validateJobForm, validateApplicationMethod } from "@/lib/utils/validation";
 import { JOB_TYPES, DEFAULT_BENEFITS } from "@/lib/config/constants";
+import LocationSelector from "@/components/common/forms/location-selector";
 
 export default function CreateJobForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,6 +21,8 @@ export default function CreateJobForm() {
     type: "email",
     value: "",
   });
+
+  const [locations, setLocations] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -125,12 +128,7 @@ export default function CreateJobForm() {
 
           <div>
             <label className="block text-sm font-normal text-gray-600 mb-1">Ubicación</label>
-            <input
-              type="text"
-              name="location"
-              placeholder="ej., Madrid, España"
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
-            />
+            <LocationSelector value={locations} onChange={setLocations} />
           </div>
 
           <div>
