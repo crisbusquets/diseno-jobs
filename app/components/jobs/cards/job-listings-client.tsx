@@ -22,7 +22,7 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
     applyFilters({ ...filters, search: value });
   };
 
-  const handleFilterChange = (filterType: keyof JobFiltersType, value: string) => {
+  const handleFilterChange = (filterType: keyof JobFiltersType, value: any) => {
     setFilters((prev) => ({ ...prev, [filterType]: value }));
     applyFilters({ ...filters, [filterType]: value });
   };
@@ -46,10 +46,17 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
       result = result.filter((job) => job.job_type === currentFilters.jobType);
     }
 
-    // Apply location filter
-    if (currentFilters.location) {
-      const locationTerm = currentFilters.location.toLowerCase();
-      result = result.filter((job) => job.location?.toLowerCase().includes(locationTerm));
+    // Apply location filters
+    if (currentFilters.locations.length > 0) {
+      result = result.filter((job) => {
+        // If job has no location, don't include it in location-filtered results
+        if (!job.location) return false;
+
+        // Check if any of the selected locations match the job location
+        return currentFilters.locations.some((location) =>
+          job.location?.toLowerCase().includes(location.name.toLowerCase())
+        );
+      });
     }
 
     setFilteredJobs(result);

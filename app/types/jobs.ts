@@ -36,8 +36,8 @@ export interface JobFormData extends Omit<Job, "id" | "created_at" | "is_active"
   benefits: Benefit[];
 }
 
-export interface JobFilters {
-  search: string;
-  jobType: JobType | "all";
-  location: string;
-}
+export const DEFAULT_JOB_FILTERS = {
+  search: "",
+  jobType: "all",
+  locations: [],
+};
