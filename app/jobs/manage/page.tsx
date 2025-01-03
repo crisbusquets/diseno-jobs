@@ -1,4 +1,6 @@
 // app/jobs/manage/[token]/page.tsx
+"use server";
+
 import { getSupabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import ManageJobForm from "@/components/jobs/manage-job-form";

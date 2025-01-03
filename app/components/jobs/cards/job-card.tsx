@@ -1,3 +1,5 @@
+"use client";
+
 import { Job } from "@/types";
 import { JobHeader } from "@/components/jobs/shared/job-header";
 import { JobMetadata } from "@/components/jobs/shared/job-metadata";

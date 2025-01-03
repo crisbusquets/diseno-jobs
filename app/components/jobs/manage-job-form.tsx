@@ -1,3 +1,5 @@
+"use server";
+
 import { useState } from "react";
 import { updateJob, deactivateJob } from "@/api/jobs/actions";
 import { Button } from "@/components/ui/button";

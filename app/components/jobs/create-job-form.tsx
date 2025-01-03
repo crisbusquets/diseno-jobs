@@ -178,28 +178,55 @@ export default function CreateJobForm() {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ubicación</FormLabel>
+                  <FormControl>
+                    <LocationSelector value={field.value || ""} onChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="salary_min"
-                render={({ field }) => (
+                render={({ field: { value, onChange, ...field } }) => (
                   <FormItem>
                     <FormLabel>Salario Mínimo (€)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="ej., 45000" {...field} />
+                      <Input
+                        type="number"
+                        placeholder="ej., 45000"
+                        value={value || ""}
+                        onChange={(e) => onChange(e.target.valueAsNumber)}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="salary_max"
-                render={({ field }) => (
+                render={({ field: { value, onChange, ...field } }) => (
                   <FormItem>
                     <FormLabel>Salario Máximo (€)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="ej., 60000" {...field} />
+                      <Input
+                        type="number"
+                        placeholder="ej., 60000"
+                        value={value || ""}
+                        onChange={(e) => onChange(e.target.valueAsNumber)}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

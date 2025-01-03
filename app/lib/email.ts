@@ -1,11 +1,13 @@
 // app/lib/email.ts
 
+"use server";
+
 import { Resend } from "resend";
 import { Job } from "@/types";
 import { formatSalaryRange, getJobTypeLabel } from "@/lib/utils/formatting";
 import { SITE_CONFIG } from "@/lib/config/constants";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY!);
 
 interface JobEmailData {
   to: string;

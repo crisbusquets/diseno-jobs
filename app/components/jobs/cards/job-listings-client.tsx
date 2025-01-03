@@ -1,5 +1,3 @@
-// app/components/jobs/cards/job-listings-client.tsx
-
 "use client";
 
 import { useState } from "react";

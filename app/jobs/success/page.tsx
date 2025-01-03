@@ -1,11 +1,12 @@
-// app/jobs/success/page.tsx
+"use client";
+
 import { getSupabase } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import CopyLinkButton from "@/components/common/buttons/copy-link-button";
 import JobCard from "@/components/jobs/cards/job-card";
 import Stripe from "stripe";
-import { sendJobConfirmationEmail } from "@/lib/services/email";
+import { sendJobConfirmationEmail } from "@/lib/email";
 
 async function getSessionAndJob(sessionId: string) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
