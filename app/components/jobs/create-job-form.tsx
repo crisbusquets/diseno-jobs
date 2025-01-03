@@ -45,6 +45,7 @@ export default function CreateJobForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [logo, setLogo] = useState("");
   const [benefits, setBenefits] = useState<Benefit[]>([]);
+  const [location, setLocation] = useState("");
   const [applyMethod, setApplyMethod] = useState<ApplicationMethod>({
     type: "email",
     value: "",

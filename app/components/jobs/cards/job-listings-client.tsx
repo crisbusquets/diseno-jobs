@@ -46,16 +46,11 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
       result = result.filter((job) => job.job_type === currentFilters.jobType);
     }
 
-    // Apply location filters
-    if (currentFilters.locations.length > 0) {
+    // Apply location filter
+    if (currentFilters.location) {
       result = result.filter((job) => {
-        // If job has no location, don't include it in location-filtered results
         if (!job.location) return false;
-
-        // Check if any of the selected locations match the job location
-        return currentFilters.locations.some((location) =>
-          job.location?.toLowerCase().includes(location.name.toLowerCase())
-        );
+        return job.location.toLowerCase().includes(currentFilters.location.toLowerCase());
       });
     }
 
