@@ -1,4 +1,4 @@
-"use server";
+"use client";
 
 import { useState } from "react";
 import { updateJob, deactivateJob } from "@/api/jobs/actions";
