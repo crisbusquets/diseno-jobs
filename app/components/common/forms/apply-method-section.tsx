@@ -1,10 +1,9 @@
-// app/components/common/forms/apply-method-section.tsx
-
-"use client";
-
-import React, { useState } from "react";
+import React from "react";
 import { Mail, Globe } from "lucide-react";
 import { ApplicationMethod } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ApplyMethodProps {
   value: ApplicationMethod;
@@ -12,51 +11,45 @@ interface ApplyMethodProps {
 }
 
 export function ApplyMethodSection({ value, onChange }: ApplyMethodProps) {
-  const [methodType, setMethodType] = useState<ApplicationMethod["type"]>(value?.type || "email");
-
   const handleTypeChange = (type: ApplicationMethod["type"]) => {
-    setMethodType(type);
     onChange({ type, value: "" });
   };
 
   return (
     <div className="space-y-4">
-      <label className="block text-sm font-medium text-gray-700">Método de aplicación *</label>
+      <Label>Método de aplicación *</Label>
 
       <div className="flex gap-4 p-1 bg-gray-50 rounded-lg w-fit">
-        <button
+        <Button
           type="button"
+          variant={value.type === "email" ? "secondary" : "ghost"}
           onClick={() => handleTypeChange("email")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-            methodType === "email" ? "bg-white shadow-sm text-blue-600" : "text-gray-600 hover:bg-gray-100"
-          }`}
+          className="gap-2"
         >
           <Mail className="w-4 h-4" />
           Email
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant={value.type === "url" ? "secondary" : "ghost"}
           onClick={() => handleTypeChange("url")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-            methodType === "url" ? "bg-white shadow-sm text-blue-600" : "text-gray-600 hover:bg-gray-100"
-          }`}
+          className="gap-2"
         >
           <Globe className="w-4 h-4" />
           URL
-        </button>
+        </Button>
       </div>
 
       <div>
-        <input
-          type={methodType === "email" ? "email" : "url"}
+        <Input
+          type={value.type === "email" ? "email" : "url"}
           value={value.value}
-          onChange={(e) => onChange({ type: methodType, value: e.target.value })}
-          placeholder={methodType === "email" ? "jobs@company.com" : "https://company.com/apply"}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          onChange={(e) => onChange({ type: value.type, value: e.target.value })}
+          placeholder={value.type === "email" ? "jobs@company.com" : "https://company.com/apply"}
           required
         />
         <p className="mt-2 text-sm text-gray-500">
-          {methodType === "email"
+          {value.type === "email"
             ? "Los candidatos recibirán un botón para enviar email directamente"
             : "Los candidatos serán redirigidos a esta URL para aplicar"}
         </p>
