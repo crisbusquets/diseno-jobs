@@ -1,3 +1,5 @@
+"use client";
+
 import { Building2 } from "lucide-react";
 import { Job } from "@/types";
 import { getJobTypeLabel, getJobTypeColor } from "@/lib/utils/formatting";

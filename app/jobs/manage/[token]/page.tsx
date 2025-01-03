@@ -3,11 +3,18 @@ import { getSupabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import ManageJobForm from "@/components/jobs/manage-job-form";
 
-export default async function ManageJobPage({ params }: { params: { token: string } }) {
+interface PageProps {
+  params: {
+    token: string;
+  };
+}
+
+export default async function ManageJobPage({ params }: PageProps) {
+  const token = await params.token; // Properly await the token
   const supabase = getSupabase();
 
   // Get job by management token
-  const { data: job } = await supabase.from("job_listings").select("*").eq("management_token", params.token).single();
+  const { data: job } = await supabase.from("job_listings").select("*").eq("management_token", token).single();
 
   if (!job) {
     notFound();
@@ -26,7 +33,7 @@ export default async function ManageJobPage({ params }: { params: { token: strin
             </div>
           </div>
 
-          <ManageJobForm job={job} token={params.token} />
+          <ManageJobForm job={job} token={token} />
         </div>
       </div>
     </div>

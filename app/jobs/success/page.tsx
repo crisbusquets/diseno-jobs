@@ -1,72 +1,106 @@
-"use client";
-
-import { getSupabase } from "@/lib/supabase";
+// app/jobs/success/page.tsx
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import CopyLinkButton from "@/components/common/buttons/copy-link-button";
-import JobCard from "@/components/jobs/cards/job-card";
 import Stripe from "stripe";
+import { getSupabase } from "@/lib/supabase";
 import { sendJobConfirmationEmail } from "@/lib/email";
+import JobCard from "@/components/jobs/cards/job-card";
+import CopyLinkButton from "@/components/common/buttons/copy-link-button";
 
-async function getSessionAndJob(sessionId: string) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2023-10-16",
-  });
-
-  const session = await stripe.checkout.sessions.retrieve(sessionId);
-  const jobId = session.metadata?.jobId;
-
-  if (!jobId) {
-    return null;
-  }
-
-  const supabase = getSupabase();
-
-  // Update job status
-  await supabase
-    .from("job_listings")
-    .update({
-      is_active: true,
-      stripe_payment_id: session.id,
-      activated_at: new Date().toISOString(),
-    })
-    .eq("id", jobId);
-
-  // Get complete job details
-  const { data: job } = await supabase.from("job_listings").select("*").eq("id", jobId).single();
-
-  return job;
+interface PageProps {
+  searchParams: { session_id?: string };
 }
 
-export default async function SuccessPage({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
-  const sessionId = searchParams.session_id;
+export default async function SuccessPage({ searchParams }: PageProps) {
+  const { session_id: sessionId } = await searchParams;
 
   if (!sessionId) {
     redirect("/");
   }
 
   try {
-    const job = await getSessionAndJob(sessionId);
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: "2023-10-16",
+    });
 
-    if (!job) {
-      redirect("/");
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const jobId = session.metadata?.jobId;
+
+    if (!jobId) {
+      throw new Error("No job ID found in session metadata");
     }
+
+    const supabase = getSupabase();
+
+    // First update and get the job
+    const { data: job, error: updateError } = await supabase
+      .from("job_listings")
+      .update({
+        is_active: true,
+        stripe_payment_id: session.id,
+        activated_at: new Date().toISOString(),
+      })
+      .eq("id", jobId)
+      .select()
+      .single();
+
+    if (updateError || !job) {
+      console.error("Failed to update job status:", updateError);
+      throw new Error("Failed to update job status");
+    }
+
+    // Then get the benefits separately
+    const { data: jobBenefits, error: benefitsError } = await supabase
+      .from("job_benefits")
+      .select("benefit_name, is_custom")
+      .eq("job_id", jobId);
+
+    if (benefitsError) {
+      console.error("Failed to fetch benefits:", benefitsError);
+      // Don't throw error here, continue with empty benefits
+    }
+
+    // Transform benefits
+    const benefits =
+      jobBenefits?.map((benefit) => ({
+        name: benefit.benefit_name,
+        isCustom: benefit.is_custom,
+      })) || [];
 
     const managementUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/manage/${job.management_token}`;
 
-    // Send confirmation email with all job details
-    await sendJobConfirmationEmail({
-      to: job.company_email,
-      jobTitle: job.title,
-      companyName: job.company,
-      managementUrl: managementUrl,
-      jobType: job.job_type,
-      location: job.location,
-      salaryMin: job.salary_min,
-      salaryMax: job.salary_max,
-      description: job.description,
-      benefits: job.benefits,
-    });
+    try {
+      // Send confirmation email
+      await sendJobConfirmationEmail({
+        to: job.company_email,
+        jobTitle: job.title,
+        companyName: job.company,
+        companyEmail: job.company_email,
+        companyLogo: job.company_logo,
+        managementUrl,
+        jobType: job.job_type,
+        location: job.location,
+        salaryMin: job.salary_min,
+        salaryMax: job.salary_max,
+        description: job.description,
+        benefits,
+        applicationMethod: {
+          type: job.application_method_type,
+          value: job.application_method_value,
+        },
+      });
+
+      console.log("Confirmation email sent successfully");
+    } catch (emailError) {
+      console.error("Failed to send confirmation email:", emailError);
+      // Continue execution even if email fails
+    }
+
+    // Create a job object that includes the transformed benefits
+    const jobWithBenefits = {
+      ...job,
+      benefits,
+    };
 
     return (
       <div className="min-h-screen bg-gray-50 py-12">
@@ -91,12 +125,11 @@ export default async function SuccessPage({ searchParams }: { searchParams: { [k
 
             {/* Success Message */}
             <h1 className="text-2xl font-semibold text-center text-gray-900 mb-2">¡Tu oferta ha sido publicada!</h1>
-
             <p className="text-gray-600 text-center mb-8">Tu oferta ya está disponible en DisñoJobs</p>
 
             {/* Job Details */}
             <div className="mb-6">
-              <JobCard job={job} variant="detailed" />
+              <JobCard job={jobWithBenefits} variant="detailed" showApplySection={false} />
             </div>
 
             {/* Management Link Section */}

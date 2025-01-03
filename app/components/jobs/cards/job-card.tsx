@@ -6,14 +6,14 @@ import { JobMetadata } from "@/components/jobs/shared/job-metadata";
 import { JobBenefits } from "@/components/jobs/shared/job-benefits";
 import { ApplySection } from "@/components/common/forms/apply-section";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 interface JobCardProps {
   job: Job;
   variant?: "list" | "detailed";
+  showApplySection?: boolean;
 }
 
-const JobCard = ({ job, variant = "list" }: JobCardProps) => {
+const JobCard = ({ job, variant = "list", showApplySection = true }: JobCardProps) => {
   const isDetailed = variant === "detailed";
 
   return (
@@ -31,14 +31,16 @@ const JobCard = ({ job, variant = "list" }: JobCardProps) => {
               <div className="mt-4 prose max-w-none text-muted-foreground">{job.description}</div>
             </div>
 
-            {job.benefits && <JobBenefits benefits={job.benefits} />}
+            {job.benefits && job.benefits.length > 0 && <JobBenefits benefits={job.benefits} />}
 
-            <ApplySection
-              method={{
-                type: job.application_method_type,
-                value: job.application_method_value,
-              }}
-            />
+            {showApplySection && (
+              <ApplySection
+                method={{
+                  type: job.application_method_type,
+                  value: job.application_method_value,
+                }}
+              />
+            )}
           </>
         ) : (
           <p className="mt-4 text-muted-foreground line-clamp-3">{job.description}</p>

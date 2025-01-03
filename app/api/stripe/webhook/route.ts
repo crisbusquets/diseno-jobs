@@ -57,8 +57,11 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       activated_at: new Date().toISOString(),
     })
     .eq("id", jobId)
-    .select()
+    .select() // Make sure we're getting all fields
     .single();
+
+  // For debugging, add this:
+  console.log("Job data in webhook:", JSON.stringify(job, null, 2));
 
   if (updateError) {
     throw new Error(`Failed to update job: ${updateError.message}`);
@@ -75,6 +78,8 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     to: job.company_email,
     jobTitle: job.title,
     companyName: job.company,
+    companyEmail: job.company_email,
+    companyLogo: job.company_logo,
     managementUrl,
     jobType: job.job_type,
     location: job.location,
@@ -82,6 +87,10 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     salaryMax: job.salary_max,
     description: job.description,
     benefits: job.benefits,
+    applicationMethod: {
+      type: job.application_method_type,
+      value: job.application_method_value,
+    },
   });
 
   console.log(`Job ${jobId} activated and confirmation email sent`);
