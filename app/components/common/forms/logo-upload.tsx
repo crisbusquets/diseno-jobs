@@ -21,8 +21,9 @@ export default function LogoUpload({ value, onChange }: LogoUploadProps) {
   }, []);
 
   const showWidget = useCallback(() => {
-    if (!isReady) {
-      setError("Upload widget is still loading...");
+    if (!window?.cloudinary) {
+      console.error("Cloudinary not loaded");
+      setError("Error loading upload widget. Please try again.");
       return;
     }
 

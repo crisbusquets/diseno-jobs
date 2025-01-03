@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className}>
         <Navigation />
         {children}
-        <Script src="https://upload-widget.cloudinary.com/global/all.js" strategy="lazyOnload" />
+        <Script src="https://upload-widget.cloudinary.com/global/all.js" strategy="beforeInteractive" />
       </body>
     </html>
   );

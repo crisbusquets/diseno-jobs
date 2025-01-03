@@ -1,20 +1,48 @@
-// app/components/jobs/create-job-form.tsx
-
 "use client";
 
 import React, { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import { createPaymentSession } from "@/api/stripe/actions";
 import LogoUpload from "@/components/common/forms/logo-upload";
 import { ApplyMethodSection } from "@/components/common/forms/apply-method-section";
 import { BenefitsSection } from "@/components/common/forms/benefits-section";
-import { JobType, JobFormData, ApplicationMethod, Benefit } from "@/types";
-import { validateJobForm, validateApplicationMethod } from "@/lib/utils/validation";
-import { JOB_TYPES, DEFAULT_BENEFITS } from "@/lib/config/constants";
 import LocationSelector from "@/components/common/forms/location-selector";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { JobType, JobFormData, ApplicationMethod, Benefit } from "@/types";
+import { JOB_TYPES } from "@/lib/config/constants";
+
+const formSchema = z.object({
+  title: z.string().min(1, "Job title is required"),
+  company: z.string().min(1, "Company name is required"),
+  company_email: z.string().email("Valid email is required"),
+  company_logo: z.string().optional(),
+  description: z.string().min(10, "Please provide a detailed description"),
+  job_type: z.enum(["remote", "hybrid", "onsite"]),
+  location: z.string().optional(),
+  salary_min: z.number().optional(),
+  salary_max: z.number().optional(),
+  benefits: z
+    .array(
+      z.object({
+        name: z.string(),
+        icon: z.string().optional(),
+        isCustom: z.boolean().optional(),
+      })
+    )
+    .optional(),
+  application_method_type: z.enum(["email", "url"]),
+  application_method_value: z.string(),
+});
 
 export default function CreateJobForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [logo, setLogo] = useState("");
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [applyMethod, setApplyMethod] = useState<ApplicationMethod>({
@@ -22,39 +50,28 @@ export default function CreateJobForm() {
     value: "",
   });
 
-  const [locations, setLocations] = useState<string[]>([]);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      company: "",
+      company_email: "",
+      company_logo: "",
+      description: "",
+      job_type: "remote" as JobType,
+      benefits: [],
+      application_method_type: "email",
+      application_method_value: "",
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    setError(null);
 
     try {
-      const formData = new FormData(e.currentTarget);
-
-      // Validate form
-      const validationErrors = validateJobForm(formData);
-      if (validationErrors.length > 0) {
-        throw new Error(validationErrors[0].message);
-      }
-
-      // Validate application method
-      const applicationError = validateApplicationMethod(applyMethod.type, applyMethod.value);
-      if (applicationError) {
-        throw new Error(applicationError);
-      }
-
-      // Create job data object
       const jobData: JobFormData = {
-        title: formData.get("title") as string,
-        company: formData.get("company") as string,
-        company_email: formData.get("email") as string,
+        ...values,
         company_logo: logo,
-        description: formData.get("description") as string,
-        job_type: formData.get("job_type") as JobType,
-        location: (formData.get("location") as string) || null,
-        salary_min: formData.get("salary_min") ? Number(formData.get("salary_min")) : undefined,
-        salary_max: formData.get("salary_max") ? Number(formData.get("salary_max")) : undefined,
         benefits: benefits,
         application_method_type: applyMethod.type,
         application_method_value: applyMethod.value,
@@ -68,137 +85,156 @@ export default function CreateJobForm() {
 
       if (result.data?.url) {
         window.location.href = result.data.url;
-      } else {
-        throw new Error("No URL received from payment session");
       }
     } catch (error) {
-      console.error("Error:", error);
-      setError(error instanceof Error ? error.message : "Error al procesar tu solicitud");
+      form.setError("root", {
+        message: error instanceof Error ? error.message : "Error processing request",
+      });
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
   return (
     <div className="max-w-[600px] mx-auto bg-white rounded-2xl p-8">
       <h1 className="text-2xl font-normal text-gray-900 mb-8">Publicar Oferta de Diseño</h1>
 
-      {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">{error}</div>}
+      {form.formState.errors.root && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
+        </Alert>
+      )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Company Info Section */}
-        <div className="space-y-6">
-          <LogoUpload value={logo} onChange={setLogo} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
+            <LogoUpload value={logo} onChange={setLogo} />
 
-          <div>
-            <label className="block text-sm font-normal text-gray-600 mb-1">Nombre de la Empresa *</label>
-            <input
-              type="text"
+            <FormField
+              control={form.control}
               name="company"
-              required
-              placeholder="ej., Design Studio Inc."
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre de la Empresa</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ej., Design Studio Inc." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="company_email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email de la Empresa</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="ej., contacto@empresa.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-normal text-gray-600 mb-1">Email de la Empresa *</label>
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="ej., contacto@empresa.com"
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        {/* Job Details Section */}
-        <div className="space-y-6 pt-6 border-t">
-          <div>
-            <label className="block text-sm font-normal text-gray-600 mb-1">Título del Puesto *</label>
-            <input
-              type="text"
+          <div className="space-y-6 pt-6 border-t">
+            <FormField
+              control={form.control}
               name="title"
-              required
-              placeholder="ej., Diseñador/a UX Senior"
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Título del Puesto</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ej., Diseñador/a UX Senior" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div>
-            <label className="block text-sm font-normal text-gray-600 mb-1">Ubicación</label>
-            <LocationSelector value={locations} onChange={setLocations} />
-          </div>
-
-          <div>
-            <label className="block text-sm font-normal text-gray-600 mb-1">Modalidad de Trabajo *</label>
-            <select
+            <FormField
+              control={form.control}
               name="job_type"
-              required
-              defaultValue=""
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:border-blue-500"
-            >
-              <option value="" disabled>
-                Selecciona una modalidad
-              </option>
-              <option value={JOB_TYPES.REMOTE}>Remoto</option>
-              <option value={JOB_TYPES.HYBRID}>Híbrido</option>
-              <option value={JOB_TYPES.ONSITE}>Presencial</option>
-            </select>
-          </div>
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Modalidad de Trabajo</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una modalidad" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={JOB_TYPES.REMOTE}>Remoto</SelectItem>
+                      <SelectItem value={JOB_TYPES.HYBRID}>Híbrido</SelectItem>
+                      <SelectItem value={JOB_TYPES.ONSITE}>Presencial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-normal text-gray-600 mb-1">Salario Mínimo (€)</label>
-              <input
-                type="number"
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
                 name="salary_min"
-                placeholder="ej., 45000"
-                min="0"
-                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Salario Mínimo (€)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="ej., 45000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-normal text-gray-600 mb-1">Salario Máximo (€)</label>
-              <input
-                type="number"
+              <FormField
+                control={form.control}
                 name="salary_max"
-                placeholder="ej., 60000"
-                min="0"
-                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Salario Máximo (€)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="ej., 60000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-normal text-gray-600 mb-1">Descripción del Puesto *</label>
-            <textarea
+            <FormField
+              control={form.control}
               name="description"
-              required
-              rows={6}
-              placeholder="Describe el rol, responsabilidades, requisitos y cualquier otra información relevante..."
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción del Puesto</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe el rol, responsabilidades, requisitos..."
+                      className="h-32"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
-        </div>
 
-        {/* Benefits & Application Method Section */}
-        <div className="space-y-6 pt-6 border-t">
-          <BenefitsSection benefits={benefits} onBenefitsChange={setBenefits} defaultBenefits={DEFAULT_BENEFITS} />
+          <div className="space-y-6 pt-6 border-t">
+            <BenefitsSection benefits={benefits} onBenefitsChange={setBenefits} />
+            <ApplyMethodSection value={applyMethod} onChange={setApplyMethod} />
+          </div>
 
-          <ApplyMethodSection value={applyMethod} onChange={setApplyMethod} />
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full py-3 bg-blue-600 text-white font-normal rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? "Procesando..." : "Continuar al Pago"}
-        </button>
-      </form>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Procesando..." : "Continuar al Pago"}
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 }
