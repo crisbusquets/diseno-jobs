@@ -1,11 +1,32 @@
-// app/components/jobs/manage-job-form.tsx
-"use client";
-
 import { useState } from "react";
 import { updateJob, deactivateJob } from "@/api/jobs/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+});
 
 interface ManageJobFormProps {
-  job: any; // We'll define proper types later
+  job: any;
   token: string;
 }
 
@@ -14,14 +35,23 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: job.title,
+      description: job.description,
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setError(null);
     setMessage(null);
 
     try {
-      const formData = new FormData(e.currentTarget);
+      const formData = new FormData();
       formData.append("token", token);
+      formData.append("title", values.title);
+      formData.append("description", values.description);
 
       const result = await updateJob(formData);
 
@@ -34,13 +64,9 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
     } catch (error) {
       setError("Error al actualizar la oferta");
     }
-  };
+  }
 
   const handleDeactivate = async () => {
-    if (!confirm("¿Estás seguro de que quieres desactivar esta oferta?")) {
-      return;
-    }
-
     try {
       const result = await deactivateJob(token);
       if (result.success) {
@@ -54,66 +80,83 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
   };
 
   return (
-    <div>
-      {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">{error}</div>}
+    <div className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       {message && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-600 rounded-lg">{message}</div>
+        <Alert>
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
       )}
 
       {isEditing ? (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Título del Puesto</label>
-            <input
-              type="text"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
               name="title"
-              defaultValue={job.title}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Título del Puesto</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-            <textarea
+            <FormField
+              control={form.control}
               name="description"
-              defaultValue={job.description}
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} rows={4} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="flex space-x-4">
-            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              Guardar Cambios
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsEditing(false)}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
+            <div className="flex gap-4">
+              <Button type="submit">Guardar Cambios</Button>
+              <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        </Form>
       ) : (
         <div className="space-y-6">
-          <div>
-            <button
-              onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Editar Oferta
-            </button>
-          </div>
+          <Button onClick={() => setIsEditing(true)}>Editar Oferta</Button>
 
           <div className="border-t pt-6">
-            <button onClick={handleDeactivate} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-              Desactivar Oferta
-            </button>
-            <p className="mt-2 text-sm text-gray-500">Al desactivar la oferta, dejará de ser visible en el listado</p>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">Desactivar Oferta</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Al desactivar la oferta, dejará de ser visible en el listado
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeactivate}>Desactivar</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Al desactivar la oferta, dejará de ser visible en el listado
+            </p>
           </div>
         </div>
       )}
