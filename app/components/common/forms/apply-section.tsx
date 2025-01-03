@@ -1,10 +1,7 @@
-// app/components/common/forms/apply-section.tsx
-
-"use client";
-
-import React from "react";
 import { ArrowRight, Mail, Globe } from "lucide-react";
 import { ApplicationMethod } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ApplySectionProps {
   method: ApplicationMethod;
@@ -17,7 +14,6 @@ export function ApplySection({ method }: ApplySectionProps) {
     if (method.type === "email") {
       window.location.href = `mailto:${method.value}`;
     } else {
-      // Ensure URL has protocol
       let url = method.value;
       if (!url.startsWith("http://") && !url.startsWith("https://")) {
         url = `https://${url}`;
@@ -27,34 +23,32 @@ export function ApplySection({ method }: ApplySectionProps) {
   };
 
   return (
-    <div className="mt-8 pt-8 border-t border-gray-200">
-      <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-xl font-semibold text-gray-900">¿Te interesa esta posición?</h2>
-
-        <button
-          onClick={handleApply}
-          className="mt-6 w-full md:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
+    <Card className="mt-8">
+      <CardHeader className="text-center">
+        <CardTitle>¿Te interesa esta posición?</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col items-center">
+        <Button onClick={handleApply} size="lg" className="gap-2">
           {method.type === "email" ? (
             <>
-              <Mail className="w-5 h-5" />
+              <Mail className="h-5 w-5" />
               Enviar email
             </>
           ) : (
             <>
-              <Globe className="w-5 h-5" />
+              <Globe className="h-5 w-5" />
               Aplicar ahora
             </>
           )}
-          <ArrowRight className="w-4 h-4" />
-        </button>
+          <ArrowRight className="h-4 w-4" />
+        </Button>
 
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4 text-sm text-muted-foreground">
           {method.type === "email"
             ? "Se abrirá tu cliente de email para enviar tu aplicación"
             : "Serás redirigido al formulario de aplicación"}
         </p>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
