@@ -1,10 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import JobCard from "./job-card";
-import JobFilters from "@/components/jobs/forms/job-filters";
-import { Job, JobFilters as JobFiltersType } from "@/types";
+import { Search, EuroIcon } from "lucide-react";
+import { Job, JobFilters } from "@/types";
 import { DEFAULT_JOB_FILTERS } from "@/lib/config/constants";
+import { getJobTypeLabel } from "@/lib/utils/formatting";
+import JobCard from "./job-card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface JobListingsClientProps {
   initialJobs: Job[];
@@ -12,7 +19,7 @@ interface JobListingsClientProps {
 
 export default function JobListingsClient({ initialJobs }: JobListingsClientProps) {
   const [filteredJobs, setFilteredJobs] = useState<Job[]>(initialJobs);
-  const [filters, setFilters] = useState<JobFiltersType>(DEFAULT_JOB_FILTERS);
+  const [filters, setFilters] = useState<JobFilters>(DEFAULT_JOB_FILTERS);
 
   // Extract all unique benefits from jobs
   const availableBenefits = Array.from(
@@ -23,26 +30,9 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
     )
   ).map((benefitString) => JSON.parse(benefitString));
 
-  console.log("Initial jobs:", initialJobs); // Debug log
-  console.log("Available benefits:", availableBenefits); // Debug log
-
-  const handleSearch = (value: string) => {
-    setFilters((prev) => ({ ...prev, search: value }));
-    applyFilters({ ...filters, search: value });
-  };
-
-  const handleFilterChange = (filterType: keyof JobFiltersType, value: any) => {
-    console.log("Filter change:", filterType, value); // Debug log
-    const newFilters = { ...filters, [filterType]: value };
-    setFilters(newFilters);
-    applyFilters(newFilters);
-  };
-
-  const applyFilters = (currentFilters: JobFiltersType) => {
-    console.log("Applying filters:", currentFilters); // Debug log
+  const applyFilters = (currentFilters: JobFilters) => {
     let result = initialJobs;
 
-    // Apply search filter
     if (currentFilters.search) {
       const searchTerm = currentFilters.search.toLowerCase();
       result = result.filter(
@@ -53,12 +43,10 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
       );
     }
 
-    // Apply job type filter
     if (currentFilters.jobType !== "all") {
       result = result.filter((job) => job.job_type === currentFilters.jobType);
     }
 
-    // Apply location filter
     if (currentFilters.location) {
       result = result.filter((job) => {
         if (!job.location) return false;
@@ -66,74 +54,161 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
       });
     }
 
-    // Apply minimum salary filter
     if (currentFilters.minSalary) {
       result = result.filter((job) => {
-        if (job.salary_min) {
-          return job.salary_min >= currentFilters.minSalary;
-        }
-        if (job.salary_max) {
-          return job.salary_max >= currentFilters.minSalary;
-        }
+        if (job.salary_min) return job.salary_min >= currentFilters.minSalary!;
+        if (job.salary_max) return job.salary_max >= currentFilters.minSalary!;
         return false;
       });
     }
 
-    // Apply benefits filter
-    if (currentFilters.benefits && currentFilters.benefits.length > 0) {
+    if (currentFilters.benefits?.length) {
       result = result.filter((job) => {
-        // If job has no benefits, it doesn't match
-        if (!job.benefits || !Array.isArray(job.benefits) || job.benefits.length === 0) {
-          console.log("Job has no benefits:", job.title); // Debug log
-          return false;
-        }
-
-        // Check if job has all selected benefits
-        const hasAllBenefits = currentFilters.benefits.every((requiredBenefit) => {
-          const found = job.benefits.some((jobBenefit) => {
-            const match = jobBenefit.name.toLowerCase() === requiredBenefit.toLowerCase();
-            console.log("Comparing benefit:", jobBenefit.name, "with", requiredBenefit, "Match:", match); // Debug log
-            return match;
-          });
-          return found;
-        });
-
-        console.log("Job:", job.title, "Has all benefits:", hasAllBenefits); // Debug log
-        return hasAllBenefits;
+        if (!job.benefits?.length) return false;
+        return currentFilters.benefits!.every((requiredBenefit) =>
+          job.benefits!.some((jobBenefit) => jobBenefit.name.toLowerCase() === requiredBenefit.toLowerCase())
+        );
       });
     }
 
-    console.log("Filtered results:", result); // Debug log
     setFilteredJobs(result);
   };
 
-  return (
-    <div className="space-y-6">
-      <JobFilters
-        onSearch={handleSearch}
-        onFilterChange={handleFilterChange}
-        initialFilters={filters}
-        availableBenefits={availableBenefits}
-      />
+  const updateFilters = (updates: Partial<JobFilters>) => {
+    const newFilters = { ...filters, ...updates };
+    setFilters(newFilters);
+    applyFilters(newFilters);
+  };
 
-      {filteredJobs.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron ofertas</h3>
-          <p className="text-gray-500">Prueba a cambiar los filtros de búsqueda</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredJobs.map((job) => (
-            <div
-              key={job.id}
-              className="group cursor-pointer"
-              onClick={() => (window.location.href = `/jobs/${job.id}`)}
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      {/* Filters Section */}
+      <Card className="lg:col-span-1 h-fit">
+        <CardContent className="p-6 space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Búsqueda</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Título o empresa..."
+                value={filters.search}
+                onChange={(e) => updateFilters({ search: e.target.value })}
+                className="pl-9"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Tipo de trabajo</label>
+            <Select value={filters.jobType} onValueChange={(value) => updateFilters({ jobType: value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="remote">{getJobTypeLabel("remote")}</SelectItem>
+                <SelectItem value="hybrid">{getJobTypeLabel("hybrid")}</SelectItem>
+                <SelectItem value="onsite">{getJobTypeLabel("onsite")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Ubicación</label>
+            <Input
+              placeholder="Ej: Madrid, Barcelona..."
+              value={filters.location}
+              onChange={(e) => updateFilters({ location: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Salario mínimo</label>
+            <div className="relative">
+              <EuroIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Input
+                type="number"
+                placeholder="Ej: 30000"
+                className="pl-9"
+                value={filters.minSalary || ""}
+                onChange={(e) =>
+                  updateFilters({
+                    minSalary: e.target.value ? Number(e.target.value) : undefined,
+                  })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Beneficios</label>
+            <ScrollArea className="h-[200px] rounded-md border p-4">
+              <div className="space-y-2">
+                {availableBenefits.map((benefit) => (
+                  <div key={benefit.name} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={benefit.name}
+                      checked={filters.benefits?.includes(benefit.name)}
+                      onChange={(e) => {
+                        const newBenefits = e.target.checked
+                          ? [...(filters.benefits || []), benefit.name]
+                          : (filters.benefits || []).filter((b) => b !== benefit.name);
+                        updateFilters({ benefits: newBenefits });
+                      }}
+                    />
+                    <label htmlFor={benefit.name} className="text-sm">
+                      {benefit.icon} {benefit.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {(filters.jobType !== "all" ||
+            filters.location ||
+            filters.minSalary ||
+            filters.benefits?.length ||
+            filters.search) && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setFilters(DEFAULT_JOB_FILTERS);
+                applyFilters(DEFAULT_JOB_FILTERS);
+              }}
             >
+              Limpiar filtros
+            </Button>
+          )}
+
+          <div className="pt-2 border-t">
+            <p className="text-sm text-muted-foreground">
+              {filteredJobs.length} {filteredJobs.length === 1 ? "oferta" : "ofertas"} encontrada
+              {filteredJobs.length === 1 ? "" : "s"}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Jobs List Section */}
+      <div className="lg:col-span-3 space-y-4">
+        {filteredJobs.length > 0 ? (
+          filteredJobs.map((job) => (
+            <div key={job.id} onClick={() => (window.location.href = `/jobs/${job.id}`)}>
               <JobCard job={job} variant="list" showApplySection={false} />
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        ) : (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron ofertas</h3>
+              <p className="text-gray-500">Prueba a cambiar los filtros de búsqueda</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
