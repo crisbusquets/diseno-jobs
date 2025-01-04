@@ -1,4 +1,5 @@
-import { MapPin, BriefcaseIcon } from "lucide-react";
+// app/components/jobs/shared/job-metadata.tsx
+import { MapPin, BriefcaseIcon, Mail, Globe } from "lucide-react";
 import { Job } from "@/types";
 import { formatSalaryRange } from "@/lib/utils/formatting";
 
@@ -29,6 +30,37 @@ export function JobMetadata({ job, variant = "compact" }: JobMetadataProps) {
           </div>
         </div>
       )}
+
+      <div className="flex items-start gap-2">
+        {job.application_method_type === "email" ? (
+          <Mail className={`text-gray-400 ${variant === "compact" ? "w-4 h-4" : "w-5 h-5"} mt-1`} />
+        ) : (
+          <Globe className={`text-gray-400 ${variant === "compact" ? "w-4 h-4" : "w-5 h-5"} mt-1`} />
+        )}
+        <div>
+          {variant === "detailed" && (
+            <h3 className="font-medium text-gray-900">
+              {job.application_method_type === "email" ? "Email de contacto" : "URL para aplicar"}
+            </h3>
+          )}
+          <p className="text-gray-600">
+            {job.application_method_type === "email" ? (
+              <a href={`mailto:${job.application_method_value}`} className="hover:text-blue-600">
+                {job.application_method_value}
+              </a>
+            ) : (
+              <a
+                href={job.application_method_value}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-blue-600"
+              >
+                {job.application_method_value}
+              </a>
+            )}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
