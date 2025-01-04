@@ -7,11 +7,36 @@ export default async function HomePage() {
   noStore();
   const supabase = getSupabase();
 
+  // First get all active job listings
   const { data: jobListings } = await supabase
     .from("job_listings")
     .select("*")
     .eq("is_active", true)
     .order("created_at", { ascending: false });
+
+  // Then get all benefits for these jobs
+  let jobsWithBenefits = [];
+
+  if (jobListings) {
+    // Get all job IDs
+    const jobIds = jobListings.map((job) => job.id);
+
+    // Fetch benefits for all jobs in a single query
+    const { data: allBenefits } = await supabase.from("job_benefits").select("*").in("job_id", jobIds);
+
+    // Map benefits to their respective jobs
+    jobsWithBenefits = jobListings.map((job) => ({
+      ...job,
+      benefits:
+        allBenefits
+          ?.filter((benefit) => benefit.job_id === job.id)
+          .map((benefit) => ({
+            name: benefit.benefit_name,
+            icon: "✨", // You might want to map this based on the benefit name
+            isCustom: benefit.is_custom,
+          })) || [],
+    }));
+  }
 
   // Get current time for debugging
   const now = new Date().toLocaleTimeString();
@@ -21,19 +46,19 @@ export default async function HomePage() {
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {/* Debug timestamp */}
         <div className="px-4 sm:px-0 flex justify-between items-center">
-          <p className="text-gray-600">{jobListings?.length || 0} trabajos disponibles</p>
+          <p className="text-gray-600">{jobsWithBenefits?.length || 0} trabajos disponibles</p>
           <p className="text-sm text-gray-400">Última actualización: {now}</p>
         </div>
 
         {/* Job Listings with Filters */}
         <div className="mt-6">
-          {jobListings?.length === 0 ? (
+          {jobsWithBenefits?.length === 0 ? (
             <div className="text-center py-12">
               <h3 className="text-lg font-medium text-gray-900 mb-2">No hay trabajos publicados</h3>
               <p className="text-gray-500">Sé el primero en publicar una oferta de trabajo</p>
             </div>
           ) : (
-            <JobListingsClient initialJobs={jobListings || []} />
+            <JobListingsClient initialJobs={jobsWithBenefits} />
           )}
         </div>
       </div>

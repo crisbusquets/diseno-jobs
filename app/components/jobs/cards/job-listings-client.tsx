@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import JobCard from "./job-card";
 import JobFilters from "@/components/jobs/forms/job-filters";
 import { Job, JobFilters as JobFiltersType } from "@/types";
@@ -15,17 +14,32 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
   const [filteredJobs, setFilteredJobs] = useState<Job[]>(initialJobs);
   const [filters, setFilters] = useState<JobFiltersType>(DEFAULT_JOB_FILTERS);
 
+  // Extract all unique benefits from jobs
+  const availableBenefits = Array.from(
+    new Set(
+      initialJobs
+        .flatMap((job) => job.benefits || [])
+        .map((benefit) => JSON.stringify({ name: benefit.name, icon: benefit.icon }))
+    )
+  ).map((benefitString) => JSON.parse(benefitString));
+
+  console.log("Initial jobs:", initialJobs); // Debug log
+  console.log("Available benefits:", availableBenefits); // Debug log
+
   const handleSearch = (value: string) => {
     setFilters((prev) => ({ ...prev, search: value }));
     applyFilters({ ...filters, search: value });
   };
 
   const handleFilterChange = (filterType: keyof JobFiltersType, value: any) => {
-    setFilters((prev) => ({ ...prev, [filterType]: value }));
-    applyFilters({ ...filters, [filterType]: value });
+    console.log("Filter change:", filterType, value); // Debug log
+    const newFilters = { ...filters, [filterType]: value };
+    setFilters(newFilters);
+    applyFilters(newFilters);
   };
 
   const applyFilters = (currentFilters: JobFiltersType) => {
+    console.log("Applying filters:", currentFilters); // Debug log
     let result = initialJobs;
 
     // Apply search filter
@@ -52,12 +66,55 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
       });
     }
 
+    // Apply minimum salary filter
+    if (currentFilters.minSalary) {
+      result = result.filter((job) => {
+        if (job.salary_min) {
+          return job.salary_min >= currentFilters.minSalary;
+        }
+        if (job.salary_max) {
+          return job.salary_max >= currentFilters.minSalary;
+        }
+        return false;
+      });
+    }
+
+    // Apply benefits filter
+    if (currentFilters.benefits && currentFilters.benefits.length > 0) {
+      result = result.filter((job) => {
+        // If job has no benefits, it doesn't match
+        if (!job.benefits || !Array.isArray(job.benefits) || job.benefits.length === 0) {
+          console.log("Job has no benefits:", job.title); // Debug log
+          return false;
+        }
+
+        // Check if job has all selected benefits
+        const hasAllBenefits = currentFilters.benefits.every((requiredBenefit) => {
+          const found = job.benefits.some((jobBenefit) => {
+            const match = jobBenefit.name.toLowerCase() === requiredBenefit.toLowerCase();
+            console.log("Comparing benefit:", jobBenefit.name, "with", requiredBenefit, "Match:", match); // Debug log
+            return match;
+          });
+          return found;
+        });
+
+        console.log("Job:", job.title, "Has all benefits:", hasAllBenefits); // Debug log
+        return hasAllBenefits;
+      });
+    }
+
+    console.log("Filtered results:", result); // Debug log
     setFilteredJobs(result);
   };
 
   return (
     <div className="space-y-6">
-      <JobFilters onSearch={handleSearch} onFilterChange={handleFilterChange} initialFilters={filters} />
+      <JobFilters
+        onSearch={handleSearch}
+        onFilterChange={handleFilterChange}
+        initialFilters={filters}
+        availableBenefits={availableBenefits}
+      />
 
       {filteredJobs.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
@@ -67,9 +124,13 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
       ) : (
         <div className="space-y-4">
           {filteredJobs.map((job) => (
-            <Link key={job.id} href={`/jobs/${job.id}`}>
-              <JobCard job={job} variant="list" />
-            </Link>
+            <div
+              key={job.id}
+              className="group cursor-pointer"
+              onClick={() => (window.location.href = `/jobs/${job.id}`)}
+            >
+              <JobCard job={job} variant="list" showApplySection={false} />
+            </div>
           ))}
         </div>
       )}
