@@ -1,9 +1,11 @@
+// components/common/forms/apply-method-section.tsx
 import React from "react";
 import { Mail, Globe } from "lucide-react";
 import { ApplicationMethod } from "@/types";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface ApplyMethodProps {
   value: ApplicationMethod;
@@ -11,49 +13,58 @@ interface ApplyMethodProps {
 }
 
 export function ApplyMethodSection({ value, onChange }: ApplyMethodProps) {
-  const handleTypeChange = (type: ApplicationMethod["type"]) => {
-    onChange({ type, value: "" });
-  };
-
   return (
     <div className="space-y-4">
       <Label>Método de aplicación *</Label>
 
-      <div className="flex gap-4 p-1 bg-gray-50 rounded-lg w-fit">
-        <Button
-          type="button"
-          variant={value.type === "email" ? "secondary" : "ghost"}
-          onClick={() => handleTypeChange("email")}
-          className="gap-2"
-        >
-          <Mail className="w-4 h-4" />
-          Email
-        </Button>
-        <Button
-          type="button"
-          variant={value.type === "url" ? "secondary" : "ghost"}
-          onClick={() => handleTypeChange("url")}
-          className="gap-2"
-        >
-          <Globe className="w-4 h-4" />
-          URL
-        </Button>
-      </div>
-
-      <div>
-        <Input
-          type={value.type === "email" ? "email" : "url"}
-          value={value.value}
-          onChange={(e) => onChange({ type: value.type, value: e.target.value })}
-          placeholder={value.type === "email" ? "jobs@company.com" : "https://company.com/apply"}
-          required
-        />
-        <p className="mt-2 text-sm text-gray-500">
-          {value.type === "email"
-            ? "Los candidatos recibirán un botón para enviar email directamente"
-            : "Los candidatos serán redirigidos a esta URL para aplicar"}
-        </p>
-      </div>
+      <Tabs
+        value={value.type}
+        onValueChange={(newType) => onChange({ type: newType as "email" | "url", value: "" })}
+        className="w-full"
+      >
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="email" className="flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Email
+          </TabsTrigger>
+          <TabsTrigger value="url" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            URL
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="email">
+          <Card>
+            <CardContent className="pt-6">
+              <Input
+                type="email"
+                value={value.type === "email" ? value.value : ""}
+                onChange={(e) => onChange({ type: "email", value: e.target.value })}
+                placeholder="jobs@company.com"
+                className="w-full"
+              />
+              <p className="mt-2 text-sm text-muted-foreground">
+                Los candidatos recibirán un botón para enviar email directamente
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="url">
+          <Card>
+            <CardContent className="pt-6">
+              <Input
+                type="url"
+                value={value.type === "url" ? value.value : ""}
+                onChange={(e) => onChange({ type: "url", value: e.target.value })}
+                placeholder="https://company.com/apply"
+                className="w-full"
+              />
+              <p className="mt-2 text-sm text-muted-foreground">
+                Los candidatos serán redirigidos a esta URL para aplicar
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
