@@ -56,14 +56,20 @@ app/
 ├── globals.css
 ├── jobs/
 │ ├── [id]/
+│ │ ├── error.tsx
+│ │ ├── loading.tsx
 │ │ └── page.tsx
 │ ├── create/
 │ │ └── page.tsx
 │ ├── manage/
 │ │ ├── [token]/
+│ │ │ ├── error.tsx
+│ │ │ ├── loading.tsx
 │ │ │ └── page.tsx
 │ │ └── page.tsx
 │ ├── success/
+│ │ ├── error.tsx
+│ │ ├── loading.tsx
 │ │ └── page.tsx
 ├── layout.tsx
 ├── lib/
