@@ -1,4 +1,4 @@
-// app/jobs/success/page.tsx
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Stripe from "stripe";
@@ -6,13 +6,10 @@ import { getSupabase } from "@/lib/supabase";
 import { sendJobConfirmationEmail } from "@/lib/email";
 import JobCard from "@/components/jobs/cards/job-card";
 import CopyLinkButton from "@/components/common/buttons/copy-link-button";
+import SuccessLoading from "./loading";
 
-interface PageProps {
-  searchParams: { session_id?: string };
-}
-
-export default async function SuccessPage({ searchParams }: PageProps) {
-  const { session_id: sessionId } = await searchParams;
+async function SuccessContent({ searchParams }: { searchParams: { session_id?: string } }) {
+  const { session_id: sessionId } = searchParams;
 
   if (!sessionId) {
     redirect("/");
@@ -193,4 +190,12 @@ export default async function SuccessPage({ searchParams }: PageProps) {
     console.error("Error in success page:", error);
     redirect("/");
   }
+}
+
+export default function SuccessPage({ searchParams }: { searchParams: { session_id?: string } }) {
+  return (
+    <Suspense fallback={<SuccessLoading />}>
+      <SuccessContent searchParams={searchParams} />
+    </Suspense>
+  );
 }

@@ -1,6 +1,7 @@
+// app/components/jobs/cards/job-listings-client.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, EuroIcon } from "lucide-react";
 import { Job, JobFilters } from "@/types";
 import { DEFAULT_JOB_FILTERS } from "@/lib/config/constants";
@@ -12,14 +13,50 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface JobListingsClientProps {
   initialJobs: Job[];
 }
 
+const JobCardSkeleton = () => {
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-start gap-4">
+          <Skeleton className="h-12 w-12 rounded-lg" />
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-5 w-1/3" />
+            <Skeleton className="h-4 w-1/4" />
+          </div>
+          <Skeleton className="h-6 w-20 rounded-full" />
+        </div>
+        <div className="mt-4 space-y-3">
+          <div className="flex gap-4">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function JobListingsClient({ initialJobs }: JobListingsClientProps) {
+  const [isLoading, setIsLoading] = useState(true);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>(initialJobs);
   const [filters, setFilters] = useState<JobFilters>(DEFAULT_JOB_FILTERS);
+
+  // Simulate loading state and initialize data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Extract all unique benefits from jobs
   const availableBenefits = Array.from(
@@ -79,6 +116,28 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
     setFilters(newFilters);
     applyFilters(newFilters);
   };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <Card className="lg:col-span-1 h-fit">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+        <div className="lg:col-span-3 space-y-4">
+          <JobCardSkeleton />
+          <JobCardSkeleton />
+          <JobCardSkeleton />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

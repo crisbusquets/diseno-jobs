@@ -1,18 +1,12 @@
-// app/jobs/manage/[token]/page.tsx
-
+import { Suspense } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import ManageJobForm from "@/components/jobs/manage-job-form";
 import JobCard from "@/components/jobs/cards/job-card";
 import { formatDate } from "@/lib/utils/formatting";
+import ManageJobLoading from "./loading";
 
-interface PageProps {
-  params: {
-    token: string;
-  };
-}
-
-export default async function ManageJobPage({ params }: PageProps) {
+async function ManageContent({ params }: { params: { token: string } }) {
   const supabase = getSupabase();
 
   // First get the job listing
@@ -28,7 +22,7 @@ export default async function ManageJobPage({ params }: PageProps) {
     .select("benefit_name, is_custom")
     .eq("job_id", job.id);
 
-  // Transform benefits to the format expected by components
+  // Transform benefits
   const benefits =
     jobBenefits?.map((benefit) => ({
       name: benefit.benefit_name,
@@ -87,5 +81,13 @@ export default async function ManageJobPage({ params }: PageProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ManagePage({ params }: { params: { token: string } }) {
+  return (
+    <Suspense fallback={<ManageJobLoading />}>
+      <ManageContent params={params} />
+    </Suspense>
   );
 }

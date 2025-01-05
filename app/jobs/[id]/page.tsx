@@ -1,10 +1,11 @@
-// app/jobs/[id]/page.tsx
+import { Suspense } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import JobCard from "@/components/jobs/cards/job-card";
 import { formatDate } from "@/lib/utils/formatting";
+import JobLoading from "./loading";
 
-export default async function JobPage({ params }: { params: { id: string } }) {
+async function JobContent({ params }: { params: { id: string } }) {
   const supabase = getSupabase();
 
   // Get the job listing
@@ -36,7 +37,6 @@ export default async function JobPage({ params }: { params: { id: string } }) {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-3xl mx-auto px-4">
-        {/* Main Job Card with all the details */}
         <JobCard job={jobWithBenefits} variant="detailed" />
 
         {/* Publication Info */}
@@ -45,5 +45,13 @@ export default async function JobPage({ params }: { params: { id: string } }) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function JobPage({ params }: { params: { id: string } }) {
+  return (
+    <Suspense fallback={<JobLoading />}>
+      <JobContent params={params} />
+    </Suspense>
   );
 }
