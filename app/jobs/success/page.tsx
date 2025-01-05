@@ -16,10 +16,12 @@ async function SuccessContent({ searchParams }: { searchParams: { session_id?: s
   }
 
   try {
+    // Initialize Stripe
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: "2023-10-16",
     });
 
+    // Get session
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     const jobId = session.metadata?.jobId;
 
@@ -29,7 +31,7 @@ async function SuccessContent({ searchParams }: { searchParams: { session_id?: s
 
     const supabase = getSupabase();
 
-    // First update and get the job
+    // Update and get the job
     const { data: job, error: updateError } = await supabase
       .from("job_listings")
       .update({
@@ -42,11 +44,10 @@ async function SuccessContent({ searchParams }: { searchParams: { session_id?: s
       .single();
 
     if (updateError || !job) {
-      console.error("Failed to update job status:", updateError);
-      throw new Error("Failed to update job status");
+      throw new Error(`Failed to update job status: ${updateError?.message || "Job not found"}`);
     }
 
-    // Then get the benefits separately
+    // Get benefits
     const { data: jobBenefits, error: benefitsError } = await supabase
       .from("job_benefits")
       .select("benefit_name, is_custom")
@@ -54,7 +55,7 @@ async function SuccessContent({ searchParams }: { searchParams: { session_id?: s
 
     if (benefitsError) {
       console.error("Failed to fetch benefits:", benefitsError);
-      // Don't throw error here, continue with empty benefits
+      // Continue with empty benefits rather than throwing
     }
 
     // Transform benefits
@@ -66,8 +67,8 @@ async function SuccessContent({ searchParams }: { searchParams: { session_id?: s
 
     const managementUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/manage/${job.management_token}`;
 
+    // Send confirmation email
     try {
-      // Send confirmation email
       await sendJobConfirmationEmail({
         to: job.company_email,
         jobTitle: job.title,
@@ -86,14 +87,11 @@ async function SuccessContent({ searchParams }: { searchParams: { session_id?: s
           value: job.application_method_value,
         },
       });
-
-      console.log("Confirmation email sent successfully");
     } catch (emailError) {
       console.error("Failed to send confirmation email:", emailError);
       // Continue execution even if email fails
     }
 
-    // Create a job object that includes the transformed benefits
     const jobWithBenefits = {
       ...job,
       benefits,
@@ -187,8 +185,8 @@ async function SuccessContent({ searchParams }: { searchParams: { session_id?: s
       </div>
     );
   } catch (error) {
-    console.error("Error in success page:", error);
-    redirect("/");
+    console.error("Error al cargar la página de confirmación:", error);
+    throw error; // This will trigger the error.tsx component
   }
 }
 
