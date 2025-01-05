@@ -3,6 +3,7 @@
 import { ArrowRight, Mail, Globe } from "lucide-react";
 import { ApplicationMethod } from "@/types";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ApplySectionProps {
@@ -10,17 +11,30 @@ interface ApplySectionProps {
 }
 
 export function ApplySection({ method }: ApplySectionProps) {
+  const { toast } = useToast();
   const handleApply = () => {
     if (!method.value) return;
 
-    if (method.type === "email") {
-      window.location.href = `mailto:${method.value}`;
-    } else {
-      let url = method.value;
-      if (!url.startsWith("http://") && !url.startsWith("https://")) {
-        url = `https://${url}`;
+    try {
+      if (method.type === "email") {
+        window.location.href = `mailto:${method.value}`;
+        toast({
+          title: "Abriendo cliente de email",
+          description: "Se abrirá tu cliente de email para enviar la aplicación",
+        });
+      } else {
+        let url = method.value;
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+          url = `https://${url}`;
+        }
+        window.open(url, "_blank");
       }
-      window.open(url, "_blank");
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: method.type === "email" ? "Error al abrir el cliente de email" : "Error al abrir el enlace",
+      });
     }
   };
 

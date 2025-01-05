@@ -8,6 +8,7 @@ import { updateJob, deactivateJob } from "@/api/jobs/actions";
 import { Job, Benefit } from "@/types";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useToast } from "@/components/ui/use-toast";
 
 import LogoUpload from "@/components/common/forms/logo-upload";
 import { ApplyMethodSection } from "@/components/common/forms/apply-method-section";
@@ -18,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -58,6 +58,7 @@ interface ManageJobFormProps {
 }
 
 export default function ManageJobForm({ job, token }: ManageJobFormProps) {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("preview");
   const [logo, setLogo] = useState(job.company_logo || "");
   const [benefits, setBenefits] = useState<Benefit[]>(job.benefits || []);
@@ -99,23 +100,54 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
       const result = await updateJob(formData);
 
       if (!result.success) {
-        throw new Error(result.error || "Error al actualizar la oferta");
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error || "Error al actualizar la oferta",
+        });
+        throw new Error(result.error);
       }
+
+      toast({
+        title: "Cambios guardados",
+        description: "La oferta se ha actualizado correctamente",
+      });
 
       setActiveTab("preview");
     } catch (error) {
       console.error("Update error:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al guardar los cambios",
+      });
     }
   }
 
   const handleDeactivate = async () => {
     try {
       const result = await deactivateJob(token);
+
       if (!result.success) {
-        throw new Error(result.error || "Error al desactivar la oferta");
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error || "Error al desactivar la oferta",
+        });
+        throw new Error(result.error);
       }
+
+      toast({
+        title: "Oferta desactivada",
+        description: "La oferta ya no será visible en el listado",
+      });
     } catch (error) {
       console.error("Deactivate error:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Error al desactivar la oferta",
+      });
     }
   };
 
