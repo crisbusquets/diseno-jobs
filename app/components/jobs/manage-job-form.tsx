@@ -64,7 +64,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
     salary_max: job.salary_max?.toString() || "",
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -73,16 +73,19 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
   };
 
   const validateForm = () => {
-    if (!formData.title) return "El título es obligatorio";
-    if (!formData.company) return "El nombre de la empresa es obligatorio";
-    if (!formData.company_email) return "El email es obligatorio";
-    if (!formData.description) return "La descripción es obligatoria";
-    if (!applyMethod.value) return "El método de aplicación es obligatorio";
+    // Required fields
+    if (!formData.title.trim()) return "El título es obligatorio";
+    if (!formData.company.trim()) return "El nombre de la empresa es obligatorio";
+    if (!formData.company_email.trim()) return "El email es obligatorio";
+    if (!formData.description.trim()) return "La descripción es obligatoria";
+    if (!applyMethod.value.trim()) return "El método de aplicación es obligatorio";
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.company_email)) return "Email no válido";
-    if (applyMethod.type === "email" && !emailRegex.test(applyMethod.value)) return "Email de aplicación no válido";
+    if (applyMethod.type === "email" && !emailRegex.test(applyMethod.value)) {
+      return "Email de aplicación no válido";
+    }
 
     // URL validation
     if (applyMethod.type === "url" && !applyMethod.value.startsWith("http")) {
@@ -99,7 +102,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
     return "";
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setFormError("");
 
@@ -117,40 +120,65 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
     setIsSubmitting(true);
 
     try {
+      // Create FormData instance
       const formDataToSubmit = new FormData();
+
+      // Add the token
       formDataToSubmit.append("token", token);
 
-      // Append form fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== undefined && value !== "") {
-          formDataToSubmit.append(key, value.toString());
-        }
-      });
+      // Add all form fields
+      formDataToSubmit.append("title", formData.title);
+      formDataToSubmit.append("company", formData.company);
+      formDataToSubmit.append("company_email", formData.company_email);
+      formDataToSubmit.append("description", formData.description);
+      formDataToSubmit.append("job_type", formData.job_type);
 
-      formDataToSubmit.append("company_logo", logo);
+      // Add optional fields only if they have a value
+      if (formData.location) formDataToSubmit.append("location", formData.location);
+      if (formData.salary_min) formDataToSubmit.append("salary_min", formData.salary_min);
+      if (formData.salary_max) formDataToSubmit.append("salary_max", formData.salary_max);
+
+      // Add company logo if present
+      if (logo) formDataToSubmit.append("company_logo", logo);
+
+      // Add benefits
       formDataToSubmit.append("benefits", JSON.stringify(benefits));
+
+      // Add application method
       formDataToSubmit.append("application_method_type", applyMethod.type);
       formDataToSubmit.append("application_method_value", applyMethod.value);
 
       const result = await updateJob(formDataToSubmit);
 
       if (!result.success) {
-        throw new Error(result.error);
+        // Don't throw here, handle the error directly
+        setFormError(result.error || "Error al guardar los cambios");
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error || "Error al guardar los cambios",
+        });
+        return;
       }
 
+      // Clear any existing errors
+      setFormError("");
+
+      // Show success message
       toast({
         title: "Cambios guardados",
         description: "La oferta se ha actualizado correctamente",
       });
 
+      // Return to preview mode
       setActiveTab("preview");
-    } catch (error) {
-      console.error("Update error:", error);
-      setFormError(error.message || "Error al guardar los cambios");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Error al guardar los cambios";
+      setFormError(errorMessage);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Error al guardar los cambios",
+        description: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
@@ -169,16 +197,17 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
         title: "Oferta desactivada",
         description: "La oferta ya no será visible en el listado",
       });
-    } catch (error) {
-      console.error("Deactivate error:", error);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Error al desactivar la oferta";
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Error al desactivar la oferta",
+        description: errorMessage,
       });
     }
   };
 
+  // Rest of your component JSX remains the same...
   return (
     <Card>
       <CardHeader className="space-y-1">
