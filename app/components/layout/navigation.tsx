@@ -4,6 +4,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 interface NavLink {
   href: string;
@@ -25,11 +26,8 @@ export default function Navigation() {
             DisñoJobs
           </Link>
 
-          <Link
-            href="/jobs/create"
-            className="px-4 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Publicar Empleo
+          <Link href="/jobs/create">
+            <Button>Publicar empleo</Button>
           </Link>
         </div>
       </div>
