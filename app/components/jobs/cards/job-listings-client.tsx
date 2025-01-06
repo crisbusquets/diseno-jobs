@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import LocationSelector from "@/components/common/forms/location-selector";
 
 interface JobListingsClientProps {
   initialJobs: Job[];
@@ -48,6 +49,9 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
   const [isLoading, setIsLoading] = useState(true);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>(initialJobs);
   const [filters, setFilters] = useState<JobFilters>(DEFAULT_JOB_FILTERS);
+  const [formData, setFormData] = useState({
+    location: "",
+  });
 
   // Simulate loading state and initialize data
   useEffect(() => {
@@ -174,11 +178,7 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Ubicación</label>
-            <Input
-              placeholder="Ej: Madrid, Barcelona..."
-              value={filters.location}
-              onChange={(e) => updateFilters({ location: e.target.value })}
-            />
+            <LocationSelector value={filters.location} onChange={(value) => updateFilters({ location: value })} />
           </div>
 
           <div className="space-y-2">

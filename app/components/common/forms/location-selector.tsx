@@ -7,12 +7,12 @@ type Region = {
 };
 
 const REGIONS: Region[] = [
-  { name: "Worldwide", emoji: "🌍" },
-  { name: "Europe", emoji: "🇪🇺" },
-  { name: "Spain", emoji: "🇪🇸" },
-  { name: "France", emoji: "🇫🇷" },
-  { name: "Germany", emoji: "🇩🇪" },
-  { name: "United Kingdom", emoji: "🇬🇧" },
+  { name: "En cualquier parte", emoji: "🌍" },
+  { name: "Europa", emoji: "🇪🇺" },
+  { name: "España", emoji: "🇪🇸" },
+  { name: "Francia", emoji: "🇫🇷" },
+  { name: "Alemania", emoji: "🇩🇪" },
+  { name: "Reino Unido", emoji: "🇬🇧" },
   { name: "Portugal", emoji: "🇵🇹" },
 ];
 
