@@ -1,47 +1,71 @@
 // app/lib/utils/validation.ts
 
-interface ValidationError {
+export interface ValidationError {
   field: string;
   message: string;
 }
 
-export function validateJobForm(formData: FormData): ValidationError[] {
+export function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+export function validateUrl(url: string): boolean {
+  return url.startsWith("http://") || url.startsWith("https://");
+}
+
+export function validateJobForm(formData: any): ValidationError[] {
   const errors: ValidationError[] = [];
 
-  // Required fields
+  // Required fields validation
   const requiredFields = [
-    { field: "title", label: "Título del puesto" },
-    { field: "company", label: "Nombre de la empresa" },
-    { field: "email", label: "Email" },
-    { field: "description", label: "Descripción" },
+    { name: "title", label: "Título del puesto" },
+    { name: "company", label: "Nombre de la empresa" },
+    { name: "company_email", label: "Email" },
+    { name: "description", label: "Descripción" },
   ];
 
-  requiredFields.forEach(({ field, label }) => {
-    if (!formData.get(field)) {
+  requiredFields.forEach(({ name, label }) => {
+    if (!formData[name]?.trim()) {
       errors.push({
-        field,
+        field: name,
         message: `${label} es obligatorio`,
       });
     }
   });
 
   // Email validation
-  const email = formData.get("email") as string;
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (formData.company_email && !validateEmail(formData.company_email)) {
     errors.push({
-      field: "email",
+      field: "company_email",
       message: "Email no válido",
     });
   }
 
   // Salary validation
-  const salaryMin = Number(formData.get("salary_min"));
-  const salaryMax = Number(formData.get("salary_max"));
+  if (formData.salary_min && formData.salary_max) {
+    const minSalary = Number(formData.salary_min);
+    const maxSalary = Number(formData.salary_max);
+    if (minSalary > maxSalary) {
+      errors.push({
+        field: "salary_min",
+        message: "El salario mínimo no puede ser mayor que el máximo",
+      });
+    }
+  }
 
-  if (salaryMin && salaryMax && salaryMin > salaryMax) {
+  // Application method validation
+  if (formData.application_method_type === "email" && !validateEmail(formData.application_method_value)) {
     errors.push({
-      field: "salary_min",
-      message: "El salario mínimo no puede ser mayor que el máximo",
+      field: "application_method_value",
+      message: "Email de aplicación no válido",
+    });
+  }
+
+  if (formData.application_method_type === "url" && !validateUrl(formData.application_method_value)) {
+    errors.push({
+      field: "application_method_value",
+      message: "La URL debe comenzar con http:// o https://",
     });
   }
 
@@ -53,11 +77,11 @@ export function validateApplicationMethod(type: string, value: string): string |
     return "El método de aplicación es obligatorio";
   }
 
-  if (type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+  if (type === "email" && !validateEmail(value)) {
     return "Email no válido";
   }
 
-  if (type === "url" && !/^https?:\/\/.+/.test(value)) {
+  if (type === "url" && !validateUrl(value)) {
     return "URL no válida";
   }
 

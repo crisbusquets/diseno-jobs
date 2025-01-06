@@ -1,9 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { updateJob, deactivateJob } from "@/api/jobs/actions";
 import { Job, Benefit } from "@/types";
 import { format } from "date-fns";
@@ -16,7 +13,6 @@ import { BenefitsSection } from "@/components/common/forms/benefits-section";
 import LocationSelector from "@/components/common/forms/location-selector";
 
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -36,21 +32,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { JOB_TYPES } from "@/lib/config/constants";
-
-// Form schema
-const formSchema = z.object({
-  title: z.string().min(1, "El título es obligatorio"),
-  company: z.string().min(1, "El nombre de la empresa es obligatorio"),
-  company_email: z.string().email("Email válido requerido"),
-  description: z.string().min(10, "La descripción debe tener al menos 10 caracteres"),
-  job_type: z.enum(["remote", "hybrid", "onsite"]),
-  location: z.string().optional(),
-  salary_min: z.number().optional(),
-  salary_max: z.number().optional(),
-  application_method_type: z.enum(["email", "url"]),
-  application_method_value: z.string(),
-});
 
 interface ManageJobFormProps {
   job: Job;
@@ -60,6 +43,8 @@ interface ManageJobFormProps {
 export default function ManageJobForm({ job, token }: ManageJobFormProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("preview");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
   const [logo, setLogo] = useState(job.company_logo || "");
   const [benefits, setBenefits] = useState<Benefit[]>(job.benefits || []);
   const [applyMethod, setApplyMethod] = useState({
@@ -67,44 +52,89 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
     value: job.application_method_value,
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: job.title,
-      company: job.company,
-      company_email: job.company_email,
-      description: job.description,
-      job_type: job.job_type,
-      location: job.location,
-      salary_min: job.salary_min,
-      salary_max: job.salary_max,
-      application_method_type: job.application_method_type,
-      application_method_value: job.application_method_value,
-    },
+  // Form fields state
+  const [formData, setFormData] = useState({
+    title: job.title,
+    company: job.company,
+    company_email: job.company_email,
+    description: job.description,
+    job_type: job.job_type,
+    location: job.location || "",
+    salary_min: job.salary_min?.toString() || "",
+    salary_max: job.salary_max?.toString() || "",
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const formData = new FormData();
-      formData.append("token", token);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-      Object.entries(values).forEach(([key, value]) => {
-        if (value !== undefined) {
-          formData.append(key, value.toString());
+  const validateForm = () => {
+    if (!formData.title) return "El título es obligatorio";
+    if (!formData.company) return "El nombre de la empresa es obligatorio";
+    if (!formData.company_email) return "El email es obligatorio";
+    if (!formData.description) return "La descripción es obligatoria";
+    if (!applyMethod.value) return "El método de aplicación es obligatorio";
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.company_email)) return "Email no válido";
+    if (applyMethod.type === "email" && !emailRegex.test(applyMethod.value)) return "Email de aplicación no válido";
+
+    // URL validation
+    if (applyMethod.type === "url" && !applyMethod.value.startsWith("http")) {
+      return "La URL debe comenzar con http:// o https://";
+    }
+
+    // Salary validation
+    if (formData.salary_min && formData.salary_max) {
+      if (Number(formData.salary_min) > Number(formData.salary_max)) {
+        return "El salario mínimo no puede ser mayor que el máximo";
+      }
+    }
+
+    return "";
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setFormError("");
+
+    const error = validateForm();
+    if (error) {
+      setFormError(error);
+      toast({
+        variant: "destructive",
+        title: "Error de validación",
+        description: error,
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const formDataToSubmit = new FormData();
+      formDataToSubmit.append("token", token);
+
+      // Append form fields
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== undefined && value !== "") {
+          formDataToSubmit.append(key, value.toString());
         }
       });
 
-      formData.append("company_logo", logo);
-      formData.append("benefits", JSON.stringify(benefits));
+      formDataToSubmit.append("company_logo", logo);
+      formDataToSubmit.append("benefits", JSON.stringify(benefits));
+      formDataToSubmit.append("application_method_type", applyMethod.type);
+      formDataToSubmit.append("application_method_value", applyMethod.value);
 
-      const result = await updateJob(formData);
+      const result = await updateJob(formDataToSubmit);
 
       if (!result.success) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: result.error || "Error al actualizar la oferta",
-        });
         throw new Error(result.error);
       }
 
@@ -116,24 +146,22 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
       setActiveTab("preview");
     } catch (error) {
       console.error("Update error:", error);
+      setFormError(error.message || "Error al guardar los cambios");
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Error al guardar los cambios",
+        description: error.message || "Error al guardar los cambios",
       });
+    } finally {
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleDeactivate = async () => {
     try {
       const result = await deactivateJob(token);
 
       if (!result.success) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: result.error || "Error al desactivar la oferta",
-        });
         throw new Error(result.error);
       }
 
@@ -146,7 +174,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Error al desactivar la oferta",
+        description: error.message || "Error al desactivar la oferta",
       });
     }
   };
@@ -185,11 +213,11 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Empresa</p>
-                      <p>{job.company}</p>
+                      <p>{formData.company}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Email</p>
-                      <p>{job.company_email}</p>
+                      <p>{formData.company_email}</p>
                     </div>
                   </div>
                   {logo && (
@@ -208,33 +236,33 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                   <div className="space-y-4">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Título</p>
-                      <p>{job.title}</p>
+                      <p>{formData.title}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Modalidad</p>
-                        <p>{job.job_type}</p>
+                        <p>{formData.job_type}</p>
                       </div>
-                      {job.location && (
+                      {formData.location && (
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Ubicación</p>
-                          <p>{job.location}</p>
+                          <p>{formData.location}</p>
                         </div>
                       )}
                     </div>
-                    {(job.salary_min || job.salary_max) && (
+                    {(formData.salary_min || formData.salary_max) && (
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Salario</p>
                         <p>
-                          {job.salary_min && `${job.salary_min}€`}
-                          {job.salary_min && job.salary_max && " - "}
-                          {job.salary_max && `${job.salary_max}€`}
+                          {formData.salary_min && `${formData.salary_min}€`}
+                          {formData.salary_min && formData.salary_max && " - "}
+                          {formData.salary_max && `${formData.salary_max}€`}
                         </p>
                       </div>
                     )}
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Descripción</p>
-                      <p className="whitespace-pre-wrap">{job.description}</p>
+                      <p className="whitespace-pre-wrap">{formData.description}</p>
                     </div>
                   </div>
                 </div>
@@ -296,206 +324,157 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
           </TabsContent>
 
           <TabsContent value="edit">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {/* Company Information */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-medium">Información de la empresa</h3>
+            {formError && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertDescription>{formError}</AlertDescription>
+              </Alert>
+            )}
 
-                  <LogoUpload value={logo} onChange={setLogo} />
+            <form className="space-y-8">
+              {/* Company Information */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-medium">Información de la empresa</h3>
 
-                  <FormField
-                    control={form.control}
-                    name="company"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nombre de la Empresa</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <LogoUpload value={logo} onChange={setLogo} />
 
-                  <FormField
-                    control={form.control}
-                    name="company_email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email de la Empresa</FormLabel>
-                        <FormControl>
-                          <Input type="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Nombre de la Empresa *</label>
+                    <Input name="company" value={formData.company} onChange={handleInputChange} />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Email de la Empresa *</label>
+                    <Input
+                      name="company_email"
+                      type="email"
+                      value={formData.company_email}
+                      onChange={handleInputChange}
+                    />
+                  </div>
                 </div>
+              </div>
 
-                <Separator />
+              <Separator />
 
-                {/* Job Details */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-medium">Detalles del puesto</h3>
+              {/* Job Details */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-medium">Detalles del puesto</h3>
 
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Título del Puesto</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Título del Puesto *</label>
+                    <Input name="title" value={formData.title} onChange={handleInputChange} />
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name="job_type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Modalidad de Trabajo</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona una modalidad" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value={JOB_TYPES.REMOTE}>Remoto</SelectItem>
-                            <SelectItem value={JOB_TYPES.HYBRID}>Híbrido</SelectItem>
-                            <SelectItem value={JOB_TYPES.ONSITE}>Presencial</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div>
+                    <label className="text-sm font-medium">Modalidad de Trabajo *</label>
+                    <Select
+                      value={formData.job_type}
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, job_type: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una modalidad" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={JOB_TYPES.REMOTE}>Remoto</SelectItem>
+                        <SelectItem value={JOB_TYPES.HYBRID}>Híbrido</SelectItem>
+                        <SelectItem value={JOB_TYPES.ONSITE}>Presencial</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ubicación</FormLabel>
-                        <FormControl>
-                          <LocationSelector value={field.value || ""} onChange={field.onChange} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div>
+                    <label className="text-sm font-medium">Ubicación</label>
+                    <LocationSelector
+                      value={formData.location}
+                      onChange={(value) => setFormData((prev) => ({ ...prev, location: value }))}
+                    />
+                  </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="salary_min"
-                      render={({ field: { value, onChange, ...field } }) => (
-                        <FormItem>
-                          <FormLabel>Salario Mínimo (€)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="ej., 30000"
-                              value={value || ""}
-                              onChange={(e) => onChange(e.target.valueAsNumber)}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div>
+                      <label className="text-sm font-medium">Salario Mínimo (€)</label>
+                      <Input
+                        name="salary_min"
+                        type="number"
+                        value={formData.salary_min}
+                        onChange={handleInputChange}
+                        placeholder="ej., 45000"
+                      />
+                    </div>
 
-                    <FormField
-                      control={form.control}
-                      name="salary_max"
-                      render={({ field: { value, onChange, ...field } }) => (
-                        <FormItem>
-                          <FormLabel>Salario Máximo (€)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="ej., 45000"
-                              value={value || ""}
-                              onChange={(e) => onChange(e.target.valueAsNumber)}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div>
+                      <label className="text-sm font-medium">Salario Máximo (€)</label>
+                      <Input
+                        name="salary_max"
+                        type="number"
+                        value={formData.salary_max}
+                        onChange={handleInputChange}
+                        placeholder="ej., 60000"
+                      />
+                    </div>
                   </div>
 
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descripción del Puesto</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Describe el rol, responsabilidades, requisitos..."
-                            className="min-h-[200px] resize-y"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div>
+                    <label className="text-sm font-medium">Descripción del Puesto *</label>
+                    <Textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      placeholder="Describe el rol, responsabilidades, requisitos..."
+                      className="min-h-[200px] resize-y"
+                    />
+                  </div>
                 </div>
+              </div>
 
-                <Separator />
+              <Separator />
 
-                {/* Benefits & Application Section */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-medium">Beneficios y proceso de aplicación</h3>
+              {/* Benefits & Application Section */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-medium">Beneficios y proceso de aplicación</h3>
 
-                  <BenefitsSection benefits={benefits} onBenefitsChange={setBenefits} />
+                <BenefitsSection benefits={benefits} onBenefitsChange={setBenefits} />
 
-                  <ApplyMethodSection value={applyMethod} onChange={setApplyMethod} />
-                </div>
+                <ApplyMethodSection value={applyMethod} onChange={setApplyMethod} />
+              </div>
 
-                {/* Form Actions */}
-                <div className="flex justify-between items-center pt-6">
-                  <Button type="button" variant="ghost" onClick={() => setActiveTab("preview")}>
-                    Cancelar
+              {/* Form Actions */}
+              <div className="flex justify-between items-center pt-6">
+                <Button type="button" variant="ghost" onClick={() => setActiveTab("preview")}>
+                  Cancelar
+                </Button>
+                <div className="space-x-2">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive">Desactivar oferta</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Al desactivar la oferta, dejará de ser visible en el listado. Esta acción no se puede
+                          deshacer.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDeactivate}
+                          className="bg-destructive text-destructive-foreground"
+                        >
+                          Desactivar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <Button onClick={handleSubmit} disabled={isSubmitting}>
+                    {isSubmitting ? "Guardando..." : "Guardar cambios"}
                   </Button>
-                  <div className="space-x-2">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive">Desactivar oferta</Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Al desactivar la oferta, dejará de ser visible en el listado. Esta acción no se puede
-                            deshacer.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={handleDeactivate}
-                            className="bg-destructive text-destructive-foreground"
-                          >
-                            Desactivar
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    <Button type="submit">Guardar cambios</Button>
-                  </div>
                 </div>
-              </form>
-            </Form>
+              </div>
+            </form>
           </TabsContent>
         </Tabs>
       </CardContent>
