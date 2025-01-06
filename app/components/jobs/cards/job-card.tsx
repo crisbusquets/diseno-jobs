@@ -40,9 +40,14 @@ export default function JobCard({ job, variant = "list", showApplySection = true
               <CardDescription className={cn(isDetailed ? "text-lg" : "text-base")}>{job.company}</CardDescription>
             </div>
           </div>
-          <Badge variant={job.job_type === "remote" ? "default" : job.job_type === "hybrid" ? "secondary" : "outline"}>
-            {getJobTypeLabel(job.job_type)}
-          </Badge>
+          <div className="flex gap-2">
+            <Badge variant="outline">{job.experience_level}</Badge>
+            <Badge
+              variant={job.job_type === "remote" ? "default" : job.job_type === "hybrid" ? "secondary" : "outline"}
+            >
+              {getJobTypeLabel(job.job_type)}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
 

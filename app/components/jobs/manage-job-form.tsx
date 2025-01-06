@@ -33,7 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { JOB_TYPES } from "@/lib/config/constants";
+import { JOB_TYPES, EXPERIENCE_LEVEL } from "@/lib/config/constants";
 
 interface ManageJobFormProps {
   job: Job;
@@ -59,6 +59,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
     company_email: job.company_email,
     description: job.description,
     job_type: job.job_type,
+    experience_level: job.experience_level,
     location: job.location || "",
     salary_min: job.salary_min?.toString() || "",
     salary_max: job.salary_max?.toString() || "",
@@ -238,6 +239,10 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                       <p className="text-sm font-medium text-muted-foreground">Título</p>
                       <p>{formData.title}</p>
                     </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Experiencia</p>
+                      <p>{formData.experience_level}</p>
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Modalidad</p>
@@ -390,6 +395,26 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                       value={formData.location}
                       onChange={(value) => setFormData((prev) => ({ ...prev, location: value }))}
                     />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Nivel de Experiencia *</label>
+                    <Select
+                      value={formData.experience_level}
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, experience_level: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un nivel" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={EXPERIENCE_LEVEL.ENTRY}>Entry level</SelectItem>
+                        <SelectItem value={EXPERIENCE_LEVEL.JUNIOR}>Junior</SelectItem>
+                        <SelectItem value={EXPERIENCE_LEVEL.MID}>Mid</SelectItem>
+                        <SelectItem value={EXPERIENCE_LEVEL.SENIOR}>Senior</SelectItem>
+                        <SelectItem value={EXPERIENCE_LEVEL.MANAGER}>Manager</SelectItem>
+                        <SelectItem value={EXPERIENCE_LEVEL.LEAD}>Lead</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

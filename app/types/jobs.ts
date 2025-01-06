@@ -21,6 +21,7 @@ export interface Job {
   company_logo?: string;
   description: string;
   job_type: JobType;
+  experience_level: string;
   location?: string;
   salary_min?: number;
   salary_max?: number;

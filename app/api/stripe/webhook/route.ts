@@ -82,6 +82,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     companyLogo: job.company_logo,
     managementUrl,
     jobType: job.job_type,
+    experience_level: job.experience_level,
     location: job.location,
     salaryMin: job.salary_min,
     salaryMax: job.salary_max,

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { createPaymentSession } from "@/api/stripe/actions";
-import { JOB_TYPES, SITE_CONFIG } from "@/lib/config/constants";
+import { JOB_TYPES, SITE_CONFIG, EXPERIENCE_LEVEL } from "@/lib/config/constants";
 import { JobType, JobFormData } from "@/types";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,7 @@ export default function CreateJobForm() {
     description: "",
     job_type: "remote" as JobType,
     location: "",
+    experience_level: "",
     salary_min: "",
     salary_max: "",
   });
@@ -206,30 +207,49 @@ export default function CreateJobForm() {
                   placeholder="ej., Diseñador/a UX Senior"
                 />
               </div>
-
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Modalidad de Trabajo *</label>
+                  <Select
+                    value={formData.job_type}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, job_type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una modalidad" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={JOB_TYPES.REMOTE}>Remoto</SelectItem>
+                      <SelectItem value={JOB_TYPES.HYBRID}>Híbrido</SelectItem>
+                      <SelectItem value={JOB_TYPES.ONSITE}>Presencial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Ubicación</label>
+                  <LocationSelector
+                    value={formData.location}
+                    onChange={(value) => setFormData((prev) => ({ ...prev, location: value }))}
+                  />
+                </div>
+              </div>
               <div>
-                <label className="text-sm font-medium">Modalidad de Trabajo *</label>
+                <label className="text-sm font-medium">Nivel de Experiencia *</label>
                 <Select
-                  value={formData.job_type}
-                  onValueChange={(value) => setFormData((prev) => ({ ...prev, job_type: value }))}
+                  value={formData.experience_level}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, experience_level: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una modalidad" />
+                    <SelectValue placeholder="Selecciona un nivel" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={JOB_TYPES.REMOTE}>Remoto</SelectItem>
-                    <SelectItem value={JOB_TYPES.HYBRID}>Híbrido</SelectItem>
-                    <SelectItem value={JOB_TYPES.ONSITE}>Presencial</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.ENTRY}>Entry level</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.JUNIOR}>Junior</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.MID}>Mid</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.SENIOR}>Senior</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.MANAGER}>Manager</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.LEAD}>Lead</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Ubicación</label>
-                <LocationSelector
-                  value={formData.location}
-                  onChange={(value) => setFormData((prev) => ({ ...prev, location: value }))}
-                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -255,7 +275,6 @@ export default function CreateJobForm() {
                   />
                 </div>
               </div>
-
               <div>
                 <label className="text-sm font-medium">Descripción del Puesto *</label>
                 <Textarea

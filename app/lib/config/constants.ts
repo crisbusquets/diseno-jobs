@@ -17,6 +17,15 @@ export const DEFAULT_JOB_FILTERS = {
   location: "",
 };
 
+export const EXPERIENCE_LEVEL = {
+  ENTRY: "Entry level",
+  JUNIOR: "Junior",
+  MID: "Mid",
+  SENIOR: "Senior",
+  MANAGER: "Manager",
+  LEAD: "Lead",
+} as const;
+
 export const CLOUDINARY_UPLOAD_PRESET = "company_logos";
 
 export const DEFAULT_BENEFITS = [
