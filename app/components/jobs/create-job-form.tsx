@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { createPaymentSession } from "@/api/stripe/actions";
 import { JOB_TYPES, SITE_CONFIG, EXPERIENCE_LEVEL } from "@/lib/config/constants";
-import { JobType, JobFormData } from "@/types";
+import { JobType, JobFormData, ExperienceLevel } from "@/types";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,8 +37,8 @@ export default function CreateJobForm() {
     company_email: "",
     description: "",
     job_type: "remote" as JobType,
+    experience_level: "" as ExperienceLevel,
     location: "",
-    experience_level: "",
     salary_min: "",
     salary_max: "",
   });

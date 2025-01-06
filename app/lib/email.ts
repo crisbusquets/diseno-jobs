@@ -16,7 +16,7 @@ interface JobEmailData {
   companyLogo?: string;
   managementUrl: string;
   jobType: Job["job_type"];
-  experience_level: string;
+  experienceLevel: Job["experience_level"];
   location?: string;
   salaryMin?: number;
   salaryMax?: number;
@@ -93,7 +93,7 @@ export async function sendJobConfirmationEmail(jobData: JobEmailData) {
         <h2 style="color: #111827; font-size: 18px; margin: 0 0 16px 0;">${jobData.jobTitle}</h2>
         
         <div style="margin-bottom: 16px;">
-        <p style="margin: 0 0 8px 0;"><strong>Experiencia:</strong> ${jobData.experience_level}</p>
+        <p style="margin: 0 0 8px 0;"><strong>Experiencia:</strong> ${jobData.experienceLevel}</p>
           <p style="margin: 0 0 8px 0;"><strong>Modalidad:</strong> ${getJobTypeLabel(jobData.jobType)}</p>
           ${jobData.location ? `<p style="margin: 0 0 8px 0;"><strong>Ubicación:</strong> ${jobData.location}</p>` : ""}
           ${

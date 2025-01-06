@@ -2,6 +2,8 @@
 
 export type JobType = "remote" | "hybrid" | "onsite";
 
+export type ExperienceLevel = "entry" | "junior" | "mid" | "senior" | "manager" | "lead";
+
 export type ApplicationMethod = {
   type: "email" | "url";
   value: string;
@@ -21,7 +23,7 @@ export interface Job {
   company_logo?: string;
   description: string;
   job_type: JobType;
-  experience_level: string;
+  experience_level: ExperienceLevel;
   location?: string;
   salary_min?: number;
   salary_max?: number;
@@ -40,6 +42,7 @@ export interface JobFormData extends Omit<Job, "id" | "created_at" | "is_active"
 export interface JobFilters {
   search: string;
   jobType: string;
+  ExperienceLevel: string;
   location: string;
   minSalary?: number;
   benefits?: string[];
@@ -48,6 +51,7 @@ export interface JobFilters {
 export const DEFAULT_JOB_FILTERS: JobFilters = {
   search: "",
   jobType: "all",
+  ExperienceLevel: "",
   location: "",
   minSalary: undefined,
   benefits: [],

@@ -76,6 +76,7 @@ async function Success({ searchParams }: { searchParams: { session_id?: string }
         companyLogo: job.company_logo,
         managementUrl,
         jobType: job.job_type,
+        experienceLevel: job.experience_level,
         location: job.location,
         salaryMin: job.salary_min,
         salaryMax: job.salary_max,
