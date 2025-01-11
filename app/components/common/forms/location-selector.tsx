@@ -1,19 +1,21 @@
+// app/components/common/forms/location-selector.tsx
 import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Region = {
-  name: string;
+  id: string; // Value that gets stored in database
+  name: string; // Display text in Spanish
   emoji: string;
 };
 
 const REGIONS: Region[] = [
-  { name: "En cualquier parte", emoji: "🌍" },
-  { name: "Europa", emoji: "🇪🇺" },
-  { name: "España", emoji: "🇪🇸" },
-  { name: "Francia", emoji: "🇫🇷" },
-  { name: "Alemania", emoji: "🇩🇪" },
-  { name: "Reino Unido", emoji: "🇬🇧" },
-  { name: "Portugal", emoji: "🇵🇹" },
+  { id: "anywhere", name: "En cualquier parte", emoji: "🌍" },
+  { id: "europe", name: "Europa", emoji: "🇪🇺" },
+  { id: "spain", name: "España", emoji: "🇪🇸" },
+  { id: "france", name: "Francia", emoji: "🇫🇷" },
+  { id: "germany", name: "Alemania", emoji: "🇩🇪" },
+  { id: "uk", name: "Reino Unido", emoji: "🇬🇧" },
+  { id: "portugal", name: "Portugal", emoji: "🇵🇹" },
 ];
 
 interface LocationSelectorProps {
@@ -25,11 +27,11 @@ export default function LocationSelector({ value, onChange }: LocationSelectorPr
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select location" />
+        <SelectValue placeholder="Select location">{value && REGIONS.find((r) => r.id === value)?.name}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {REGIONS.map((location) => (
-          <SelectItem key={location.name} value={location.name}>
+          <SelectItem key={location.id} value={location.id}>
             <span className="flex items-center gap-2">
               {location.emoji} {location.name}
             </span>
@@ -38,4 +40,9 @@ export default function LocationSelector({ value, onChange }: LocationSelectorPr
       </SelectContent>
     </Select>
   );
+}
+
+// Helper function to get display name from ID
+export function getLocationName(id: string): string {
+  return REGIONS.find((r) => r.id === id)?.name || id;
 }

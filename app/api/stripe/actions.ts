@@ -26,6 +26,7 @@ export async function createPaymentSession(
         company_email: data.company_email,
         company_logo: data.company_logo,
         description: data.description,
+        location: data.location || null,
         job_type: data.job_type,
         experience_level: data.experience_level,
         contract_type: data.contract_type || null,

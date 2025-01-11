@@ -2,6 +2,7 @@
 import { MapPin, BriefcaseIcon, Mail, Globe } from "lucide-react";
 import { Job } from "@/types";
 import { formatSalaryRange } from "@/lib/utils/formatting";
+import { getLocationName } from "@/components/common/forms/location-selector";
 
 interface JobMetadataProps {
   job: Job;
@@ -16,7 +17,7 @@ export function JobMetadata({ job, variant = "compact" }: JobMetadataProps) {
           <MapPin className={`text-gray-400 ${variant === "compact" ? "w-4 h-4" : "w-5 h-5"} mt-1`} />
           <div>
             {variant === "detailed" && <h3 className="font-medium text-gray-900">Ubicación</h3>}
-            <p className="text-gray-600">{job.location}</p>
+            <p className="text-gray-600">{getLocationName(job.location)}</p>
           </div>
         </div>
       )}

@@ -2,6 +2,7 @@
 "use client";
 
 import { Building2, MapPin, EuroIcon } from "lucide-react";
+import { getLocationName } from "@/components/common/forms/location-selector";
 import { CONTRACT_TYPE_LABELS } from "@/lib/config/constants";
 import { Job } from "@/types";
 import { formatSalaryRange, getJobTypeLabel } from "@/lib/utils/formatting";
@@ -59,7 +60,7 @@ export default function JobCard({ job, variant = "list", showApplySection = true
             {job.location && (
               <div className="flex items-center">
                 <MapPin className="h-4 w-4 mr-1" />
-                {job.location}
+                {getLocationName(job.location)}
               </div>
             )}
             {(job.salary_min || job.salary_max) && (

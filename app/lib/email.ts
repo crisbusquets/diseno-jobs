@@ -5,6 +5,7 @@
 import { Resend } from "resend";
 import { Job, Benefit } from "@/types";
 import { formatSalaryRange, getJobTypeLabel } from "@/lib/utils/formatting";
+import { getLocationName } from "@/components/common/forms/location-selector";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -97,13 +98,9 @@ export async function sendJobConfirmationEmail(jobData: JobEmailData) {
         <p style="margin: 0 0 8px 0;"><strong>Experiencia:</strong> ${jobData.experienceLevel}</p>
         <p style="margin: 0 0 8px 0;"><strong>Tipo de contracto:</strong> ${jobData.contractType}</p>
           <p style="margin: 0 0 8px 0;"><strong>Modalidad:</strong> ${getJobTypeLabel(jobData.jobType)}</p>
-          ${jobData.location ? `<p style="margin: 0 0 8px 0;"><strong>Ubicación:</strong> ${jobData.location}</p>` : ""}
           ${
-            jobData.salaryMin || jobData.salaryMax
-              ? `<p style="margin: 0 0 8px 0;"><strong>Salario:</strong> ${formatSalaryRange(
-                  jobData.salaryMin,
-                  jobData.salaryMax
-                )}</p>`
+            jobData.location
+              ? `<p style="margin: 0 0 8px 0;"><strong>Ubicación:</strong> ${getLocationName(jobData.location)}</p>`
               : ""
           }
         </div>

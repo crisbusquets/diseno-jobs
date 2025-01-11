@@ -11,6 +11,7 @@ import LogoUpload from "@/components/common/forms/logo-upload";
 import { ApplyMethodSection } from "@/components/common/forms/apply-method-section";
 import { BenefitsSection } from "@/components/common/forms/benefits-section";
 import LocationSelector from "@/components/common/forms/location-selector";
+import { getLocationName } from "@/components/common/forms/location-selector";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -256,7 +257,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                       {formData.location && (
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">Ubicación</p>
-                          <p>{formData.location}</p>
+                          <p>{getLocationName(formData.location)}</p>
                         </div>
                       )}
                     </div>
