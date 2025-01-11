@@ -2,6 +2,7 @@
 "use client";
 
 import { Building2, MapPin, EuroIcon } from "lucide-react";
+import { CONTRACT_TYPE_LABELS } from "@/lib/config/constants";
 import { Job } from "@/types";
 import { formatSalaryRange, getJobTypeLabel } from "@/lib/utils/formatting";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -42,6 +43,7 @@ export default function JobCard({ job, variant = "list", showApplySection = true
           </div>
           <div className="flex gap-2">
             <Badge variant="outline">{job.experience_level}</Badge>
+            {job.contract_type && <Badge variant="outline">{CONTRACT_TYPE_LABELS[job.contract_type]}</Badge>}
             <Badge
               variant={job.job_type === "remote" ? "default" : job.job_type === "hybrid" ? "secondary" : "outline"}
             >

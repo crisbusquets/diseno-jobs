@@ -4,6 +4,8 @@ export type JobType = "remote" | "hybrid" | "onsite";
 
 export type ExperienceLevel = "entry" | "junior" | "mid" | "senior" | "manager" | "lead";
 
+export type ContractType = "fulltime" | "parttime" | "internship" | "freelance";
+
 export type ApplicationMethod = {
   type: "email" | "url";
   value: string;
@@ -24,6 +26,7 @@ export interface Job {
   description: string;
   job_type: JobType;
   experience_level: ExperienceLevel;
+  contract_type: ContractType;
   location?: string;
   salary_min?: number;
   salary_max?: number;
@@ -43,6 +46,7 @@ export interface JobFilters {
   search: string;
   jobType: string;
   ExperienceLevel: string;
+  ContractType: string;
   location: string;
   minSalary?: number;
   benefits?: string[];
@@ -52,6 +56,7 @@ export const DEFAULT_JOB_FILTERS: JobFilters = {
   search: "",
   jobType: "all",
   ExperienceLevel: "",
+  ContractType: "",
   location: "",
   minSalary: undefined,
   benefits: [],

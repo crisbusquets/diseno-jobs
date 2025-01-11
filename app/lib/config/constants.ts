@@ -26,6 +26,20 @@ export const EXPERIENCE_LEVEL = {
   LEAD: "Lead",
 } as const;
 
+export const CONTRACT_TYPE = {
+  FULLTIME: "fulltime",
+  PARTTIME: "parttime",
+  INTERNSHIP: "internship",
+  FREELANCE: "freelance",
+} as const;
+
+export const CONTRACT_TYPE_LABELS = {
+  fulltime: "Tiempo completo",
+  parttime: "Tiempo parcial",
+  internship: "Prácticas",
+  freelance: "Freelance",
+} as const;
+
 export const CLOUDINARY_UPLOAD_PRESET = "company_logos";
 
 export const DEFAULT_BENEFITS = [

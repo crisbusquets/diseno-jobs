@@ -48,20 +48,29 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
   const supabase = getSupabase();
 
-  // Update job status
+  // First get the current job data
+  const { data: currentJob, error: fetchError } = await supabase
+    .from("job_listings")
+    .select("*")
+    .eq("id", jobId)
+    .single();
+
+  if (fetchError || !currentJob) {
+    throw new Error(`Failed to fetch job: ${fetchError?.message}`);
+  }
+
+  // Then update while preserving all fields
   const { data: job, error: updateError } = await supabase
     .from("job_listings")
     .update({
+      ...currentJob, // Keep all existing data
       is_active: true,
       stripe_payment_id: session.id,
       activated_at: new Date().toISOString(),
     })
     .eq("id", jobId)
-    .select() // Make sure we're getting all fields
+    .select()
     .single();
-
-  // For debugging, add this:
-  console.log("Job data in webhook:", JSON.stringify(job, null, 2));
 
   if (updateError) {
     throw new Error(`Failed to update job: ${updateError.message}`);
@@ -83,6 +92,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     managementUrl,
     jobType: job.job_type,
     experienceLevel: job.experience_level,
+    contractType: job.contract_type,
     location: job.location,
     salaryMin: job.salary_min,
     salaryMax: job.salary_max,

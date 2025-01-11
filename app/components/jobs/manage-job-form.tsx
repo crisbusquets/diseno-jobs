@@ -33,7 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { JOB_TYPES, EXPERIENCE_LEVEL } from "@/lib/config/constants";
+import { JOB_TYPES, EXPERIENCE_LEVEL, CONTRACT_TYPE } from "@/lib/config/constants";
 
 interface ManageJobFormProps {
   job: Job;
@@ -60,6 +60,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
     description: job.description,
     job_type: job.job_type,
     experience_level: job.experience_level,
+    contract_type: job.contract_type,
     location: job.location || "",
     salary_min: job.salary_min?.toString() || "",
     salary_max: job.salary_max?.toString() || "",
@@ -243,6 +244,10 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                       <p className="text-sm font-medium text-muted-foreground">Experiencia</p>
                       <p>{formData.experience_level}</p>
                     </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Contrato</p>
+                      <p>{formData.contract_type}</p>
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Modalidad</p>
@@ -413,6 +418,24 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                         <SelectItem value={EXPERIENCE_LEVEL.SENIOR}>Senior</SelectItem>
                         <SelectItem value={EXPERIENCE_LEVEL.MANAGER}>Manager</SelectItem>
                         <SelectItem value={EXPERIENCE_LEVEL.LEAD}>Lead</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Tipo de contrato *</label>
+                    <Select
+                      value={formData.contract_type}
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, contract_type: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una opción" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={CONTRACT_TYPE.FULLTIME}>Tiempo completo</SelectItem>
+                        <SelectItem value={CONTRACT_TYPE.PARTTIME}>Tiempo parcial</SelectItem>
+                        <SelectItem value={CONTRACT_TYPE.INTERNSHIP}>Prácticas</SelectItem>
+                        <SelectItem value={CONTRACT_TYPE.FREELANCE}>Freelance</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

@@ -28,6 +28,7 @@ export async function createPaymentSession(
         description: data.description,
         job_type: data.job_type,
         experience_level: data.experience_level,
+        contract_type: data.contract_type || null,
         salary_min: data.salary_min || null,
         salary_max: data.salary_max || null,
         application_method_type: data.application_method_type,

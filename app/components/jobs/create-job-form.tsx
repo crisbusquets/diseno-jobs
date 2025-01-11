@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { createPaymentSession } from "@/api/stripe/actions";
-import { JOB_TYPES, SITE_CONFIG, EXPERIENCE_LEVEL } from "@/lib/config/constants";
-import { JobType, JobFormData, ExperienceLevel } from "@/types";
+import { JOB_TYPES, SITE_CONFIG, EXPERIENCE_LEVEL, CONTRACT_TYPE } from "@/lib/config/constants";
+import { JobType, JobFormData, ExperienceLevel, ContractType } from "@/types";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +38,7 @@ export default function CreateJobForm() {
     description: "",
     job_type: "remote" as JobType,
     experience_level: "" as ExperienceLevel,
+    contract_type: "" as ContractType,
     location: "",
     salary_min: "",
     salary_max: "",
@@ -248,6 +249,24 @@ export default function CreateJobForm() {
                     <SelectItem value={EXPERIENCE_LEVEL.SENIOR}>Senior</SelectItem>
                     <SelectItem value={EXPERIENCE_LEVEL.MANAGER}>Manager</SelectItem>
                     <SelectItem value={EXPERIENCE_LEVEL.LEAD}>Lead</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Tipo de contrato *</label>
+                <Select
+                  value={formData.contract_type}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, contract_type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una opción" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={CONTRACT_TYPE.FULLTIME}>Tiempo completo</SelectItem>
+                    <SelectItem value={CONTRACT_TYPE.PARTTIME}>Tiempo parcial</SelectItem>
+                    <SelectItem value={CONTRACT_TYPE.INTERNSHIP}>Prácticas</SelectItem>
+                    <SelectItem value={CONTRACT_TYPE.FREELANCE}>Freelance</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
