@@ -21,9 +21,9 @@
 /build
 
 # misc
+architecture.md
 .DS_Store
 *.pem
-architecture.md
 
 # debug
 npm-debug.log*
