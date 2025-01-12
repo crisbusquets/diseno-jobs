@@ -35,12 +35,12 @@ export const translations = {
       title: "Como postular",
       email: {
         label: "Email",
-        placeholder: "jobs@company.com",
+        placeholder: "info@dominio.com",
         help: "Los candidatos recibirán un botón para enviar email directamente",
       },
       url: {
         label: "URL",
-        placeholder: "https://company.com/apply",
+        placeholder: "https://dominio.com/empleo/oferta",
         help: "Los candidatos serán redirigidos a esta URL para aplicar",
       },
     },
