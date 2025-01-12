@@ -6,7 +6,7 @@ import { JOB_TYPES, SITE_CONFIG, EXPERIENCE_LEVEL, CONTRACT_TYPE } from "@/lib/c
 import { JobType, JobFormData, ExperienceLevel, ContractType } from "@/types";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,6 +18,8 @@ import LogoUpload from "@/components/common/forms/logo-upload";
 import { ApplyMethodSection } from "@/components/common/forms/apply-method-section";
 import { BenefitsSection } from "@/components/common/forms/benefits-section";
 import LocationSelector from "@/components/common/forms/location-selector";
+
+import { t } from "@/lib/translations/utils";
 
 export default function CreateJobForm() {
   const { toast } = useToast();
@@ -53,26 +55,27 @@ export default function CreateJobForm() {
   };
 
   const validateForm = () => {
-    if (!formData.title) return "El título es obligatorio";
-    if (!formData.company) return "El nombre de la empresa es obligatorio";
-    if (!formData.company_email) return "El email es obligatorio";
-    if (!formData.description) return "La descripción es obligatoria";
-    if (!applyMethod.value) return "El método de aplicación es obligatorio";
+    if (!formData.title) return t("jobs.create.validation.required");
+    if (!formData.company) return t("jobs.create.validation.required");
+    if (!formData.company_email) return t("jobs.create.validation.required");
+    if (!formData.description) return t("jobs.create.validation.required");
+    if (!applyMethod.value) return t("jobs.create.validation.required");
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.company_email)) return "Email no válido";
-    if (applyMethod.type === "email" && !emailRegex.test(applyMethod.value)) return "Email de aplicación no válido";
+    if (!emailRegex.test(formData.company_email)) return t("jobs.create.validation.email");
+    if (applyMethod.type === "email" && !emailRegex.test(applyMethod.value))
+      return t("jobs.create.validation.applyEmail");
 
     // URL validation
     if (applyMethod.type === "url" && !applyMethod.value.startsWith("http")) {
-      return "La URL debe comenzar con http:// o https://";
+      return t("jobs.create.validation.url");
     }
 
     // Salary validation
     if (formData.salary_min && formData.salary_max) {
       if (Number(formData.salary_min) > Number(formData.salary_max)) {
-        return "El salario mínimo no puede ser mayor que el máximo";
+        return t("jobs.create.validation.salary");
       }
     }
 
@@ -88,7 +91,7 @@ export default function CreateJobForm() {
       setFormError(error);
       toast({
         variant: "destructive",
-        title: "Error de validación",
+        title: t("jobs.toasts.validationError"),
         description: error,
       });
       return;
@@ -122,7 +125,7 @@ export default function CreateJobForm() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Error al procesar la solicitud",
+        description: error.message || t("jobs.toasts.submitError"),
       });
     } finally {
       setIsSubmitting(false);
@@ -132,15 +135,15 @@ export default function CreateJobForm() {
   return (
     <Card className="max-w-3xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl">Publicar Oferta de Diseño</CardTitle>
+        <CardTitle className="text-2xl">{t("jobs.create.title")}</CardTitle>
         <div className="mt-4 flex items-center justify-between rounded-lg border bg-muted/50 p-4">
           <div>
-            <p className="text-base font-medium">Publicación por 30 días</p>
-            <p className="text-sm text-muted-foreground">Visible para toda la comunidad de diseño</p>
+            <p className="text-base font-medium">{t("jobs.create.duration")}</p>
+            <p className="text-sm text-muted-foreground">{t("jobs.create.visibility")}</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-medium">{SITE_CONFIG.jobPrice / 100}€</p>
-            <p className="text-sm text-muted-foreground">Pago único</p>
+            <p className="text-sm text-muted-foreground">{t("jobs.create.pricingNote")}</p>
           </div>
         </div>
       </CardHeader>
@@ -156,25 +159,25 @@ export default function CreateJobForm() {
           {/* Company Information Section */}
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-medium">Información de la empresa</h3>
-              <p className="text-sm text-muted-foreground">Datos sobre tu empresa y cómo contactarte</p>
+              <h3 className="text-lg font-medium">{t("jobs.create.company.title")}</h3>
+              <p className="text-sm text-muted-foreground">{t("jobs.create.company.description")}</p>
             </div>
 
             <LogoUpload value={logo} onChange={setLogo} />
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Nombre de la Empresa *</label>
+                <label className="text-sm font-medium">{t("jobs.form.company")} *</label>
                 <Input
                   name="company"
                   value={formData.company}
                   onChange={handleInputChange}
-                  placeholder="ej., Design Studio Inc."
+                  placeholder={t("jobs.create.company.placeholder")}
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium">Email de la Empresa *</label>
+                <label className="text-sm font-medium">{t("jobs.form.email")} *</label>
                 <Input
                   name="company_email"
                   type="email"
@@ -182,9 +185,7 @@ export default function CreateJobForm() {
                   onChange={handleInputChange}
                   placeholder="ej., contacto@empresa.com"
                 />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Se usará para gestionar la oferta y recibir notificaciones
-                </p>
+                <p className="text-sm text-muted-foreground mt-1">{t("jobs.create.company.emailHelp")}</p>
               </div>
             </div>
           </div>
@@ -194,39 +195,39 @@ export default function CreateJobForm() {
           {/* Job Details Section */}
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-medium">Detalles del puesto</h3>
-              <p className="text-sm text-muted-foreground">Información sobre la posición y requisitos</p>
+              <h3 className="text-lg font-medium">{t("jobs.form.details.title")}</h3>
+              <p className="text-sm text-muted-foreground">{t("jobs.form.details.description")}</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Título del Puesto *</label>
+                <label className="text-sm font-medium">{t("jobs.create.details.titleLabel")} *</label>
                 <Input
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  placeholder="ej., Diseñador/a UX Senior"
+                  placeholder={t("jobs.create.details.titlePlaceholder")}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Modalidad de Trabajo *</label>
+                  <label className="text-sm font-medium">{t("jobs.form.workMode.label")} *</label>
                   <Select
                     value={formData.job_type}
                     onValueChange={(value) => setFormData((prev) => ({ ...prev, job_type: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecciona una modalidad" />
+                      <SelectValue placeholder={t("jobs.form.workMode.placeholder")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={JOB_TYPES.REMOTE}>Remoto</SelectItem>
-                      <SelectItem value={JOB_TYPES.HYBRID}>Híbrido</SelectItem>
-                      <SelectItem value={JOB_TYPES.ONSITE}>Presencial</SelectItem>
+                      <SelectItem value={JOB_TYPES.REMOTE}>{t("jobs.form.workMode.remote")}</SelectItem>
+                      <SelectItem value={JOB_TYPES.HYBRID}>{t("jobs.form.workMode.hybrid")}</SelectItem>
+                      <SelectItem value={JOB_TYPES.ONSITE}>{t("jobs.form.workMode.onsite")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Ubicación</label>
+                  <label className="text-sm font-medium">{t("jobs.location.label")}</label>
                   <LocationSelector
                     value={formData.location}
                     onChange={(value) => setFormData((prev) => ({ ...prev, location: value }))}
@@ -234,73 +235,73 @@ export default function CreateJobForm() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium">Nivel de Experiencia *</label>
+                <label className="text-sm font-medium">{t("jobs.form.experience.label")} *</label>
                 <Select
                   value={formData.experience_level}
                   onValueChange={(value) => setFormData((prev) => ({ ...prev, experience_level: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un nivel" />
+                    <SelectValue placeholder={t("jobs.form.experience.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={EXPERIENCE_LEVEL.ENTRY}>Entry level</SelectItem>
-                    <SelectItem value={EXPERIENCE_LEVEL.JUNIOR}>Junior</SelectItem>
-                    <SelectItem value={EXPERIENCE_LEVEL.MID}>Mid</SelectItem>
-                    <SelectItem value={EXPERIENCE_LEVEL.SENIOR}>Senior</SelectItem>
-                    <SelectItem value={EXPERIENCE_LEVEL.MANAGER}>Manager</SelectItem>
-                    <SelectItem value={EXPERIENCE_LEVEL.LEAD}>Lead</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.ENTRY}>{t("jobs.form.experience.entry")}</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.JUNIOR}>{t("jobs.form.experience.junior")}</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.MID}>{t("jobs.form.experience.mid")}</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.SENIOR}>{t("jobs.form.experience.senior")}</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.MANAGER}>{t("jobs.form.experience.manager")}</SelectItem>
+                    <SelectItem value={EXPERIENCE_LEVEL.LEAD}>{t("jobs.form.experience.lead")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <label className="text-sm font-medium">Tipo de contrato *</label>
+                <label className="text-sm font-medium">{t("jobs.form.contract.label")} *</label>
                 <Select
                   value={formData.contract_type}
                   onValueChange={(value) => setFormData((prev) => ({ ...prev, contract_type: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una opción" />
+                    <SelectValue placeholder={t("jobs.form.contract.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={CONTRACT_TYPE.FULLTIME}>Tiempo completo</SelectItem>
-                    <SelectItem value={CONTRACT_TYPE.PARTTIME}>Tiempo parcial</SelectItem>
-                    <SelectItem value={CONTRACT_TYPE.INTERNSHIP}>Prácticas</SelectItem>
-                    <SelectItem value={CONTRACT_TYPE.FREELANCE}>Freelance</SelectItem>
+                    <SelectItem value={CONTRACT_TYPE.FULLTIME}>{t("jobs.form.contract.fulltime")}</SelectItem>
+                    <SelectItem value={CONTRACT_TYPE.PARTTIME}>{t("jobs.form.contract.parttime")}</SelectItem>
+                    <SelectItem value={CONTRACT_TYPE.INTERNSHIP}>{t("jobs.form.contract.internship")}</SelectItem>
+                    <SelectItem value={CONTRACT_TYPE.FREELANCE}>{t("jobs.form.contract.freelance")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Salario Mínimo (€)</label>
+                  <label className="text-sm font-medium">{t("jobs.form.salary.min")}</label>
                   <Input
                     name="salary_min"
                     type="number"
                     value={formData.salary_min}
                     onChange={handleInputChange}
-                    placeholder="ej., 45000"
+                    placeholder={t("jobs.form.salary.placeholder.min")}
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium">Salario Máximo (€)</label>
+                  <label className="text-sm font-medium">{t("jobs.form.salary.max")}</label>
                   <Input
                     name="salary_max"
                     type="number"
                     value={formData.salary_max}
                     onChange={handleInputChange}
-                    placeholder="ej., 60000"
+                    placeholder={t("jobs.form.salary.placeholder.max")}
                   />
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium">Descripción del Puesto *</label>
+                <label className="text-sm font-medium">{t("jobs.form.description.label")} *</label>
                 <Textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="Describe el rol, responsabilidades, requisitos..."
+                  placeholder={t("jobs.form.description.placeholder")}
                   className="min-h-[200px] resize-y"
                 />
               </div>
@@ -312,8 +313,8 @@ export default function CreateJobForm() {
           {/* Benefits & Application Section */}
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-medium">Beneficios y proceso de aplicación</h3>
-              <p className="text-sm text-muted-foreground">Beneficios de la empresa y cómo aplicar al puesto</p>
+              <h3 className="text-lg font-medium">{t("jobs.form.benefits.title")}</h3>
+              <p className="text-sm text-muted-foreground">{t("jobs.form.benefits.description")}</p>
             </div>
 
             <BenefitsSection benefits={benefits} onBenefitsChange={setBenefits} />
@@ -325,11 +326,9 @@ export default function CreateJobForm() {
 
       <CardFooter className="flex flex-col space-y-2">
         <Button onClick={handleSubmit} className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Procesando..." : "Continuar al Pago"}
+          {isSubmitting ? t("jobs.create.buttons.processing") : t("jobs.create.buttons.continue")}
         </Button>
-        <p className="text-sm text-muted-foreground text-center">
-          Al continuar, aceptas nuestros términos y condiciones
-        </p>
+        <p className="text-sm text-muted-foreground text-center">{t("jobs.create.terms")}</p>
       </CardFooter>
     </Card>
   );

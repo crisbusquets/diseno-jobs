@@ -9,6 +9,7 @@ import { formatSalaryRange, getJobTypeLabel } from "@/lib/utils/formatting";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/translations/utils";
 
 interface JobCardProps {
   job: Job;
@@ -32,7 +33,11 @@ export default function JobCard({ job, variant = "list", showApplySection = true
               )}
             >
               {job.company_logo ? (
-                <img src={job.company_logo} alt={`${job.company} logo`} className="h-full w-full object-contain p-2" />
+                <img
+                  src={job.company_logo}
+                  alt={t("jobs.companyLogo", { company: job.company })}
+                  className="h-full w-full object-contain p-2"
+                />
               ) : (
                 <Building2 className={cn("text-gray-400", isDetailed ? "h-8 w-8" : "h-6 w-6")} />
               )}
@@ -43,8 +48,8 @@ export default function JobCard({ job, variant = "list", showApplySection = true
             </div>
           </div>
           <div className="flex gap-2">
-            <Badge variant="outline">{job.experience_level}</Badge>
-            {job.contract_type && <Badge variant="outline">{CONTRACT_TYPE_LABELS[job.contract_type]}</Badge>}
+            <Badge variant="outline">{t(`jobs.experience.${job.experience_level}`)}</Badge>
+            {job.contract_type && <Badge variant="outline">{CONTRACT_TYPE_LABELS[job.contract_type]()}</Badge>}
             <Badge
               variant={job.job_type === "remote" ? "default" : job.job_type === "hybrid" ? "secondary" : "outline"}
             >

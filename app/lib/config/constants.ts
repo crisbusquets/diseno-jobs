@@ -1,4 +1,5 @@
 // app/lib/config/constants.ts
+import { t } from "@/lib/translations/utils";
 
 export const JOB_TYPES = {
   REMOTE: "remote",
@@ -18,12 +19,12 @@ export const DEFAULT_JOB_FILTERS = {
 };
 
 export const EXPERIENCE_LEVEL = {
-  ENTRY: "Entry level",
-  JUNIOR: "Junior",
-  MID: "Mid",
-  SENIOR: "Senior",
-  MANAGER: "Manager",
-  LEAD: "Lead",
+  ENTRY: "entry",
+  JUNIOR: "junior",
+  MID: "mid",
+  SENIOR: "senior",
+  MANAGER: "manager",
+  LEAD: "lead",
 } as const;
 
 export const CONTRACT_TYPE = {
@@ -34,24 +35,22 @@ export const CONTRACT_TYPE = {
 } as const;
 
 export const CONTRACT_TYPE_LABELS = {
-  fulltime: "Tiempo completo",
-  parttime: "Tiempo parcial",
-  internship: "Prácticas",
-  freelance: "Freelance",
+  fulltime: () => t("jobs.contract.fulltime"),
+  parttime: () => t("jobs.contract.parttime"),
+  internship: () => t("jobs.contract.internship"),
+  freelance: () => t("jobs.contract.freelance"),
 } as const;
 
-export const CLOUDINARY_UPLOAD_PRESET = "company_logos";
-
 export const DEFAULT_BENEFITS = [
-  { name: "Seguro médico", icon: "🏥" },
-  { name: "Trabajo remoto", icon: "🏠" },
-  { name: "Horario flexible", icon: "⏰" },
-  { name: "Formación continua", icon: "📚" },
-  { name: "Días libres extra", icon: "📅" },
+  { name: t("benefits.presets.healthInsurance.name"), icon: "🏥" },
+  { name: t("benefits.presets.remoteWork.name"), icon: "🏠" },
+  { name: t("benefits.presets.flexibleHours.name"), icon: "⏰" },
+  { name: t("benefits.presets.training.name"), icon: "📚" },
+  { name: t("benefits.presets.extraHolidays.name"), icon: "📅" },
 ];
 
 export const SITE_CONFIG = {
   title: "DisñoJobs - Trabajos de Diseño de Producto",
   description: "Portal de empleo para diseñadores de producto en España",
   jobPrice: 2900, // 29€ in cents
-};
+} as const;

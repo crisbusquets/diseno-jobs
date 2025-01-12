@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
+import { t } from "@/lib/translations/utils";
+
 interface JobFiltersProps {
   onSearch: (value: string) => void;
   onFilterChange: (filterType: keyof JobFiltersType, value: any) => void;
@@ -51,13 +53,13 @@ export default function JobFilters({
       {/* Search Input */}
       <div className="space-y-2">
         <label htmlFor="search" className="text-sm font-medium text-gray-700">
-          Búsqueda
+          {t("jobs.search.label")}
         </label>
         <div className="relative">
           <Input
             id="search"
             type="text"
-            placeholder="Buscar por título o empresa..."
+            placeholder={t("jobs.search.placeholder")}
             defaultValue={initialFilters.search}
             onChange={(e) => onSearch(e.target.value)}
             className="pl-9"
@@ -69,7 +71,7 @@ export default function JobFilters({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Job Type Filter */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Tipo de Trabajo</label>
+          <label className="text-sm font-medium text-gray-700">{t("jobs.form.workMode.placeholder")}</label>
           <Select defaultValue={initialFilters.jobType} onValueChange={(value) => onFilterChange("jobType", value)}>
             <SelectTrigger>
               <SelectValue placeholder="Selecciona tipo" />
@@ -87,17 +89,17 @@ export default function JobFilters({
 
         {/* Location Filter */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Ubicación</label>
+          <label className="text-sm font-medium text-gray-700">{t("jobs.location.label")}</label>
           <LocationSelector value={initialFilters.location} onChange={(value) => onFilterChange("location", value)} />
         </div>
 
         {/* Minimum Salary Filter */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Salario mínimo</label>
+          <label className="text-sm font-medium text-gray-700">{t("jobs.form.salary.min")}</label>
           <div className="relative">
             <Input
               type="number"
-              placeholder="ej., 30000"
+              placeholder={t("jobs.form.salary.placeholder.min")}
               value={minSalary}
               onChange={handleSalaryChange}
               className="pl-9"
@@ -108,7 +110,7 @@ export default function JobFilters({
 
         {/* Benefits Filter */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Beneficios</label>
+          <label className="text-sm font-medium text-gray-700">{t("jobs.form.benefit.title")}</label>
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-full justify-start">

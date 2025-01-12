@@ -1,4 +1,5 @@
 // app/lib/utils/formatting.ts
+import { t } from "@/lib/translations/utils";
 
 /**
  * Format currency in EUR with Spanish locale
@@ -25,7 +26,7 @@ export function formatSalaryRange(min?: number, max?: number): string {
   if (max) {
     return `Hasta ${formatCurrency(max)}`;
   }
-  return "No especificado";
+  return t("jobs.form.salary.notSpecified");
 }
 
 /**
@@ -40,15 +41,10 @@ export function formatDate(dateString: string): string {
 }
 
 /**
- * Get job type label in Spanish
+ * Get job type label using translation system
  */
 export function getJobTypeLabel(type: "remote" | "hybrid" | "onsite"): string {
-  const types = {
-    remote: "Remoto",
-    hybrid: "Híbrido",
-    onsite: "Presencial",
-  };
-  return types[type] || "No especificado";
+  return t(`jobs.types.${type}`);
 }
 
 /**

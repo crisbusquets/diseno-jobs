@@ -4,6 +4,8 @@ import { Job } from "@/types";
 import { formatSalaryRange } from "@/lib/utils/formatting";
 import { getLocationName } from "@/components/common/forms/location-selector";
 
+import { t } from "@/lib/translations/utils";
+
 interface JobMetadataProps {
   job: Job;
   variant?: "compact" | "detailed";
@@ -16,7 +18,7 @@ export function JobMetadata({ job, variant = "compact" }: JobMetadataProps) {
         <div className="flex items-start gap-2">
           <MapPin className={`text-gray-400 ${variant === "compact" ? "w-4 h-4" : "w-5 h-5"} mt-1`} />
           <div>
-            {variant === "detailed" && <h3 className="font-medium text-gray-900">Ubicación</h3>}
+            {variant === "detailed" && <h3 className="font-medium text-gray-900">{t("jobs.location.label")}</h3>}
             <p className="text-gray-600">{getLocationName(job.location)}</p>
           </div>
         </div>
@@ -26,7 +28,7 @@ export function JobMetadata({ job, variant = "compact" }: JobMetadataProps) {
         <div className="flex items-start gap-2">
           <BriefcaseIcon className={`text-gray-400 ${variant === "compact" ? "w-4 h-4" : "w-5 h-5"} mt-1`} />
           <div>
-            {variant === "detailed" && <h3 className="font-medium text-gray-900">Salario</h3>}
+            {variant === "detailed" && <h3 className="font-medium text-gray-900">{t("jobs.salary.label")}</h3>}
             <p className="text-gray-600">{formatSalaryRange(job.salary_min, job.salary_max)}</p>
           </div>
         </div>
@@ -41,7 +43,9 @@ export function JobMetadata({ job, variant = "compact" }: JobMetadataProps) {
         <div>
           {variant === "detailed" && (
             <h3 className="font-medium text-gray-900">
-              {job.application_method_type === "email" ? "Email de contacto" : "URL para aplicar"}
+              {job.application_method_type === "email"
+                ? t("jobs.application.email.label")
+                : t("jobs.application.url.label")}
             </h3>
           )}
           <p className="text-gray-600">

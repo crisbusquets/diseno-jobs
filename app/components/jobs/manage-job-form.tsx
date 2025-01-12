@@ -36,6 +36,8 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { JOB_TYPES, EXPERIENCE_LEVEL, CONTRACT_TYPE } from "@/lib/config/constants";
 
+import { t } from "@/lib/translations/utils";
+
 interface ManageJobFormProps {
   job: Job;
   token: string;
@@ -76,26 +78,27 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
   };
 
   const validateForm = () => {
-    if (!formData.title) return "El título es obligatorio";
-    if (!formData.company) return "El nombre de la empresa es obligatorio";
-    if (!formData.company_email) return "El email es obligatorio";
-    if (!formData.description) return "La descripción es obligatoria";
-    if (!applyMethod.value) return "El método de aplicación es obligatorio";
+    if (!formData.title) return t("jobs.create.validation.required");
+    if (!formData.company) return t("jobs.create.validation.required");
+    if (!formData.company_email) return t("jobs.create.validation.required");
+    if (!formData.description) return t("jobs.create.validation.required");
+    if (!applyMethod.value) return t("jobs.create.validation.required");
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.company_email)) return "Email no válido";
-    if (applyMethod.type === "email" && !emailRegex.test(applyMethod.value)) return "Email de aplicación no válido";
+    if (!emailRegex.test(formData.company_email)) return t("jobs.create.validation.email");
+    if (applyMethod.type === "email" && !emailRegex.test(applyMethod.value))
+      return t("jobs.create.validation.applyEmail");
 
     // URL validation
     if (applyMethod.type === "url" && !applyMethod.value.startsWith("http")) {
-      return "La URL debe comenzar con http:// o https://";
+      return t("jobs.create.validation.url");
     }
 
     // Salary validation
     if (formData.salary_min && formData.salary_max) {
       if (Number(formData.salary_min) > Number(formData.salary_max)) {
-        return "El salario mínimo no puede ser mayor que el máximo";
+        return t("jobs.create.validation.salary");
       }
     }
 
@@ -111,7 +114,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
       setFormError(error);
       toast({
         variant: "destructive",
-        title: "Error de validación",
+        title: t("jobs.toasts.validationError"),
         description: error,
       });
       return;
@@ -142,8 +145,8 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
       }
 
       toast({
-        title: "Cambios guardados",
-        description: "La oferta se ha actualizado correctamente",
+        title: t("jobs.toasts.saveChanges.title"),
+        description: t("jobs.toasts.saveChanges.description"),
       });
 
       setActiveTab("preview");
@@ -153,7 +156,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Error al guardar los cambios",
+        description: error.message || t("jobs.toasts.saveChanges.error"),
       });
     } finally {
       setIsSubmitting(false);
@@ -169,15 +172,15 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
       }
 
       toast({
-        title: "Oferta desactivada",
-        description: "La oferta ya no será visible en el listado",
+        title: t("jobs.toasts.deactivateOfferSuccess.title"),
+        description: t("jobs.toasts.deactivateOfferSuccess.description"),
       });
     } catch (error) {
       console.error("Deactivate error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Error al desactivar la oferta",
+        description: error.message || t("jobs.toasts.deactivateOfferError"),
       });
     }
   };
@@ -187,15 +190,25 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
       <CardHeader className="space-y-1">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-2xl">Gestionar Oferta</CardTitle>
-            <CardDescription>{job.is_active ? "Oferta activa" : "Oferta inactiva"}</CardDescription>
+            <CardTitle className="text-2xl">{t("jobs.manage.title")}</CardTitle>
+            <CardDescription>
+              {job.is_active ? t("jobs.manage.status.active") : t("jobs.manage.status.inactive")}
+            </CardDescription>
           </div>
           <Badge variant={job.is_active ? "default" : "secondary"}>{job.is_active ? "Activa" : "Inactiva"}</Badge>
         </div>
         <div className="flex flex-col gap-2 mt-4 text-sm text-muted-foreground">
-          <p>Publicada el {format(new Date(job.created_at), "d 'de' MMMM, yyyy", { locale: es })}</p>
+          <p>
+            {t("jobs.manage.dates.published", {
+              date: format(new Date(job.created_at), "d 'de' MMMM, yyyy", { locale: es }),
+            })}
+          </p>
           {job.activated_at && (
-            <p>Activada el {format(new Date(job.activated_at), "d 'de' MMMM, yyyy", { locale: es })}</p>
+            <p>
+              {t("jobs.manage.dates.activated", {
+                date: format(new Date(job.created_at), "d 'de' MMMM, yyyy", { locale: es }),
+              })}
+            </p>
           )}
         </div>
       </CardHeader>
@@ -203,8 +216,8 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="preview">Vista previa</TabsTrigger>
-            <TabsTrigger value="edit">Editar</TabsTrigger>
+            <TabsTrigger value="preview">{t("jobs.manage.preview.tab")}</TabsTrigger>
+            <TabsTrigger value="edit">{t("jobs.manage.edit.tab")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="preview">
@@ -212,20 +225,20 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
               <div className="space-y-6">
                 {/* Company Info */}
                 <div>
-                  <h3 className="text-lg font-medium mb-4">Información de la empresa</h3>
+                  <h3 className="text-lg font-medium mb-4">{t("jobs.create.company.title")}</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Empresa</p>
+                      <p className="text-sm font-medium text-muted-foreground">{t("jobs.create.company.titleLabel")}</p>
                       <p>{formData.company}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Email</p>
+                      <p className="text-sm font-medium text-muted-foreground">{t("jobs.create.company.emailLabel")}</p>
                       <p>{formData.company_email}</p>
                     </div>
                   </div>
                   {logo && (
                     <div className="mt-4">
-                      <p className="text-sm font-medium text-muted-foreground mb-2">Logo</p>
+                      <p className="text-sm font-medium text-muted-foreground mb-2">{t("jobs.create.company.logo")}</p>
                       <img src={logo} alt="Company logo" className="h-20 object-contain" />
                     </div>
                   )}
@@ -235,35 +248,35 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
 
                 {/* Job Details */}
                 <div>
-                  <h3 className="text-lg font-medium mb-4">Detalles del puesto</h3>
+                  <h3 className="text-lg font-medium mb-4">{t("jobs.create.details.title")}</h3>
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Título</p>
+                      <p className="text-sm font-medium text-muted-foreground">{t("jobs.create.details.titleLabel")}</p>
                       <p>{formData.title}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Experiencia</p>
+                      <p className="text-sm font-medium text-muted-foreground">{t("jobs.form.experience.label")}</p>
                       <p>{formData.experience_level}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Contrato</p>
+                      <p className="text-sm font-medium text-muted-foreground">{t("jobs.form.contract.label")}</p>
                       <p>{formData.contract_type}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">Modalidad</p>
+                        <p className="text-sm font-medium text-muted-foreground">{t("jobs.form.workMode.label")}</p>
                         <p>{formData.job_type}</p>
                       </div>
                       {formData.location && (
                         <div>
-                          <p className="text-sm font-medium text-muted-foreground">Ubicación</p>
+                          <p className="text-sm font-medium text-muted-foreground">{t("jobs.form.location.label")}</p>
                           <p>{getLocationName(formData.location)}</p>
                         </div>
                       )}
                     </div>
                     {(formData.salary_min || formData.salary_max) && (
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">Salario</p>
+                        <p className="text-sm font-medium text-muted-foreground">{t("jobs.salary.label")}</p>
                         <p>
                           {formData.salary_min && `${formData.salary_min}€`}
                           {formData.salary_min && formData.salary_max && " - "}
@@ -272,7 +285,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                       </div>
                     )}
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Descripción</p>
+                      <p className="text-sm font-medium text-muted-foreground">{t("jobs.form.description.label")}</p>
                       <p className="whitespace-pre-wrap">{formData.description}</p>
                     </div>
                   </div>
@@ -282,10 +295,10 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
 
                 {/* Benefits & Application */}
                 <div>
-                  <h3 className="text-lg font-medium mb-4">Beneficios y aplicación</h3>
+                  <h3 className="text-lg font-medium mb-4">{t("jobs.form.benefit.title")}</h3>
                   {benefits.length > 0 && (
                     <div className="mb-4">
-                      <p className="text-sm font-medium text-muted-foreground mb-2">Beneficios</p>
+                      <p className="text-sm font-medium text-muted-foreground mb-2">{t("jobs.benefits.label")}</p>
                       <div className="flex flex-wrap gap-2">
                         {benefits.map((benefit, index) => (
                           <Badge key={index} variant="secondary">
@@ -296,7 +309,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                     </div>
                   )}
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Método de aplicación</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t("jobs.application.title")}</p>
                     <p>{applyMethod.value}</p>
                   </div>
                 </div>
@@ -306,27 +319,25 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
             {/* Preview Actions */}
             <div className="flex justify-between items-center mt-4">
               <Button variant="outline" onClick={() => setActiveTab("edit")}>
-                Editar información
+                {t("jobs.manage.preview.button")}
               </Button>
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive">Desactivar oferta</Button>
+                  <Button variant="destructive">{t("jobs.manage.deactivate.button")}</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Al desactivar la oferta, dejará de ser visible en el listado. Esta acción no se puede deshacer.
-                    </AlertDialogDescription>
+                    <AlertDialogTitle>{t("jobs.manage.deactivate.confirm.title")}</AlertDialogTitle>
+                    <AlertDialogDescription>{t("jobs.manage.deactivate.confirm.description")}</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogCancel>{t("jobs.manage.deactivate.confirm.cancel")}</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDeactivate}
                       className="bg-destructive text-destructive-foreground"
                     >
-                      Desactivar
+                      {t("jobs.manage.deactivate.confirm.confirm")}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -344,18 +355,18 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
             <form className="space-y-8">
               {/* Company Information */}
               <div className="space-y-6">
-                <h3 className="text-lg font-medium">Información de la empresa</h3>
+                <h3 className="text-lg font-medium">{t("jobs.create.company.title")}</h3>
 
                 <LogoUpload value={logo} onChange={setLogo} />
 
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium">Nombre de la Empresa *</label>
+                    <label className="text-sm font-medium">{t("jobs.form.company")} *</label>
                     <Input name="company" value={formData.company} onChange={handleInputChange} />
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Email de la Empresa *</label>
+                    <label className="text-sm font-medium">{t("jobs.form.email")} *</label>
                     <Input
                       name="company_email"
                       type="email"
@@ -370,33 +381,33 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
 
               {/* Job Details */}
               <div className="space-y-6">
-                <h3 className="text-lg font-medium">Detalles del puesto</h3>
+                <h3 className="text-lg font-medium">{t("jobs.form.details.title")}</h3>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium">Título del Puesto *</label>
+                    <label className="text-sm font-medium">{t("jobs.create.details.titleLabel")} *</label>
                     <Input name="title" value={formData.title} onChange={handleInputChange} />
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Modalidad de Trabajo *</label>
+                    <label className="text-sm font-medium">{t("jobs.form.workMode.label")} *</label>
                     <Select
                       value={formData.job_type}
                       onValueChange={(value) => setFormData((prev) => ({ ...prev, job_type: value }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una modalidad" />
+                        <SelectValue placeholder={t("jobs.form.workMode.placeholder")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={JOB_TYPES.REMOTE}>Remoto</SelectItem>
-                        <SelectItem value={JOB_TYPES.HYBRID}>Híbrido</SelectItem>
-                        <SelectItem value={JOB_TYPES.ONSITE}>Presencial</SelectItem>
+                        <SelectItem value={JOB_TYPES.REMOTE}>{t("jobs.form.workMode.remote")}</SelectItem>
+                        <SelectItem value={JOB_TYPES.HYBRID}>{t("jobs.form.workMode.hybrid")}</SelectItem>
+                        <SelectItem value={JOB_TYPES.ONSITE}>{t("jobs.form.workMode.onsite")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Ubicación</label>
+                    <label className="text-sm font-medium">{t("jobs.location.label")}</label>
                     <LocationSelector
                       value={formData.location}
                       onChange={(value) => setFormData((prev) => ({ ...prev, location: value }))}
@@ -404,7 +415,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Nivel de Experiencia *</label>
+                    <label className="text-sm font-medium">{t("jobs.form.experience.label")} *</label>
                     <Select
                       value={formData.experience_level}
                       onValueChange={(value) => setFormData((prev) => ({ ...prev, experience_level: value }))}
@@ -413,18 +424,18 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                         <SelectValue placeholder="Selecciona un nivel" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={EXPERIENCE_LEVEL.ENTRY}>Entry level</SelectItem>
-                        <SelectItem value={EXPERIENCE_LEVEL.JUNIOR}>Junior</SelectItem>
-                        <SelectItem value={EXPERIENCE_LEVEL.MID}>Mid</SelectItem>
-                        <SelectItem value={EXPERIENCE_LEVEL.SENIOR}>Senior</SelectItem>
-                        <SelectItem value={EXPERIENCE_LEVEL.MANAGER}>Manager</SelectItem>
-                        <SelectItem value={EXPERIENCE_LEVEL.LEAD}>Lead</SelectItem>
+                        <SelectItem value={EXPERIENCE_LEVEL.ENTRY}>{t("jobs.form.experience.entry")}</SelectItem>
+                        <SelectItem value={EXPERIENCE_LEVEL.JUNIOR}>{t("jobs.form.experience.junior")}</SelectItem>
+                        <SelectItem value={EXPERIENCE_LEVEL.MID}>{t("jobs.form.experience.mid")}</SelectItem>
+                        <SelectItem value={EXPERIENCE_LEVEL.SENIOR}>{t("jobs.form.experience.senior")}</SelectItem>
+                        <SelectItem value={EXPERIENCE_LEVEL.MANAGER}>{t("jobs.form.experience.manager")}</SelectItem>
+                        <SelectItem value={EXPERIENCE_LEVEL.LEAD}>{t("jobs.form.experience.lead")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Tipo de contrato *</label>
+                    <label className="text-sm font-medium">{t("jobs.form.contract.label")} *</label>
                     <Select
                       value={formData.contract_type}
                       onValueChange={(value) => setFormData((prev) => ({ ...prev, contract_type: value }))}
@@ -433,45 +444,45 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
                         <SelectValue placeholder="Selecciona una opción" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={CONTRACT_TYPE.FULLTIME}>Tiempo completo</SelectItem>
-                        <SelectItem value={CONTRACT_TYPE.PARTTIME}>Tiempo parcial</SelectItem>
-                        <SelectItem value={CONTRACT_TYPE.INTERNSHIP}>Prácticas</SelectItem>
-                        <SelectItem value={CONTRACT_TYPE.FREELANCE}>Freelance</SelectItem>
+                        <SelectItem value={CONTRACT_TYPE.FULLTIME}>{t("jobs.form.contract.fulltime")}</SelectItem>
+                        <SelectItem value={CONTRACT_TYPE.PARTTIME}>{t("jobs.form.contract.parttime")}</SelectItem>
+                        <SelectItem value={CONTRACT_TYPE.INTERNSHIP}>{t("jobs.form.contract.internship")}</SelectItem>
+                        <SelectItem value={CONTRACT_TYPE.FREELANCE}>{t("jobs.form.contract.freelance")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium">Salario Mínimo (€)</label>
+                      <label className="text-sm font-medium">{t("jobs.form.salary.min")}</label>
                       <Input
                         name="salary_min"
                         type="number"
                         value={formData.salary_min}
                         onChange={handleInputChange}
-                        placeholder="ej., 45000"
+                        placeholder={t("jobs.form.salary.placeholder.min")}
                       />
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium">Salario Máximo (€)</label>
+                      <label className="text-sm font-medium">{t("jobs.form.salary.max")}</label>
                       <Input
                         name="salary_max"
                         type="number"
                         value={formData.salary_max}
                         onChange={handleInputChange}
-                        placeholder="ej., 60000"
+                        placeholder={t("jobs.form.salary.placeholder.max")}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Descripción del Puesto *</label>
+                    <label className="text-sm font-medium">{t("jobs.form.description.label")} *</label>
                     <Textarea
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
-                      placeholder="Describe el rol, responsabilidades, requisitos..."
+                      placeholder={t("jobs.form.description.placeholder")}
                       className="min-h-[200px] resize-y"
                     />
                   </div>
@@ -482,7 +493,7 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
 
               {/* Benefits & Application Section */}
               <div className="space-y-6">
-                <h3 className="text-lg font-medium">Beneficios y proceso de aplicación</h3>
+                <h3 className="text-lg font-medium">{t("jobs.form.benefits.title")}</h3>
 
                 <BenefitsSection benefits={benefits} onBenefitsChange={setBenefits} />
 
@@ -492,34 +503,31 @@ export default function ManageJobForm({ job, token }: ManageJobFormProps) {
               {/* Form Actions */}
               <div className="flex justify-between items-center pt-6">
                 <Button type="button" variant="ghost" onClick={() => setActiveTab("preview")}>
-                  Cancelar
+                  {t("jobs.deactivate.confirm.cancel")}
                 </Button>
                 <div className="space-x-2">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="destructive">Desactivar oferta</Button>
+                      <Button variant="destructive">{t("jobs.deactivate.button")}</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Al desactivar la oferta, dejará de ser visible en el listado. Esta acción no se puede
-                          deshacer.
-                        </AlertDialogDescription>
+                        <AlertDialogTitle>{t("jobs.deactivate.confirm.title")}</AlertDialogTitle>
+                        <AlertDialogDescription>{t("jobs.deactivate.confirm.description")}</AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleDeactivate}
                           className="bg-destructive text-destructive-foreground"
                         >
-                          Desactivar
+                          {t("jobs.deactivate.confirm.confirm")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                   <Button onClick={handleSubmit} disabled={isSubmitting}>
-                    {isSubmitting ? "Guardando..." : "Guardar cambios"}
+                    {isSubmitting ? t("common.saving") : t("common.save")}
                   </Button>
                 </div>
               </div>

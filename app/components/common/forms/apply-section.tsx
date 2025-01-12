@@ -5,6 +5,7 @@ import { ApplicationMethod } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { t } from "@/lib/translations/utils";
 
 interface ApplySectionProps {
   method: ApplicationMethod;
@@ -19,8 +20,8 @@ export function ApplySection({ method }: ApplySectionProps) {
       if (method.type === "email") {
         window.location.href = `mailto:${method.value}`;
         toast({
-          title: "Abriendo cliente de email",
-          description: "Se abrirá tu cliente de email para enviar la aplicación",
+          title: t("jobs.toasts.email.title"),
+          description: t("jobs.toasts.email.description"),
         });
       } else {
         let url = method.value;
@@ -33,7 +34,7 @@ export function ApplySection({ method }: ApplySectionProps) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: method.type === "email" ? "Error al abrir el cliente de email" : "Error al abrir el enlace",
+        description: method.type === "email" ? t("jobs.apply.errors.email") : t("jobs.apply.errors.url"),
       });
     }
   };
@@ -41,28 +42,26 @@ export function ApplySection({ method }: ApplySectionProps) {
   return (
     <Card className="mt-8">
       <CardHeader className="text-center">
-        <CardTitle>¿Te interesa esta posición?</CardTitle>
+        <CardTitle>{t("jobs.apply.title")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center">
         <Button onClick={handleApply} size="lg" className="gap-2">
           {method.type === "email" ? (
             <>
               <Mail className="h-5 w-5" />
-              Enviar email
+              {t("jobs.apply.email.button")}
             </>
           ) : (
             <>
               <Globe className="h-5 w-5" />
-              Aplicar ahora
+              {t("jobs.apply.url.button")}
             </>
           )}
           <ArrowRight className="h-4 w-4" />
         </Button>
 
         <p className="mt-4 text-sm text-muted-foreground">
-          {method.type === "email"
-            ? "Se abrirá tu cliente de email para enviar tu aplicación"
-            : "Serás redirigido al formulario de aplicación"}
+          {method.type === "email" ? t("jobs.apply.email.description") : t("jobs.apply.url.description")}
         </p>
       </CardContent>
     </Card>

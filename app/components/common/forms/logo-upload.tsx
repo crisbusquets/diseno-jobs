@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect } from "react";
 import { Image as LucideImage } from "lucide-react";
 import Image from "next/image";
+import { t } from "@/lib/translations/utils";
 
 interface LogoUploadProps {
   value?: string;
@@ -84,8 +85,8 @@ export default function LogoUpload({ value, onChange }: LogoUploadProps) {
           className="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-500 transition-colors flex flex-col items-center justify-center"
         >
           <LucideImage className="w-8 h-8 text-gray-400 mb-2" />
-          <span className="text-sm text-gray-500">Subir logo</span>
-          <span className="text-xs text-gray-400 mt-1">PNG, JPG o SVG (máx. 2MB)</span>
+          <span className="text-sm text-gray-500">{t("jobs.create.logo.upload")}</span>
+          <span className="text-xs text-gray-400 mt-1">{t("jobs.create.logo.uploadFormat")}</span>
         </button>
       )}
     </div>

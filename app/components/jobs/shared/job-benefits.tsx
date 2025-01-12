@@ -1,4 +1,5 @@
 import { Benefit } from "@/types";
+import { t } from "@/lib/translations/utils";
 
 interface JobBenefitsProps {
   benefits?: Benefit[];
@@ -9,7 +10,7 @@ export function JobBenefits({ benefits }: JobBenefitsProps) {
 
   return (
     <div className="mt-6">
-      <h3 className="text-lg font-medium text-gray-900">Beneficios</h3>
+      <h3 className="text-lg font-medium text-gray-900">{t("jobs.benefits.label")}</h3>
       <div className="mt-4 flex flex-wrap gap-2">
         {benefits.map((benefit, index) => (
           <span

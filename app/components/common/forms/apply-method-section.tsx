@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { t } from "@/lib/translations/utils";
 
 interface ApplyMethodProps {
   value: ApplicationMethod;
@@ -15,7 +16,7 @@ interface ApplyMethodProps {
 export function ApplyMethodSection({ value, onChange }: ApplyMethodProps) {
   return (
     <div className="space-y-4">
-      <Label>Método de aplicación *</Label>
+      <Label>{t("jobs.application.title")} *</Label>
 
       <Tabs
         value={value.type}
@@ -25,11 +26,11 @@ export function ApplyMethodSection({ value, onChange }: ApplyMethodProps) {
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="email" className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
-            Email
+            {t("jobs.application.email.label")}
           </TabsTrigger>
           <TabsTrigger value="url" className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
-            URL
+            {t("jobs.application.url.label")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="email">
@@ -39,12 +40,10 @@ export function ApplyMethodSection({ value, onChange }: ApplyMethodProps) {
                 type="email"
                 value={value.type === "email" ? value.value : ""}
                 onChange={(e) => onChange({ type: "email", value: e.target.value })}
-                placeholder="jobs@company.com"
+                placeholder={t("jobs.application.email.placeholder")}
                 className="w-full"
               />
-              <p className="mt-2 text-sm text-muted-foreground">
-                Los candidatos recibirán un botón para enviar email directamente
-              </p>
+              <p className="mt-2 text-sm text-muted-foreground">{t("jobs.application.email.help")}</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -55,12 +54,10 @@ export function ApplyMethodSection({ value, onChange }: ApplyMethodProps) {
                 type="url"
                 value={value.type === "url" ? value.value : ""}
                 onChange={(e) => onChange({ type: "url", value: e.target.value })}
-                placeholder="https://company.com/apply"
+                placeholder={t("jobs.application.url.placeholder")}
                 className="w-full"
               />
-              <p className="mt-2 text-sm text-muted-foreground">
-                Los candidatos serán redirigidos a esta URL para aplicar
-              </p>
+              <p className="mt-2 text-sm text-muted-foreground">{t("jobs.application.url.help")}</p>
             </CardContent>
           </Card>
         </TabsContent>
