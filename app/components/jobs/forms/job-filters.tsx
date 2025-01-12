@@ -1,7 +1,7 @@
 // components/jobs/forms/job-filters.tsx
 import { Search, EuroIcon } from "lucide-react";
 import { useState } from "react";
-import LocationSelector from "@/components/common/forms/location-selector";
+import LocationSelector from "@/components/jobs/forms/location-selector";
 import { JobFilters as JobFiltersType, JobType, Benefit } from "@/types";
 import { JOB_TYPES, DEFAULT_BENEFITS } from "@/lib/config/constants";
 import { getJobTypeLabel } from "@/lib/utils/formatting";

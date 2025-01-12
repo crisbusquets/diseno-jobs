@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import LocationSelector from "@/components/common/forms/location-selector";
+import LocationSelector from "@/components/jobs/forms/location-selector";
 import { t } from "@/lib/translations/utils";
 
 interface JobListingsClientProps {

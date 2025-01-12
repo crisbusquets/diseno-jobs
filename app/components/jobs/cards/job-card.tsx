@@ -1,11 +1,10 @@
-// components/jobs/cards/job-card.tsx
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Job } from "@/types";
 import { JobHeader } from "../shared/job-header";
 import { JobMetadata } from "../shared/job-metadata";
 import { JobBenefits } from "../shared/job-benefits";
-import { ApplySection } from "@/components/common/forms/apply-section";
+import { ApplySection } from "@/components/jobs/shared/apply-section";
 
 interface JobCardProps {
   job: Job;

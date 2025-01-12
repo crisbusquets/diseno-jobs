@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import JobCard from "@/components/jobs/cards/job-card";
-import CopyLinkButton from "@/components/common/buttons/copy-link-button";
+import CopyLinkButton from "@/components/jobs/shared/copy-link-button";
 import { Job } from "@/types";
 
 interface SuccessContentProps {

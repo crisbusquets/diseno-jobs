@@ -5,7 +5,7 @@
 import { Resend } from "resend";
 import { Job, Benefit } from "@/types";
 import { formatSalaryRange, getJobTypeLabel } from "@/lib/utils/formatting";
-import { getLocationName } from "@/components/common/forms/location-selector";
+import { getLocationName } from "@/components/jobs/forms/location-selector";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 

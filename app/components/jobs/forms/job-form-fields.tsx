@@ -7,10 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { JOB_TYPES, EXPERIENCE_LEVEL, CONTRACT_TYPE } from "@/lib/config/constants";
-import LogoUpload from "@/components/common/forms/logo-upload";
-import { ApplyMethodSection } from "@/components/common/forms/apply-method-section";
-import { BenefitsSection } from "@/components/common/forms/benefits-section";
-import LocationSelector from "@/components/common/forms/location-selector";
+import LogoUpload from "@/components/jobs/forms/logo-upload";
+import { ApplyMethodSection } from "@/components/jobs/forms/apply-method-section";
+import { BenefitsSection } from "@/components/jobs/forms/benefits-section";
+import LocationSelector from "@/components/jobs/forms/location-selector";
 
 import { t } from "@/lib/translations/utils";
 
