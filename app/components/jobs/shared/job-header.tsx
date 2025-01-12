@@ -1,42 +1,42 @@
-"use client";
-
 import { Building2 } from "lucide-react";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { Job } from "@/types";
-import { getJobTypeLabel, getJobTypeColor } from "@/lib/utils/formatting";
+import { getJobTypeLabel } from "@/lib/utils/formatting";
 
 interface JobHeaderProps {
   job: Job;
   variant?: "compact" | "detailed";
+  className?: string;
 }
 
-export function JobHeader({ job, variant = "compact" }: JobHeaderProps) {
+export function JobHeader({ job, variant = "compact", className }: JobHeaderProps) {
+  const size = variant === "compact" ? "h-12 w-12" : "h-16 w-16";
+  const titleSize = variant === "compact" ? "text-lg" : "text-2xl";
+
   return (
-    <div className="flex justify-between items-start">
+    <div className={cn("flex justify-between items-start", className)}>
       <div className="flex gap-4">
-        <div
-          className={`flex-shrink-0 rounded-lg bg-gray-100 flex items-center justify-center
-          ${variant === "compact" ? "w-12 h-12" : "w-16 h-16"}`}
-        >
+        <div className={cn("rounded-lg bg-gray-100 flex items-center justify-center", size)}>
           {job.company_logo ? (
-            <img
+            <Image
               src={job.company_logo}
               alt={`${job.company} logo`}
-              className={`object-contain ${variant === "compact" ? "w-10 h-10" : "w-14 h-14"}`}
+              width={variant === "compact" ? 48 : 64}
+              height={variant === "compact" ? 48 : 64}
+              className="object-contain p-2"
             />
           ) : (
-            <Building2 className={`text-gray-400 ${variant === "compact" ? "w-6 h-6" : "w-8 h-8"}`} />
+            <Building2 className={cn("text-gray-400", variant === "compact" ? "w-6 h-6" : "w-8 h-8")} />
           )}
         </div>
         <div>
-          <h1 className={`text-gray-900 ${variant === "compact" ? "text-lg" : "text-2xl"} font-semibold`}>
-            {job.title}
-          </h1>
-          <p className={`text-gray-600 ${variant === "compact" ? "text-base" : "text-lg"} mt-1`}>{job.company}</p>
+          <h2 className={cn("font-semibold text-gray-900", titleSize)}>{job.title}</h2>
+          <p className="text-gray-600">{job.company}</p>
         </div>
       </div>
-      <span className={`px-3 py-1 rounded-full text-sm ${getJobTypeColor(job.job_type)}`}>
-        {getJobTypeLabel(job.job_type)}
-      </span>
+      <Badge variant={job.job_type === "remote" ? "default" : "outline"}>{getJobTypeLabel(job.job_type)}</Badge>
     </div>
   );
 }
