@@ -3,10 +3,10 @@ import { Plus, Check } from "lucide-react";
 import { Benefit } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { benefitsPresets } from "@/lib/translations/es";
+import { BENEFITS_PRESETS } from "@/lib/translations/es";
 
 // Convert benefits object to array and ensure uniqueness by ID
-const PRESET_BENEFITS = Object.values(benefitsPresets);
+const PRESET_BENEFITS = Object.values(BENEFITS_PRESETS);
 
 interface BenefitsSectionProps {
   benefits: Benefit[];
@@ -17,12 +17,7 @@ export function BenefitsSection({ benefits, onBenefitsChange }: BenefitsSectionP
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customBenefit, setCustomBenefit] = useState("");
 
-  const generateCustomBenefitId = (name: string) => {
-    return `custom-${name.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`;
-  };
-
   const toggleBenefit = (benefit: Benefit) => {
-    // Use ID for comparison to prevent duplicates
     const newBenefits = benefits.some((b) => b.id === benefit.id)
       ? benefits.filter((b) => b.id !== benefit.id)
       : [...benefits, benefit];
@@ -32,7 +27,7 @@ export function BenefitsSection({ benefits, onBenefitsChange }: BenefitsSectionP
   const handleAddCustomBenefit = () => {
     if (customBenefit.trim()) {
       const newBenefit = {
-        id: generateCustomBenefitId(customBenefit),
+        id: `custom-${customBenefit.toLowerCase().replace(/\s+/g, "-")}`,
         name: customBenefit.trim(),
         icon: "✨",
         isCustom: true,
@@ -42,11 +37,6 @@ export function BenefitsSection({ benefits, onBenefitsChange }: BenefitsSectionP
       setShowCustomInput(false);
     }
   };
-
-  // Get unique benefits by ID
-  const uniquePresetBenefits = PRESET_BENEFITS.filter(
-    (preset) => !benefits.some((selected) => selected.id === preset.id)
-  );
 
   return (
     <div className="space-y-4">
@@ -62,34 +52,22 @@ export function BenefitsSection({ benefits, onBenefitsChange }: BenefitsSectionP
       <div className="flex flex-wrap gap-2">
         {/* Selected benefits */}
         {benefits.map((benefit) => (
-          <Button
-            key={benefit.id}
-            type="button"
-            variant="secondary"
-            onClick={() => toggleBenefit(benefit)}
-            className="gap-2"
-          >
-            <Check className="w-4 h-4" />
+          <Button key={benefit.id} variant="secondary" onClick={() => toggleBenefit(benefit)}>
+            <Check className="w-4 h-4 mr-2" />
             {benefit.name}
           </Button>
         ))}
 
         {/* Available preset benefits */}
-        {uniquePresetBenefits.map((benefit) => (
-          <Button
-            key={benefit.id}
-            type="button"
-            variant="outline"
-            onClick={() => toggleBenefit(benefit)}
-            className="gap-2"
-          >
+        {PRESET_BENEFITS.filter((benefit) => !benefits.some((b) => b.id === benefit.id)).map((benefit) => (
+          <Button key={benefit.id} variant="outline" onClick={() => toggleBefit(benefit)}>
             {benefit.icon} {benefit.name}
           </Button>
         ))}
 
         {!showCustomInput && (
-          <Button type="button" variant="outline" onClick={() => setShowCustomInput(true)} className="gap-2">
-            <Plus className="w-4 h-4" />
+          <Button variant="outline" onClick={() => setShowCustomInput(true)}>
+            <Plus className="w-4 h-4 mr-2" />
             Añadir otro
           </Button>
         )}

@@ -1,4 +1,4 @@
-export const benefitsPresets = {
+export const BENEFITS_PRESETS = {
   healthInsurance: {
     id: "health",
     name: "Seguro médico privado",
@@ -64,7 +64,7 @@ export const translations = {
     copied: "Copiado",
   },
   benefits: {
-    presets: benefitsPresets,
+    presets: BENEFITS_PRESETS,
   },
   jobs: {
     apply: {

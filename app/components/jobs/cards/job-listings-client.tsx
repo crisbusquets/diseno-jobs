@@ -1,3 +1,4 @@
+// components/jobs/cards/job-listings-client.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,7 +7,7 @@ import JobCard from "./job-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import JobFilters from "@/components/jobs/forms/job-filters";
-import { benefitsPresets } from "@/lib/translations/es";
+import { BENEFITS_PRESETS } from "@/lib/translations/es";
 import { t } from "@/lib/translations/utils";
 
 interface JobListingsClientProps {
@@ -43,7 +44,6 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
   const [filteredJobs, setFilteredJobs] = useState<Job[]>(initialJobs);
   const [filters, setFilters] = useState<JobFilters>(DEFAULT_JOB_FILTERS);
 
-  // Simulate loading state
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -51,13 +51,7 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
     return () => clearTimeout(timer);
   }, []);
 
-  // Debug useEffect
-  useEffect(() => {
-    console.log("Filters changed:", filters);
-  }, [filters]);
-
   const applyFilters = (currentFilters: JobFilters) => {
-    console.log("Applying filters:", currentFilters);
     let result = initialJobs;
 
     // Text search
@@ -94,40 +88,25 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
     }
 
     // Benefits filter
-    // Benefits filter
     if (currentFilters.benefits?.length) {
-      console.log("Has benefits to filter:", currentFilters.benefits);
       result = result.filter((job) => {
-        // If job has no benefits, exclude it
         if (!job.benefits?.length) return false;
 
-        // For each required benefit (from filter)
         return currentFilters.benefits!.every((requiredBenefitId) => {
-          // Find the preset benefit definition
-          const presetBenefit = Object.values(benefitsPresets).find((preset) => preset.id === requiredBenefitId);
+          const presetBenefit = Object.values(BENEFITS_PRESETS).find((preset) => preset.id === requiredBenefitId);
 
           if (!presetBenefit) return false;
 
-          // Check if job has this benefit
-          const match = job.benefits.some(
-            (jobBenefit) => jobBenefit.name.toLowerCase() === presetBenefit.name.toLowerCase()
-          );
-
-          console.log(`Job ${job.id}: Checking for ${presetBenefit.name} - Match: ${match}`);
-          return match;
+          return job.benefits.some((jobBenefit) => jobBenefit.name.toLowerCase() === presetBenefit.name.toLowerCase());
         });
       });
-
-      console.log(`Filtered down to ${result.length} jobs`);
     }
 
     setFilteredJobs(result);
   };
 
   const updateFilters = (field: keyof JobFilters, value: any) => {
-    console.log("Updating filters:", field, value);
     const newFilters = { ...filters, [field]: value };
-    console.log("New filters:", newFilters);
     setFilters(newFilters);
     applyFilters(newFilters);
   };
@@ -158,7 +137,7 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
         <JobFilters
           onFilterChange={updateFilters}
           initialFilters={filters}
-          availableBenefits={Object.values(benefitsPresets)}
+          availableBenefits={Object.values(BENEFITS_PRESETS)}
         />
       </div>
 

@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Benefit } from "@/types";
-import { benefitsPresets } from "@/lib/translations/es";
+import { BENEFITS_PRESETS } from "@/lib/translations/es";
 
 interface JobBenefitsProps {
   benefits: Benefit[];
@@ -11,12 +11,9 @@ interface JobBenefitsProps {
 export function JobBenefits({ benefits, className }: JobBenefitsProps) {
   if (!benefits?.length) return null;
 
-  // Map benefits from DB to preset benefits to ensure we have IDs and correct data
   const normalizedBenefits = benefits.map((benefit) => {
-    // Try to find a matching preset benefit
-    const presetBenefit = Object.values(benefitsPresets).find((preset) => preset.name === benefit.name);
+    const presetBenefit = Object.values(BENEFITS_PRESETS).find((preset) => preset.name === benefit.name);
 
-    // Return preset if found, otherwise use benefit with generated ID
     return (
       presetBenefit || {
         ...benefit,
@@ -25,7 +22,6 @@ export function JobBenefits({ benefits, className }: JobBenefitsProps) {
     );
   });
 
-  // Remove duplicates based on ID
   const uniqueBenefits = Array.from(new Map(normalizedBenefits.map((item) => [item.id, item]))).map(
     ([_, item]) => item
   );
