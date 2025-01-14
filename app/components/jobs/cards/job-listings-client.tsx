@@ -1,19 +1,12 @@
-// app/components/jobs/cards/job-listings-client.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, EuroIcon } from "lucide-react";
-import { Job, JobFilters } from "@/types";
-import { DEFAULT_JOB_FILTERS } from "@/lib/config/constants";
-import { getJobTypeLabel } from "@/lib/utils/formatting";
+import { Job, JobFilters, DEFAULT_JOB_FILTERS } from "@/types";
 import JobCard from "./job-card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import LocationSelector from "@/components/jobs/forms/location-selector";
+import JobFilters from "@/components/jobs/forms/job-filters";
+import { benefitsPresets } from "@/lib/translations/es";
 import { t } from "@/lib/translations/utils";
 
 interface JobListingsClientProps {
@@ -49,31 +42,25 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
   const [isLoading, setIsLoading] = useState(true);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>(initialJobs);
   const [filters, setFilters] = useState<JobFilters>(DEFAULT_JOB_FILTERS);
-  const [formData, setFormData] = useState({
-    location: "",
-  });
 
-  // Simulate loading state and initialize data
+  // Simulate loading state
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-
     return () => clearTimeout(timer);
   }, []);
 
-  // Extract all unique benefits from jobs
-  const availableBenefits = Array.from(
-    new Set(
-      initialJobs
-        .flatMap((job) => job.benefits || [])
-        .map((benefit) => JSON.stringify({ name: benefit.name, icon: benefit.icon }))
-    )
-  ).map((benefitString) => JSON.parse(benefitString));
+  // Debug useEffect
+  useEffect(() => {
+    console.log("Filters changed:", filters);
+  }, [filters]);
 
   const applyFilters = (currentFilters: JobFilters) => {
+    console.log("Applying filters:", currentFilters);
     let result = initialJobs;
 
+    // Text search
     if (currentFilters.search) {
       const searchTerm = currentFilters.search.toLowerCase();
       result = result.filter(
@@ -84,10 +71,12 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
       );
     }
 
+    // Job type
     if (currentFilters.jobType !== "all") {
       result = result.filter((job) => job.job_type === currentFilters.jobType);
     }
 
+    // Location
     if (currentFilters.location) {
       result = result.filter((job) => {
         if (!job.location) return false;
@@ -95,6 +84,7 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
       });
     }
 
+    // Minimum salary
     if (currentFilters.minSalary) {
       result = result.filter((job) => {
         if (job.salary_min) return job.salary_min >= currentFilters.minSalary!;
@@ -103,20 +93,41 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
       });
     }
 
+    // Benefits filter
+    // Benefits filter
     if (currentFilters.benefits?.length) {
+      console.log("Has benefits to filter:", currentFilters.benefits);
       result = result.filter((job) => {
+        // If job has no benefits, exclude it
         if (!job.benefits?.length) return false;
-        return currentFilters.benefits!.every((requiredBenefit) =>
-          job.benefits!.some((jobBenefit) => jobBenefit.name.toLowerCase() === requiredBenefit.toLowerCase())
-        );
+
+        // For each required benefit (from filter)
+        return currentFilters.benefits!.every((requiredBenefitId) => {
+          // Find the preset benefit definition
+          const presetBenefit = Object.values(benefitsPresets).find((preset) => preset.id === requiredBenefitId);
+
+          if (!presetBenefit) return false;
+
+          // Check if job has this benefit
+          const match = job.benefits.some(
+            (jobBenefit) => jobBenefit.name.toLowerCase() === presetBenefit.name.toLowerCase()
+          );
+
+          console.log(`Job ${job.id}: Checking for ${presetBenefit.name} - Match: ${match}`);
+          return match;
+        });
       });
+
+      console.log(`Filtered down to ${result.length} jobs`);
     }
 
     setFilteredJobs(result);
   };
 
-  const updateFilters = (updates: Partial<JobFilters>) => {
-    const newFilters = { ...filters, ...updates };
+  const updateFilters = (field: keyof JobFilters, value: any) => {
+    console.log("Updating filters:", field, value);
+    const newFilters = { ...filters, [field]: value };
+    console.log("New filters:", newFilters);
     setFilters(newFilters);
     applyFilters(newFilters);
   };
@@ -130,12 +141,10 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
               <Skeleton className="h-8 w-full" />
               <Skeleton className="h-8 w-full" />
               <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
             </div>
           </CardContent>
         </Card>
         <div className="lg:col-span-3 space-y-4">
-          <JobCardSkeleton />
           <JobCardSkeleton />
           <JobCardSkeleton />
         </div>
@@ -145,115 +154,14 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      {/* Filters Section */}
-      <Card className="lg:col-span-1 h-fit">
-        <CardContent className="p-6 space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">{t("jobs.search.label")}</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder={t("jobs.search.placeholder")}
-                value={filters.search}
-                onChange={(e) => updateFilters({ search: e.target.value })}
-                className="pl-9"
-              />
-            </div>
-          </div>
+      <div className="lg:col-span-1">
+        <JobFilters
+          onFilterChange={updateFilters}
+          initialFilters={filters}
+          availableBenefits={Object.values(benefitsPresets)}
+        />
+      </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">{t("jobs.type.label")}</label>
-            <Select value={filters.jobType} onValueChange={(value) => updateFilters({ jobType: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("jobs.type.all")}</SelectItem>
-                <SelectItem value="remote">{getJobTypeLabel("remote")}</SelectItem>
-                <SelectItem value="hybrid">{getJobTypeLabel("hybrid")}</SelectItem>
-                <SelectItem value="onsite">{getJobTypeLabel("onsite")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">{t("jobs.location.label")}</label>
-            <LocationSelector value={filters.location} onChange={(value) => updateFilters({ location: value })} />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">{t("jobs.salary.minimum")}</label>
-            <div className="relative">
-              <EuroIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-              <Input
-                type="number"
-                placeholder={t("jobs.salary.placeholder")}
-                className="pl-9"
-                value={filters.minSalary || ""}
-                onChange={(e) =>
-                  updateFilters({
-                    minSalary: e.target.value ? Number(e.target.value) : undefined,
-                  })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">{t("jobs.benefits.label")}</label>
-            <ScrollArea className="h-[200px] rounded-md border p-4">
-              <div className="space-y-2">
-                {availableBenefits.map((benefit) => (
-                  <div key={benefit.name} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={benefit.name}
-                      checked={filters.benefits?.includes(benefit.name)}
-                      onChange={(e) => {
-                        const newBenefits = e.target.checked
-                          ? [...(filters.benefits || []), benefit.name]
-                          : (filters.benefits || []).filter((b) => b !== benefit.name);
-                        updateFilters({ benefits: newBenefits });
-                      }}
-                    />
-                    <label htmlFor={benefit.name} className="text-sm">
-                      {benefit.icon} {benefit.name}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-
-          {(filters.jobType !== "all" ||
-            filters.location ||
-            filters.minSalary ||
-            filters.benefits?.length ||
-            filters.search) && (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                setFilters(DEFAULT_JOB_FILTERS);
-                applyFilters(DEFAULT_JOB_FILTERS);
-              }}
-            >
-              {t("jobs.filters.clear")}
-            </Button>
-          )}
-
-          <div className="pt-2 border-t">
-            <p className="text-sm text-muted-foreground">
-              {t("jobs.results.count", {
-                count: filteredJobs.length.toString(),
-                plural: filteredJobs.length === 1 ? "" : "s",
-              })}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Jobs List Section */}
       <div className="lg:col-span-3 space-y-4">
         {filteredJobs.length > 0 ? (
           filteredJobs.map((job) => (

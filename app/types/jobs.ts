@@ -1,10 +1,31 @@
-// app/types/jobs.ts
+// types/jobs.ts
 
-export type JobType = "remote" | "hybrid" | "onsite";
+export const JOB_TYPES = {
+  REMOTE: "remote",
+  HYBRID: "hybrid",
+  ONSITE: "onsite",
+} as const;
 
-export type ExperienceLevel = "entry" | "junior" | "mid" | "senior" | "manager" | "lead";
+export const EXPERIENCE_LEVELS = {
+  ENTRY: "entry",
+  JUNIOR: "junior",
+  MID: "mid",
+  SENIOR: "senior",
+  MANAGER: "manager",
+  LEAD: "lead",
+} as const;
 
-export type ContractType = "fulltime" | "parttime" | "internship" | "freelance";
+export const CONTRACT_TYPES = {
+  FULLTIME: "fulltime",
+  PARTTIME: "parttime",
+  INTERNSHIP: "internship",
+  FREELANCE: "freelance",
+} as const;
+
+// Derive types from constants
+export type JobType = (typeof JOB_TYPES)[keyof typeof JOB_TYPES];
+export type ExperienceLevel = (typeof EXPERIENCE_LEVELS)[keyof typeof EXPERIENCE_LEVELS];
+export type ContractType = (typeof CONTRACT_TYPES)[keyof typeof CONTRACT_TYPES];
 
 export type ApplicationMethod = {
   type: "email" | "url";
@@ -12,11 +33,13 @@ export type ApplicationMethod = {
 };
 
 export type Benefit = {
+  id: string;
   name: string;
   icon?: string;
   isCustom?: boolean;
 };
 
+// Base job interface
 export interface Job {
   id: number;
   title: string;
@@ -31,6 +54,7 @@ export interface Job {
   salary_min?: number;
   salary_max?: number;
   created_at: string;
+  activated_at?: string;
   is_active: boolean;
   management_token?: string;
   benefits?: Benefit[];
@@ -38,15 +62,13 @@ export interface Job {
   application_method_value: string;
 }
 
-export interface JobFormData extends Omit<Job, "id" | "created_at" | "is_active" | "management_token"> {
-  benefits: Benefit[];
-}
+// Derive form data type from Job
+export type JobFormData = Omit<Job, "id" | "created_at" | "is_active" | "management_token" | "activated_at">;
 
+// In types/jobs.ts
 export interface JobFilters {
   search: string;
-  jobType: string;
-  ExperienceLevel: string;
-  ContractType: string;
+  jobType: JobType | "all";
   location: string;
   minSalary?: number;
   benefits?: string[];
@@ -55,9 +77,5 @@ export interface JobFilters {
 export const DEFAULT_JOB_FILTERS: JobFilters = {
   search: "",
   jobType: "all",
-  ExperienceLevel: "",
-  ContractType: "",
   location: "",
-  minSalary: undefined,
-  benefits: [],
 };

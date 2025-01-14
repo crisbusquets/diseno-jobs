@@ -1,28 +1,26 @@
 "use client";
 
 import React from "react";
-import { JobFormData } from "@/types";
+import { JobFormData, JOB_TYPES, EXPERIENCE_LEVELS, CONTRACT_TYPES, ApplicationMethod } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { JOB_TYPES, EXPERIENCE_LEVEL, CONTRACT_TYPE } from "@/lib/config/constants";
-import LogoUpload from "@/components/jobs/forms/logo-upload";
-import { ApplyMethodSection } from "@/components/jobs/forms/apply-method-section";
-import { BenefitsSection } from "@/components/jobs/forms/benefits-section";
-import LocationSelector from "@/components/jobs/forms/location-selector";
-
+import LogoUpload from "./logo-upload";
+import { ApplyMethodSection } from "./apply-method-section";
+import { BenefitsSection } from "./benefits-section";
+import LocationSelector from "./location-selector";
 import { t } from "@/lib/translations/utils";
 
 interface JobFormFieldsProps {
   formData: Partial<JobFormData>;
   logo: string;
   benefits: any[];
-  applyMethod: { type: string; value: string };
+  applyMethod: ApplicationMethod;
   onFormDataChange: (field: string, value: any) => void;
   onLogoChange: (url: string) => void;
   onBenefitsChange: (benefits: any[]) => void;
-  onApplyMethodChange: (method: { type: string; value: string }) => void;
+  onApplyMethodChange: (method: ApplicationMethod) => void;
 }
 
 export function JobFormFields({
@@ -96,17 +94,16 @@ export function JobFormFields({
 
           <div>
             <label className="text-sm font-medium">{t("jobs.form.workMode.label")} *</label>
-            <Select
-              value={formData.job_type || "remote"}
-              onValueChange={(value) => onFormDataChange("job_type", value)}
-            >
+            <Select value={formData.job_type || ""} onValueChange={(value) => onFormDataChange("job_type", value)}>
               <SelectTrigger>
                 <SelectValue placeholder={t("jobs.form.workMode.placeholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={JOB_TYPES.REMOTE}>{t("jobs.form.workMode.remote")}</SelectItem>
-                <SelectItem value={JOB_TYPES.HYBRID}>{t("jobs.form.workMode.hybrid")}</SelectItem>
-                <SelectItem value={JOB_TYPES.ONSITE}>{t("jobs.form.workMode.onsite")}</SelectItem>
+                {Object.values(JOB_TYPES).map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {t(`jobs.form.workMode.${type}`)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -129,12 +126,11 @@ export function JobFormFields({
                 <SelectValue placeholder={t("jobs.form.experience.placeholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={EXPERIENCE_LEVEL.ENTRY}>{t("jobs.form.experience.entry")}</SelectItem>
-                <SelectItem value={EXPERIENCE_LEVEL.JUNIOR}>{t("jobs.form.experience.junior")}</SelectItem>
-                <SelectItem value={EXPERIENCE_LEVEL.MID}>{t("jobs.form.experience.mid")}</SelectItem>
-                <SelectItem value={EXPERIENCE_LEVEL.SENIOR}>{t("jobs.form.experience.senior")}</SelectItem>
-                <SelectItem value={EXPERIENCE_LEVEL.MANAGER}>{t("jobs.form.experience.manager")}</SelectItem>
-                <SelectItem value={EXPERIENCE_LEVEL.LEAD}>{t("jobs.form.experience.lead")}</SelectItem>
+                {Object.values(EXPERIENCE_LEVELS).map((level) => (
+                  <SelectItem key={level} value={level}>
+                    {t(`jobs.form.experience.${level}`)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -149,10 +145,11 @@ export function JobFormFields({
                 <SelectValue placeholder={t("jobs.form.contract.placeholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={CONTRACT_TYPE.FULLTIME}>{t("jobs.form.contract.fulltime")}</SelectItem>
-                <SelectItem value={CONTRACT_TYPE.PARTTIME}>{t("jobs.form.contract.parttime")}</SelectItem>
-                <SelectItem value={CONTRACT_TYPE.INTERNSHIP}>{t("jobs.form.contract.internship")}</SelectItem>
-                <SelectItem value={CONTRACT_TYPE.FREELANCE}>{t("jobs.form.contract.freelance")}</SelectItem>
+                {Object.values(CONTRACT_TYPES).map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {t(`jobs.form.contract.${type}`)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -211,7 +208,7 @@ export function JobFormFields({
 }
 
 // Validation helper
-export function validateJobForm(formData: Partial<JobFormData>, applyMethod: { type: string; value: string }): string {
+export function validateJobForm(formData: Partial<JobFormData>, applyMethod: ApplicationMethod): string {
   if (!formData.title) return t("jobs.create.validation.required");
   if (!formData.company) return t("jobs.create.validation.required");
   if (!formData.company_email) return t("jobs.create.validation.required");

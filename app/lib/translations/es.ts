@@ -1,7 +1,55 @@
-import { toast } from "@/components/ui/use-toast";
-import { Description } from "@radix-ui/react-toast";
-import { error } from "console";
-import { title } from "process";
+export const benefitsPresets = {
+  healthInsurance: {
+    id: "health",
+    name: "Seguro médico privado",
+    icon: "🏥",
+  },
+  dentalInsurance: {
+    id: "dental",
+    name: "Seguro dental",
+    icon: "🦷",
+  },
+  remoteWork: {
+    id: "remote",
+    name: "Teletrabajo flexible",
+    icon: "🏠",
+  },
+  flexibleHours: {
+    id: "flextime",
+    name: "Horario flexible",
+    icon: "⏰",
+  },
+  training: {
+    id: "training",
+    name: "Formación continua",
+    icon: "📚",
+  },
+  equipment: {
+    id: "equipment",
+    name: "Presupuesto para equipo",
+    icon: "💻",
+  },
+  pension: {
+    id: "pension",
+    name: "Plan de pensiones",
+    icon: "💰",
+  },
+  mealAllowance: {
+    id: "meal",
+    name: "Ticket restaurante",
+    icon: "🍽️",
+  },
+  gym: {
+    id: "gym",
+    name: "Gimnasio",
+    icon: "💪",
+  },
+  extraDays: {
+    id: "extradays",
+    name: "Días libres extra",
+    icon: "🌴",
+  },
+} as const;
 
 export const translations = {
   common: {
@@ -14,6 +62,9 @@ export const translations = {
     delete: "Eliminar",
     copy: "Copiar",
     copied: "Copiado",
+  },
+  benefits: {
+    presets: benefitsPresets,
   },
   jobs: {
     apply: {
@@ -222,41 +273,5 @@ export const translations = {
     },
     submitError: "Error al procesar la solicitud",
     validationError: "Error de validación",
-  },
-  benefits: {
-    presets: {
-      healthInsurance: {
-        name: "Seguro médico privado",
-        icon: "🏥",
-      },
-      dentalInsurance: {
-        name: "Seguro dental",
-        icon: "🦷",
-      },
-      remoteWork: {
-        name: "Teletrabajo flexible",
-        icon: "🏠",
-      },
-      flexibleHours: {
-        name: "Horario flexible",
-        icon: "⏰",
-      },
-      training: {
-        name: "Formación continua",
-        icon: "📚",
-      },
-      equipment: {
-        name: "Presupuesto para equipo",
-        icon: "💻",
-      },
-      pension: {
-        name: "Plan de pensiones",
-        icon: "💰",
-      },
-      mealAllowance: {
-        name: "Ticket restaurante",
-        icon: "🍽️",
-      },
-    },
   },
 };

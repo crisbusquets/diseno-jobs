@@ -1,5 +1,6 @@
 // app/lib/utils/formatting.ts
 import { t } from "@/lib/translations/utils";
+import { JobType } from "@/types";
 
 /**
  * Format currency in EUR with Spanish locale
@@ -26,7 +27,7 @@ export function formatSalaryRange(min?: number, max?: number): string {
   if (max) {
     return `Hasta ${formatCurrency(max)}`;
   }
-  return t("jobs.form.salary.notSpecified");
+  return t("jobs.salary.notSpecified");
 }
 
 /**
@@ -43,14 +44,15 @@ export function formatDate(dateString: string): string {
 /**
  * Get job type label using translation system
  */
-export function getJobTypeLabel(type: "remote" | "hybrid" | "onsite"): string {
-  return t(`jobs.types.${type}`);
+export function getJobTypeLabel(type: JobType | null | undefined | "all"): string {
+  if (!type || type === "all") return t("jobs.type.all");
+  return t(`jobs.form.workMode.${type}`);
 }
 
 /**
  * Get job type color classes for Tailwind
  */
-export function getJobTypeColor(type: "remote" | "hybrid" | "onsite"): string {
+export function getJobTypeColor(type: JobType): string {
   const colors = {
     remote: "text-green-700 bg-green-50 border-green-100",
     hybrid: "text-amber-700 bg-amber-50 border-amber-100",

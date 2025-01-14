@@ -1,4 +1,4 @@
-// app/types/forms.ts
+// types/forms.ts
 
 export interface FormStatus {
   isSubmitting: boolean;
@@ -6,20 +6,9 @@ export interface FormStatus {
   success: boolean;
 }
 
-export interface FormProps {
-  onSubmit: (data: any) => Promise<void>;
-  initialData?: any;
-  status?: FormStatus;
-}
-
 export interface FormFieldProps {
   label: string;
   name: string;
   required?: boolean;
   error?: string;
-}
-
-export interface SelectOption {
-  value: string;
-  label: string;
 }
