@@ -70,6 +70,11 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
       result = result.filter((job) => job.job_type === currentFilters.jobType);
     }
 
+    // Remote only filter
+    if (currentFilters.remoteOnly) {
+      result = result.filter((job) => job.job_type === "remote");
+    }
+
     // Location
     if (currentFilters.location) {
       result = result.filter((job) => {

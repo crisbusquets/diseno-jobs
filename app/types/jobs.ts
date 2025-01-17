@@ -65,17 +65,18 @@ export interface Job {
 // Derive form data type from Job
 export type JobFormData = Omit<Job, "id" | "created_at" | "is_active" | "management_token" | "activated_at">;
 
-// In types/jobs.ts
 export interface JobFilters {
   search: string;
   jobType: JobType | "all";
   location: string;
   minSalary?: number;
   benefits?: string[];
+  remoteOnly: boolean;
 }
 
 export const DEFAULT_JOB_FILTERS: JobFilters = {
   search: "",
   jobType: "all",
   location: "",
+  remoteOnly: false,
 };

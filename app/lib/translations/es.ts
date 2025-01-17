@@ -138,6 +138,7 @@ export const translations = {
     },
     filters: {
       clear: "Limpiar filtros",
+      remote: "Solo remoto",
     },
     form: {
       company: "Nombre de la empresa",

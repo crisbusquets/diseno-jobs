@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import LocationSelector from "./location-selector";
 import { t } from "@/lib/translations/utils";
+import { Switch } from "@/components/ui/switch";
 
 interface JobFiltersProps {
   onFilterChange: (filterType: keyof JobFilters, value: any) => void;
@@ -68,6 +69,17 @@ export default function JobFilters({ onFilterChange, initialFilters, availableBe
       <div className="space-y-2">
         <label className="text-sm font-medium">{t("jobs.location.label")}</label>
         <LocationSelector value={initialFilters.location} onChange={(value) => onFilterChange("location", value)} />
+      </div>
+
+      {/* Remote Only Toggle */}
+      <div className="space-y-2">
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={initialFilters.remoteOnly}
+            onCheckedChange={(checked) => onFilterChange("remoteOnly", checked)}
+          />
+          <label className="text-sm text-muted-foreground">{t("jobs.filters.remote")}</label>
+        </div>
       </div>
 
       {/* Minimum Salary */}
