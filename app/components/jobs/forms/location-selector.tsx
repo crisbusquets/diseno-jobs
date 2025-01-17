@@ -8,7 +8,8 @@ type Region = {
 };
 
 const REGIONS: Region[] = [
-  { id: "anywhere", name: "En cualquier parte", emoji: "🌍" },
+  { id: "all", name: "Cualquier ubicación", emoji: "🌎" },
+  { id: "anywhere", name: "Sin restricción geográfica", emoji: "🌍" },
   { id: "europe", name: "Europa", emoji: "🇪🇺" },
   { id: "spain", name: "España", emoji: "🇪🇸" },
   { id: "france", name: "Francia", emoji: "🇫🇷" },

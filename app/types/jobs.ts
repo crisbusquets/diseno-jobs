@@ -77,6 +77,6 @@ export interface JobFilters {
 export const DEFAULT_JOB_FILTERS: JobFilters = {
   search: "",
   jobType: "all",
-  location: "",
+  location: "all",
   remoteOnly: false,
 };
