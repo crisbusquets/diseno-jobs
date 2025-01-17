@@ -60,7 +60,7 @@ export function BenefitsSection({ benefits, onBenefitsChange }: BenefitsSectionP
 
         {/* Available preset benefits */}
         {PRESET_BENEFITS.filter((benefit) => !benefits.some((b) => b.id === benefit.id)).map((benefit) => (
-          <Button key={benefit.id} variant="outline" onClick={() => toggleBefit(benefit)}>
+          <Button key={benefit.id} variant="outline" onClick={() => toggleBenefit(benefit)}>
             {benefit.icon} {benefit.name}
           </Button>
         ))}
