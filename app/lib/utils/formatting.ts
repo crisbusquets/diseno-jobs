@@ -6,6 +6,7 @@ import { JobType } from "@/types";
  * Format currency in EUR with Spanish locale
  */
 export function formatCurrency(amount: number): string {
+  // Remove the division by 100 since amounts are stored in euros
   return new Intl.NumberFormat("es-ES", {
     style: "currency",
     currency: "EUR",

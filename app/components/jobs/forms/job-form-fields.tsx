@@ -12,6 +12,20 @@ import { BenefitsSection } from "./benefits-section";
 import LocationSelector from "./location-selector";
 import { t } from "@/lib/translations/utils";
 
+function normalizeSalary(value: string): number | null {
+  if (!value) return null;
+
+  // Remove any currency symbols and spaces
+  const cleaned = value.replace(/[€$\s]/g, "");
+
+  // Replace both commas and dots with dots (standardize decimal separator)
+  const normalized = cleaned.replace(/,/g, ".");
+
+  // Parse the number (don't multiply by 100)
+  const amount = parseFloat(normalized);
+  return isNaN(amount) ? null : Math.round(amount);
+}
+
 interface JobFormFieldsProps {
   formData: Partial<JobFormData>;
   logo: string;
@@ -159,9 +173,12 @@ export function JobFormFields({
               <label className="text-sm font-medium">{t("jobs.form.salary.min")}</label>
               <Input
                 name="salary_min"
-                type="number"
+                type="text" // Changed from "number" to "text"
                 value={formData.salary_min || ""}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  const normalizedValue = normalizeSalary(e.target.value);
+                  onFormDataChange("salary_min", normalizedValue);
+                }}
                 placeholder={t("jobs.form.salary.placeholder.min")}
               />
             </div>
@@ -170,9 +187,12 @@ export function JobFormFields({
               <label className="text-sm font-medium">{t("jobs.form.salary.max")}</label>
               <Input
                 name="salary_max"
-                type="number"
+                type="text" // Changed from "number" to "text"
                 value={formData.salary_max || ""}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  const normalizedValue = normalizeSalary(e.target.value);
+                  onFormDataChange("salary_max", normalizedValue);
+                }}
                 placeholder={t("jobs.form.salary.placeholder.max")}
               />
             </div>
