@@ -1,7 +1,6 @@
 import { MapPin, EuroIcon } from "lucide-react";
 import { Job } from "@/types";
-import { formatSalaryRange } from "@/lib/utils/formatting";
-import { getLocationName } from "@/components/jobs/forms/location-selector";
+import { formatSalaryRange, getLocationName } from "@/lib/utils/formatting";
 import { cn } from "@/lib/utils";
 
 interface JobMetadataProps {

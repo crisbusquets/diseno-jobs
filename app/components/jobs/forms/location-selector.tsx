@@ -80,8 +80,3 @@ export default function LocationSelector({ value, onChange }: LocationSelectorPr
     </Popover>
   );
 }
-
-export function getLocationName(value: string): string {
-  const item = [...regions, ...countries].find((item) => item.id === value);
-  return item?.name || value;
-}

@@ -1,6 +1,7 @@
 // app/lib/utils/formatting.ts
 import { t } from "@/lib/translations/utils";
 import { JobType } from "@/types";
+import { REGIONS, COUNTRIES } from "@/lib/translations/es";
 
 /**
  * Format currency in EUR with Spanish locale
@@ -60,4 +61,14 @@ export function getJobTypeColor(type: JobType): string {
     onsite: "text-blue-700 bg-blue-50 border-blue-100",
   };
   return colors[type] || "";
+}
+
+/**
+ * Job location types
+ */
+export function getLocationName(value: string): string {
+  const regions = Object.values(REGIONS);
+  const countries = Object.values(COUNTRIES);
+  const item = [...regions, ...countries].find((item) => item.id === value);
+  return item?.name || value;
 }
