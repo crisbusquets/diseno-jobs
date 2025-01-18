@@ -32,7 +32,7 @@ export default function JobFilters({ onFilterChange, initialFilters, availableBe
   );
 
   return (
-    <div className="space-y-6 bg-white rounded-lg p-6">
+    <div className="space-y-6">
       {/* Search */}
       <div className="space-y-2">
         <label className="text-sm font-medium">{t("jobs.search.label")}</label>

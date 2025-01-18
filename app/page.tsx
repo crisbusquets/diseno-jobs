@@ -43,10 +43,10 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Debug timestamp */}
-        <div className="px-4 sm:px-0 flex justify-between items-center">
-          <p className="text-gray-600">{jobsWithBenefits?.length || 0} trabajos disponibles</p>
+        <div className="px-4 sm:px-0 flex justify-between">
+          <p className="text-sm text-gray-400">{jobsWithBenefits?.length || 0} trabajos disponibles</p>
           <p className="text-sm text-gray-400">Última actualización: {now}</p>
         </div>
 

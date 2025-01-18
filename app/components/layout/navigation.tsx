@@ -22,7 +22,7 @@ export default function Navigation() {
 
   return (
     <nav className="bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between h-16 items-center">
           <Link href="/" className="text-xl font-medium hover:text-blue-600 transition-colors">
             {t("site.name")}

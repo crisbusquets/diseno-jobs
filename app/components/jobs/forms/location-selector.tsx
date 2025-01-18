@@ -33,10 +33,10 @@ export default function LocationSelector({ value, onChange }: LocationSelectorPr
           <span className="flex items-center gap-2">
             {selected.emoji} {selected.name}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-4 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-full p-full">
         <Command>
           <CommandInput placeholder={t("locations.search.placeholder")} />
           <CommandList>
@@ -51,7 +51,7 @@ export default function LocationSelector({ value, onChange }: LocationSelectorPr
                   }}
                 >
                   <Check className={cn("mr-2 h-4 w-4", value === region.id ? "opacity-100" : "opacity-0")} />
-                  <span className="flex items-center gap-2 font-medium">
+                  <span className="flex items-left gap-2 font-medium">
                     {region.emoji} {region.name}
                   </span>
                 </CommandItem>
