@@ -19,13 +19,12 @@ interface JobFiltersProps {
 export default function JobFilters({ onFilterChange, initialFilters, availableBenefits = [] }: JobFiltersProps) {
   const handleBenefitToggle = useCallback(
     (benefitId: string) => {
-      console.log("Toggling benefit:", benefitId); // Add this
       const currentBenefits = initialFilters.benefits || [];
-      console.log("Current benefits:", currentBenefits); // Add this
+
       const newBenefits = currentBenefits.includes(benefitId)
         ? currentBenefits.filter((b) => b !== benefitId)
         : [...currentBenefits, benefitId];
-      console.log("New benefits:", newBenefits); // Add this
+
       onFilterChange("benefits", newBenefits);
     },
     [initialFilters.benefits, onFilterChange]

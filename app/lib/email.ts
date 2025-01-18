@@ -48,8 +48,6 @@ export async function sendJobConfirmationEmail(jobData: JobEmailData) {
   const recipientEmail = getRecipientEmail(jobData.to);
 
   try {
-    console.log("Attempting to send email with data:", JSON.stringify(jobData, null, 2));
-
     const { data, error } = await resend.emails.send({
       from: `DisñoJobs <${senderEmail}>`,
       to: [recipientEmail],
@@ -176,7 +174,6 @@ export async function sendJobConfirmationEmail(jobData: JobEmailData) {
       throw error;
     }
 
-    console.log("Email sent successfully:", data);
     return { success: true, data };
   } catch (error) {
     console.error("Email sending error:", error);

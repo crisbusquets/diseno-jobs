@@ -103,6 +103,4 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       value: job.application_method_value,
     },
   });
-
-  console.log(`Job ${jobId} activated and confirmation email sent`);
 }
