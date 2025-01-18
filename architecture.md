@@ -7,22 +7,24 @@ app/
 │     └── webhook/
 │         └── route.ts
 ├── components/
+│ ├── common/
+│ │ ├── buttons/
+│ │ │ └── copy-link-button.tsx
+│ │ └── forms/
+│ │     ├── apply-method-section.tsx
+│ │     ├── apply-section.tsx
+│ │     ├── benefits-section.tsx
+│ │     ├── location-selector.tsx
+│ │     └── logo-upload.tsx
 │ ├── jobs/
 │ │ ├── cards/
 │ │ │ ├── job-card.tsx
 │ │ │ └── job-listings-client.tsx
 │ │ ├── create-job-form.tsx
 │ │ ├── forms/
-│ │ │   ├── apply-method-section.tsx
-│ │ │   ├── benefits-section.tsx
-│ │ │   ├── job-filters.tsx
-│ │ │   ├── job-form-fields.tsx
-│ │ │   ├── location-selector.tsx
-│ │ │   └── logo-upload.tsx
+│ │ │ └── job-filters.tsx
 │ │ ├── manage-job-form.tsx
 │ │ └── shared/
-│ │     ├── apply-section.tsx
-│ │     ├── copy-link-button.tsx
 │ │     ├── job-benefits.tsx
 │ │     ├── job-header.tsx
 │ │     └── job-metadata.tsx
@@ -45,12 +47,8 @@ app/
 │   ├── select.tsx
 │   ├── separator.tsx
 │   ├── sheet.tsx
-│   ├── skeleton.tsx
 │   ├── tabs.tsx
-│   ├── textarea.tsx
-│   ├── toast.tsx
-│   ├── toaster.tsx
-│   └── use-toast.tsx
+│   └── textarea.tsx
 ├── favicon.ico
 ├── fonts/
 │ ├── GeistMonoVF.woff
@@ -58,37 +56,32 @@ app/
 ├── globals.css
 ├── jobs/
 │ ├── [id]/
-│ │ ├── error.tsx
-│ │ ├── loading.tsx
 │ │ └── page.tsx
 │ ├── create/
 │ │ └── page.tsx
 │ ├── manage/
 │ │ ├── [token]/
-│ │ │ ├── error.tsx
-│ │ │ ├── loading.tsx
 │ │ │ └── page.tsx
 │ │ └── page.tsx
 │ ├── success/
-│ │ ├── error.tsx
-│ │ ├── loading.tsx
 │ │ └── page.tsx
 ├── layout.tsx
 ├── lib/
 │ ├── config/
-│ │ └── constants.ts
+│ │ ├── constants.ts
+│ │ └── theme.ts
 │ ├── email.ts
+│ ├── services/
+│ │ ├── jobs.ts
+│ │ └── stripe.ts
 │ ├── supabase.ts
-│ ├── translations/
-│ │ ├── es.ts
-│ │ └── utils.ts
 │ ├── utils/
 │ │ ├── formatting.ts
-│ │ ├── notifications.ts
 │ │ └── validation.ts
 │ └── utils.ts
 ├── page.tsx
 └── types/
+    ├── api.ts
     ├── forms.ts
     ├── index.ts
     └── jobs.ts

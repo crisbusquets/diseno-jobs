@@ -1,22 +1,17 @@
-import React from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+"use client";
 
-type Region = {
-  id: string; // Value that gets stored in database
-  name: string; // Display text in Spanish
-  emoji: string;
-};
+import * as React from "react";
 
-const REGIONS: Region[] = [
-  { id: "all", name: "Cualquier ubicación", emoji: "🌎" },
-  { id: "anywhere", name: "Sin restricción geográfica", emoji: "🌍" },
-  { id: "europe", name: "Europa", emoji: "🇪🇺" },
-  { id: "spain", name: "España", emoji: "🇪🇸" },
-  { id: "france", name: "Francia", emoji: "🇫🇷" },
-  { id: "germany", name: "Alemania", emoji: "🇩🇪" },
-  { id: "uk", name: "Reino Unido", emoji: "🇬🇧" },
-  { id: "portugal", name: "Portugal", emoji: "🇵🇹" },
-];
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { t } from "@/lib/translations/utils";
+import { REGIONS, COUNTRIES } from "@/lib/translations/es";
+
+const regions = Object.values(REGIONS);
+const countries = Object.values(COUNTRIES);
 
 interface LocationSelectorProps {
   value: string;
@@ -24,25 +19,69 @@ interface LocationSelectorProps {
 }
 
 export default function LocationSelector({ value, onChange }: LocationSelectorProps) {
+  const [open, setOpen] = React.useState(false);
+
+  const selected = React.useMemo(
+    () => [...regions, ...countries].find((item) => item.id === value) || regions[0],
+    [value]
+  );
+
   return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select location">{value && REGIONS.find((r) => r.id === value)?.name}</SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {REGIONS.map((location) => (
-          <SelectItem key={location.id} value={location.id}>
-            <span className="flex items-center gap-2">
-              {location.emoji} {location.name}
-            </span>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
+          <span className="flex items-center gap-2">
+            {selected.emoji} {selected.name}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0">
+        <Command>
+          <CommandInput placeholder={t("locations.search.placeholder")} />
+          <CommandList>
+            <CommandEmpty>{t("locations.search.empty")}</CommandEmpty>
+            <CommandGroup heading={t("locations.groups.regions")}>
+              {regions.map((region) => (
+                <CommandItem
+                  key={region.id}
+                  onSelect={() => {
+                    onChange(region.id);
+                    setOpen(false);
+                  }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", value === region.id ? "opacity-100" : "opacity-0")} />
+                  <span className="flex items-center gap-2 font-medium">
+                    {region.emoji} {region.name}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandGroup heading={t("locations.groups.countries")}>
+              {countries.map((country) => (
+                <CommandItem
+                  key={country.id}
+                  value={country.id}
+                  onSelect={() => {
+                    onChange(country.id);
+                    setOpen(false);
+                  }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", value === country.id ? "opacity-100" : "opacity-0")} />
+                  <span className="flex items-center gap-2">
+                    {country.emoji} {country.name}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
 
-// Helper function to get display name from ID
-export function getLocationName(id: string): string {
-  return REGIONS.find((r) => r.id === id)?.name || id;
+export function getLocationName(value: string): string {
+  const item = [...regions, ...countries].find((item) => item.id === value);
+  return item?.name || value;
 }

@@ -76,10 +76,10 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
     }
 
     // Location
-    if (currentFilters.location && currentFilters.location !== "all") {
+    if (currentFilters.location && currentFilters.location !== "worldwide") {
       result = result.filter((job) => {
         if (!job.location) return false;
-        return job.location.toLowerCase() === currentFilters.location.toLowerCase();
+        return job.location.toLowerCase().includes(currentFilters.location.toLowerCase());
       });
     }
 
