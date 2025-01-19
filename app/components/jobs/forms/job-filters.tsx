@@ -93,7 +93,7 @@ export default function JobFilters({ onFilterChange, initialFilters, availableBe
             <SelectValue placeholder="Salario mínimo" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Cualquier salario</SelectItem>
+            <SelectItem value="all">{t("jobs.salary.all")}</SelectItem>
             {SALARY_RANGES.map((range) => (
               <SelectItem key={range.value} value={range.value.toString()}>
                 {range.label}

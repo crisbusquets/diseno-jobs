@@ -1021,6 +1021,7 @@ export const translations = {
       label: "Salario",
       minimum: "Salario mínimo",
       placeholder: "Ej: 30.000",
+      all: "Cualquier salario",
       notSpecified: "No especificado",
     },
     search: {
