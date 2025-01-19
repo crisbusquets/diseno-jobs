@@ -2,13 +2,13 @@
 import { Search, EuroIcon } from "lucide-react";
 import { useCallback } from "react";
 import { JobFilters, JobType, Benefit, JOB_TYPES } from "@/types";
-import { getJobTypeLabel } from "@/lib/utils/formatting";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import LocationSelector from "./location-selector";
 import { t } from "@/lib/translations/utils";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SALARY_RANGES } from "@/lib/config/constants";
 
 interface JobFiltersProps {
   onFilterChange: (filterType: keyof JobFilters, value: any) => void;
@@ -82,18 +82,25 @@ export default function JobFilters({ onFilterChange, initialFilters, availableBe
       </div>
 
       {/* Minimum Salary */}
+
       <div className="space-y-2">
         <label className="text-sm font-medium">{t("jobs.salary.minimum")}</label>
-        <div className="relative">
-          <EuroIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-          <Input
-            type="number"
-            placeholder={t("jobs.salary.placeholder")}
-            value={initialFilters.minSalary || ""}
-            onChange={(e) => onFilterChange("minSalary", e.target.value ? Number(e.target.value) : undefined)}
-            className="pl-9"
-          />
-        </div>
+        <Select
+          value={initialFilters.minSalary?.toString() || "all"}
+          onValueChange={(value) => onFilterChange("minSalary", value === "all" ? undefined : parseInt(value))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Salario mínimo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Cualquier salario</SelectItem>
+            {SALARY_RANGES.map((range) => (
+              <SelectItem key={range.value} value={range.value.toString()}>
+                {range.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Benefits */}

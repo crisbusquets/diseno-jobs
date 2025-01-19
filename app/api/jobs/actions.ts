@@ -21,7 +21,7 @@ export async function createJob(formData: FormData) {
     location: formData.get("location") || null,
     job_type: formData.get("job_type"),
     experience_level: formData.get("experience_level"),
-    contract_type: formData.get("contract_type") || null,
+    contract_type: formData.get("contract_type") || "fulltime",
     salary_min: salaryMin,
     salary_max: salaryMax,
     benefits: benefits,

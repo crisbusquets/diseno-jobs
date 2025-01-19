@@ -49,6 +49,19 @@ export const DEFAULT_BENEFITS = [
   { name: t("benefits.presets.extraHolidays.name"), icon: "📅" },
 ];
 
+export const SALARY_RANGES = [
+  { value: 10000, label: "10.000€" },
+  { value: 20000, label: "20.000€" },
+  { value: 30000, label: "30.000€" },
+  { value: 40000, label: "40.000€" },
+  { value: 50000, label: "50.000€" },
+  { value: 60000, label: "60.000€" },
+  { value: 70000, label: "70.000€" },
+  { value: 80000, label: "80.000€" },
+  { value: 90000, label: "90.000€" },
+  { value: 100000, label: "100.000€" },
+] as const;
+
 export const SITE_CONFIG = {
   title: "DisñoJobs - Trabajos de Diseño de Producto",
   description: "Portal de empleo para diseñadores de producto en España",

@@ -11,20 +11,7 @@ import { ApplyMethodSection } from "./apply-method-section";
 import { BenefitsSection } from "./benefits-section";
 import LocationSelector from "./location-selector";
 import { t } from "@/lib/translations/utils";
-
-function normalizeSalary(value: string): number | null {
-  if (!value) return null;
-
-  // Remove any currency symbols and spaces
-  const cleaned = value.replace(/[€$\s]/g, "");
-
-  // Replace both commas and dots with dots (standardize decimal separator)
-  const normalized = cleaned.replace(/,/g, ".");
-
-  // Parse the number (don't multiply by 100)
-  const amount = parseFloat(normalized);
-  return isNaN(amount) ? null : Math.round(amount);
-}
+import { SALARY_RANGES } from "@/lib/config/constants";
 
 interface JobFormFieldsProps {
   formData: Partial<JobFormData>;
@@ -171,30 +158,40 @@ export function JobFormFields({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium">{t("jobs.form.salary.min")}</label>
-              <Input
-                name="salary_min"
-                type="text" // Changed from "number" to "text"
-                value={formData.salary_min || ""}
-                onChange={(e) => {
-                  const normalizedValue = normalizeSalary(e.target.value);
-                  onFormDataChange("salary_min", normalizedValue);
-                }}
-                placeholder={t("jobs.form.salary.placeholder.min")}
-              />
+              <Select
+                value={formData.salary_min ? (formData.salary_min / 100).toString() : ""}
+                onValueChange={(value) => onFormDataChange("salary_min", value ? parseInt(value) * 100 : undefined)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Salario mínimo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SALARY_RANGES.map((range) => (
+                    <SelectItem key={range.value} value={range.value.toString()}>
+                      {range.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
               <label className="text-sm font-medium">{t("jobs.form.salary.max")}</label>
-              <Input
-                name="salary_max"
-                type="text" // Changed from "number" to "text"
-                value={formData.salary_max || ""}
-                onChange={(e) => {
-                  const normalizedValue = normalizeSalary(e.target.value);
-                  onFormDataChange("salary_max", normalizedValue);
-                }}
-                placeholder={t("jobs.form.salary.placeholder.max")}
-              />
+              <Select
+                value={formData.salary_max ? (formData.salary_max / 100).toString() : ""}
+                onValueChange={(value) => onFormDataChange("salary_max", value ? parseInt(value) * 100 : undefined)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Salario máximo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SALARY_RANGES.map((range) => (
+                    <SelectItem key={range.value} value={range.value.toString()}>
+                      {range.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -232,6 +229,7 @@ export function validateJobForm(formData: Partial<JobFormData>, applyMethod: App
   if (!formData.title) return t("jobs.create.validation.required");
   if (!formData.company) return t("jobs.create.validation.required");
   if (!formData.company_email) return t("jobs.create.validation.required");
+  if (!formData.contract_type) return t("jobs.create.validation.required");
   if (!formData.description) return t("jobs.create.validation.required");
   if (!applyMethod.value) return t("jobs.create.validation.required");
 
@@ -245,7 +243,7 @@ export function validateJobForm(formData: Partial<JobFormData>, applyMethod: App
   }
 
   if (formData.salary_min && formData.salary_max) {
-    if (Number(formData.salary_min) > Number(formData.salary_max)) {
+    if (formData.salary_min > formData.salary_max) {
       return t("jobs.create.validation.salary");
     }
   }

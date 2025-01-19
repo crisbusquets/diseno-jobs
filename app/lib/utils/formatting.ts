@@ -20,16 +20,13 @@ export function formatCurrency(amount: number): string {
  * Format salary range
  */
 export function formatSalaryRange(min?: number, max?: number): string {
-  if (min && max) {
-    return `${formatCurrency(min)} - ${formatCurrency(max)}`;
-  }
-  if (min) {
-    return `Desde ${formatCurrency(min)}`;
-  }
-  if (max) {
-    return `Hasta ${formatCurrency(max)}`;
-  }
-  return t("jobs.salary.notSpecified");
+  if (!min && !max) return "Salario no especificado";
+
+  const formatSalary = (value: number) => `${(value / 100).toLocaleString("es-ES")}€`;
+
+  if (min && max) return `${formatSalary(min)} - ${formatSalary(max)}`;
+  if (min) return `Desde ${formatSalary(min)}`;
+  return `Hasta ${formatSalary(max!)}`;
 }
 
 /**
