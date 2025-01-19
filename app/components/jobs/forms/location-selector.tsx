@@ -36,7 +36,7 @@ export default function LocationSelector({ value, onChange }: LocationSelectorPr
           <ChevronsUpDown className="ml-4 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-full">
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
           <CommandInput placeholder={t("locations.search.placeholder")} />
           <CommandList>
