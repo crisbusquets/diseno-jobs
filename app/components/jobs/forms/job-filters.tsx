@@ -1,9 +1,9 @@
 // components/jobs/forms/job-filters.tsx
-import { Search, EuroIcon } from "lucide-react";
+import { Search, Check } from "lucide-react";
 import { useCallback } from "react";
-import { JobFilters, JobType, Benefit, JOB_TYPES } from "@/types";
+import { JobFilters, Benefit, JOB_TYPES } from "@/types";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import LocationSelector from "./location-selector";
 import { t } from "@/lib/translations/utils";
 import { Switch } from "@/components/ui/switch";
@@ -104,42 +104,23 @@ export default function JobFilters({ onFilterChange, initialFilters, availableBe
       </div>
 
       {/* Benefits */}
-      {availableBenefits.map((benefit) => (
-        <label key={benefit.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded-md cursor-pointer">
-          <input
-            type="checkbox"
-            checked={initialFilters.benefits?.includes(benefit.id) || false}
-            onChange={() => handleBenefitToggle(benefit.id)}
-            className="rounded border-gray-300"
-          />
-          <span>
-            {benefit.icon} {benefit.name}
-          </span>
-        </label>
-      ))}
-
-      {/* Selected Benefits Tags */}
-      {(initialFilters.benefits?.length || 0) > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {initialFilters.benefits?.map((benefitName) => (
-            <Badge
-              key={benefitName}
-              variant="secondary"
-              className="cursor-pointer"
-              onClick={() => handleBenefitToggle(benefitName)}
-            >
-              {benefitName}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleBenefitToggle(benefitName);
-                }}
-                className="ml-2 hover:text-destructive"
+      {availableBenefits.length > 0 && (
+        <div className="space-y-2">
+          <label className="text-sm font-medium">{t("jobs.benefits.label")}</label>
+          <div className="flex flex-wrap gap-2">
+            {availableBenefits.map((benefit) => (
+              <Button
+                key={benefit.id}
+                variant={initialFilters.benefits?.includes(benefit.id) ? "secondary" : "outline"}
+                size="sm"
+                onClick={() => handleBenefitToggle(benefit.id)}
+                className="gap-2"
               >
-                ×
-              </button>
-            </Badge>
-          ))}
+                {initialFilters.benefits?.includes(benefit.id) && <Check className="h-4 w-4" />}
+                {benefit.icon} {benefit.name}
+              </Button>
+            ))}
+          </div>
         </div>
       )}
     </div>
