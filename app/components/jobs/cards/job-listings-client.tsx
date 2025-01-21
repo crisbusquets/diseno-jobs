@@ -79,15 +79,14 @@ export default function JobListingsClient({ initialJobs }: JobListingsClientProp
         });
       }
 
-      // Minimum salary
-      if (currentFilters.minSalary) {
+      // Salary range filter
+      if (currentFilters.minSalary && currentFilters.minSalary !== "all") {
         result = result.filter((job) => {
-          if (!job.salary_min && !job.salary_max) return false;
-
-          const filterValue = currentFilters.minSalary;
-          const minSalaryEuros = job.salary_min ? job.salary_min / 100 : null;
-
-          return minSalaryEuros ? minSalaryEuros >= filterValue : false;
+          if (!job.salary_range) return false;
+          // Extract the lower bound from the range (e.g. "10-20k" -> "10")
+          const rangeLower = parseInt(job.salary_range.split("-")[0]);
+          const filterLower = parseInt(currentFilters.minSalary.split("-")[0]);
+          return rangeLower >= filterLower;
         });
       }
 

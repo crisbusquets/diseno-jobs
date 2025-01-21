@@ -141,45 +141,25 @@ export function JobFormFields({
           </div>
         </div>
 
-        {/* Salary range in 2 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium">{t("jobs.form.salary.min")}</label>
-            <Select
-              value={formData.salary_min ? (formData.salary_min / 100).toString() : ""}
-              onValueChange={(value) => onFormDataChange("salary_min", value ? parseInt(value) * 100 : undefined)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t("jobs.form.salary.placeholder.min")} />
-              </SelectTrigger>
-              <SelectContent>
-                {SALARY_RANGES.map((range) => (
-                  <SelectItem key={range.value} value={range.value.toString()}>
-                    {range.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">{t("jobs.form.salary.max")}</label>
-            <Select
-              value={formData.salary_max ? (formData.salary_max / 100).toString() : ""}
-              onValueChange={(value) => onFormDataChange("salary_max", value ? parseInt(value) * 100 : undefined)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t("jobs.form.salary.placeholder.max")} />
-              </SelectTrigger>
-              <SelectContent>
-                {SALARY_RANGES.map((range) => (
-                  <SelectItem key={range.value} value={range.value.toString()}>
-                    {range.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Salary range as a single select */}
+        <div>
+          <label className="text-sm font-medium">{t("jobs.form.salary.range")}</label>
+          <Select
+            value={formData.salary_range || ""}
+            onValueChange={(value) => onFormDataChange("salary_range", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t("jobs.form.salary.placeholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              {SALARY_RANGES.map((range) => (
+                <SelectItem key={range.id} value={range.id}>
+                  {range.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-sm text-muted-foreground mt-1">{t("jobs.form.salary.help")}</p>
         </div>
 
         {/* Description takes full width */}
@@ -264,12 +244,6 @@ export function validateJobForm(formData: Partial<JobFormData>, applyMethod: App
 
   if (applyMethod.type === "url" && !applyMethod.value.startsWith("http")) {
     return t("jobs.create.validation.url");
-  }
-
-  if (formData.salary_min && formData.salary_max) {
-    if (formData.salary_min > formData.salary_max) {
-      return t("jobs.create.validation.salary");
-    }
   }
 
   return "";

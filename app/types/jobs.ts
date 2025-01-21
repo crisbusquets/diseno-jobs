@@ -51,8 +51,7 @@ export interface Job {
   experience_level: ExperienceLevel;
   contract_type: ContractType;
   location?: string;
-  salary_min?: number;
-  salary_max?: number;
+  salary_range?: string;
   created_at: string;
   activated_at?: string;
   is_active: boolean;
@@ -70,7 +69,7 @@ export interface JobFilters {
   search: string;
   jobType: JobType | "all";
   location: string;
-  minSalary?: number;
+  minSalary?: string;
   benefits?: string[];
   remoteOnly: boolean;
 }

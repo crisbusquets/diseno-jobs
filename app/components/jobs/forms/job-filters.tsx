@@ -81,21 +81,16 @@ export default function JobFilters({ onFilterChange, initialFilters, availableBe
         </div>
       </div>
 
-      {/* Minimum Salary */}
-
       <div className="space-y-2">
-        <label className="text-sm font-medium">{t("jobs.salary.minimum")}</label>
-        <Select
-          value={initialFilters.minSalary?.toString() || "all"}
-          onValueChange={(value) => onFilterChange("minSalary", value === "all" ? undefined : parseInt(value))}
-        >
+        <label className="text-sm font-medium">{t("jobs.salary.range")}</label>
+        <Select value={initialFilters.minSalary || "all"} onValueChange={(value) => onFilterChange("minSalary", value)}>
           <SelectTrigger>
-            <SelectValue placeholder="Salario mínimo" />
+            <SelectValue placeholder={t("jobs.salary.placeholder")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("jobs.salary.all")}</SelectItem>
             {SALARY_RANGES.map((range) => (
-              <SelectItem key={range.value} value={range.value.toString()}>
+              <SelectItem key={range.id} value={range.id}>
                 {range.label}
               </SelectItem>
             ))}

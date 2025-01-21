@@ -50,16 +50,16 @@ export const DEFAULT_BENEFITS = [
 ];
 
 export const SALARY_RANGES = [
-  { value: 10000, label: "10.000€" },
-  { value: 20000, label: "20.000€" },
-  { value: 30000, label: "30.000€" },
-  { value: 40000, label: "40.000€" },
-  { value: 50000, label: "50.000€" },
-  { value: 60000, label: "60.000€" },
-  { value: 70000, label: "70.000€" },
-  { value: 80000, label: "80.000€" },
-  { value: 90000, label: "90.000€" },
-  { value: 100000, label: "100.000€" },
+  { id: "10-20k", label: "10.000€ - 20.000€" },
+  { id: "20-30k", label: "20.000€ - 30.000€" },
+  { id: "30-40k", label: "30.000€ - 40.000€" },
+  { id: "40-50k", label: "40.000€ - 50.000€" },
+  { id: "50-60k", label: "50.000€ - 60.000€" },
+  { id: "60-70k", label: "60.000€ - 70.000€" },
+  { id: "70-80k", label: "70.000€ - 80.000€" },
+  { id: "80-90k", label: "80.000€ - 90.000€" },
+  { id: "90-100k", label: "90.000€ - 100.000€" },
+  { id: "100k+", label: "Más de 100.000€" },
 ] as const;
 
 export const SITE_CONFIG = {

@@ -923,7 +923,6 @@ export const translations = {
         email: "Email no válido",
         applyEmail: "Email de aplicación no válido",
         url: "La URL debe comenzar con http:// o https://",
-        salary: "El salario mínimo no puede ser mayor que el máximo",
       },
     },
     filters: {
@@ -971,12 +970,9 @@ export const translations = {
         freelance: "Freelance",
       },
       salary: {
-        min: "Salario mínimo (€)",
-        max: "Salario máximo (€)",
-        placeholder: {
-          min: "ej., 45.000",
-          max: "ej., 60.000",
-        },
+        range: "Rango salarial",
+        placeholder: "Ej: 30.000 - 40.000",
+        help: "Si no deseas especificar el salario, déjalo en blanco",
       },
       description: {
         label: "Descripción del puesto",
@@ -1028,7 +1024,7 @@ export const translations = {
     },
     salary: {
       label: "Salario",
-      minimum: "Salario mínimo",
+      range: "Rango salarial",
       placeholder: "Ej: 30.000",
       all: "Cualquier salario",
       notSpecified: "No especificado",
