@@ -60,6 +60,7 @@ export interface Job {
   benefits?: Benefit[];
   application_method_type: "email" | "url";
   application_method_value: string;
+  contact_name?: string;
 }
 
 // Derive form data type from Job

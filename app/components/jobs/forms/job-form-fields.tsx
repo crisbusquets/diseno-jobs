@@ -40,59 +40,41 @@ export function JobFormFields({
   };
 
   return (
-    <div className="space-y-8">
-      {/* Company Information */}
+    <div>
+      {/* Company Information - now without email */}
       <div className="space-y-6">
-        <h3 className="text-lg font-medium">{t("jobs.create.company.title")}</h3>
-        <p className="text-sm text-muted-foreground">{t("jobs.create.company.description")}</p>
+        <div>
+          <h3 className="text-lg font-medium">{t("jobs.create.company.title")}</h3>
+          <p className="text-sm text-muted-foreground">{t("jobs.create.company.description")}</p>
+        </div>
 
         <LogoUpload value={logo} onChange={onLogoChange} />
 
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">{t("jobs.form.company")} *</label>
-            <Input
-              name="company"
-              placeholder={t("jobs.create.company.placeholder")}
-              value={formData.company || ""}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">{t("jobs.form.email")} *</label>
-            <Input
-              name="company_email"
-              type="email"
-              placeholder={t("jobs.application.email.placeholder")}
-              value={formData.company_email || ""}
-              onChange={handleInputChange}
-            />
-            <p className="text-sm text-muted-foreground mt-1">{t("jobs.create.company.emailHelp")}</p>
-          </div>
+        <div>
+          <label className="text-sm font-medium">{t("jobs.form.company")} *</label>
+          <Input
+            name="company"
+            placeholder={t("jobs.create.company.placeholder")}
+            value={formData.company || ""}
+            onChange={handleInputChange}
+          />
         </div>
       </div>
 
-      <Separator />
-
-      {/* Job Details */}
       <div className="space-y-6">
+        {/* Title section */}
         <div>
-          <h3 className="text-lg font-medium">{t("jobs.form.details.title")}</h3>
-          <p className="text-sm text-muted-foreground">{t("jobs.form.details.description")}</p>
+          <label className="text-sm font-medium">{t("jobs.create.details.titleLabel")} *</label>
+          <Input
+            name="title"
+            placeholder={t("jobs.create.details.titlePlaceholder")}
+            value={formData.title || ""}
+            onChange={handleInputChange}
+          />
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">{t("jobs.create.details.titleLabel")} *</label>
-            <Input
-              name="title"
-              placeholder={t("jobs.create.details.titlePlaceholder")}
-              value={formData.title || ""}
-              onChange={handleInputChange}
-            />
-          </div>
-
+        {/* Job type and location in 2 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium">{t("jobs.form.workMode.label")} *</label>
             <Select value={formData.job_type || ""} onValueChange={(value) => onFormDataChange("job_type", value)}>
@@ -116,7 +98,10 @@ export function JobFormFields({
               onChange={(value) => onFormDataChange("location", value)}
             />
           </div>
+        </div>
 
+        {/* Experience and Contract type in 2 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium">{t("jobs.form.experience.label")} *</label>
             <Select
@@ -154,71 +139,110 @@ export function JobFormFields({
               </SelectContent>
             </Select>
           </div>
+        </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">{t("jobs.form.salary.min")}</label>
-              <Select
-                value={formData.salary_min ? (formData.salary_min / 100).toString() : ""}
-                onValueChange={(value) => onFormDataChange("salary_min", value ? parseInt(value) * 100 : undefined)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Salario mínimo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SALARY_RANGES.map((range) => (
-                    <SelectItem key={range.value} value={range.value.toString()}>
-                      {range.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">{t("jobs.form.salary.max")}</label>
-              <Select
-                value={formData.salary_max ? (formData.salary_max / 100).toString() : ""}
-                onValueChange={(value) => onFormDataChange("salary_max", value ? parseInt(value) * 100 : undefined)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Salario máximo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SALARY_RANGES.map((range) => (
-                    <SelectItem key={range.value} value={range.value.toString()}>
-                      {range.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        {/* Salary range in 2 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium">{t("jobs.form.salary.min")}</label>
+            <Select
+              value={formData.salary_min ? (formData.salary_min / 100).toString() : ""}
+              onValueChange={(value) => onFormDataChange("salary_min", value ? parseInt(value) * 100 : undefined)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("jobs.form.salary.placeholder.min")} />
+              </SelectTrigger>
+              <SelectContent>
+                {SALARY_RANGES.map((range) => (
+                  <SelectItem key={range.value} value={range.value.toString()}>
+                    {range.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
-            <label className="text-sm font-medium">{t("jobs.form.description.label")} *</label>
-            <Textarea
-              name="description"
-              value={formData.description || ""}
-              onChange={handleInputChange}
-              placeholder={t("jobs.form.description.placeholder")}
-              className="min-h-[200px] resize-y"
-            />
+            <label className="text-sm font-medium">{t("jobs.form.salary.max")}</label>
+            <Select
+              value={formData.salary_max ? (formData.salary_max / 100).toString() : ""}
+              onValueChange={(value) => onFormDataChange("salary_max", value ? parseInt(value) * 100 : undefined)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("jobs.form.salary.placeholder.max")} />
+              </SelectTrigger>
+              <SelectContent>
+                {SALARY_RANGES.map((range) => (
+                  <SelectItem key={range.value} value={range.value.toString()}>
+                    {range.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-      </div>
 
-      <Separator />
-
-      {/* Benefits & Application */}
-      <div className="space-y-6">
+        {/* Description takes full width */}
         <div>
-          <h3 className="text-lg font-medium">{t("jobs.form.benefits.title")}</h3>
-          <p className="text-sm text-muted-foreground">{t("jobs.form.benefits.description")}</p>
+          <label className="text-sm font-medium">{t("jobs.form.description.label")} *</label>
+          <Textarea
+            name="description"
+            value={formData.description || ""}
+            onChange={handleInputChange}
+            placeholder={t("jobs.form.description.placeholder")}
+            className="min-h-[200px] resize-y"
+          />
+        </div>
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-medium">{t("jobs.form.benefits.title")}</h3>
+            <p className="text-sm text-muted-foreground">{t("jobs.form.benefits.description")}</p>
+          </div>
+          <BenefitsSection benefits={benefits} onBenefitsChange={onBenefitsChange} />
         </div>
 
-        <BenefitsSection benefits={benefits} onBenefitsChange={onBenefitsChange} />
-        <ApplyMethodSection value={applyMethod} onChange={onApplyMethodChange} />
+        {/* Application method section */}
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-medium">{t("jobs.application.title")}</h3>
+            <p className="text-sm text-muted-foreground">{t("jobs.application.description")}</p>
+          </div>
+          <ApplyMethodSection value={applyMethod} onChange={onApplyMethodChange} />
+        </div>
+
+        <Separator />
+        {/* Contact Information section */}
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-medium">{t("jobs.form.contact.title")}</h3>
+            <p className="text-sm text-muted-foreground">{t("jobs.form.contact.description")}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">{t("jobs.form.contact.name")} *</label>
+              <Input
+                name="contact_name"
+                placeholder={t("jobs.form.contact.namePlaceholder")}
+                value={formData.contact_name || ""}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">{t("jobs.form.contact.email")} *</label>
+              <Input
+                name="company_email"
+                type="email"
+                placeholder={t("jobs.application.email.placeholder")}
+                value={formData.company_email || ""}
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
+
+          <p className="text-sm text-muted-foreground">{t("jobs.form.contact.gdpr")}</p>
+        </div>
       </div>
     </div>
   );

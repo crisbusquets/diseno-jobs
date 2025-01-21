@@ -16,8 +16,6 @@ interface ApplyMethodProps {
 export function ApplyMethodSection({ value, onChange }: ApplyMethodProps) {
   return (
     <div className="space-y-4">
-      <Label>{t("jobs.application.title")} *</Label>
-
       <Tabs
         value={value.type}
         onValueChange={(newType) => onChange({ type: newType as "email" | "url", value: "" })}

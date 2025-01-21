@@ -873,6 +873,7 @@ export const translations = {
     },
     application: {
       title: "Como postular",
+      description: "Selecciona el método de aplicación",
       email: {
         label: "Email",
         placeholder: "info@dominio.com",
@@ -903,7 +904,7 @@ export const translations = {
         description: "Datos sobre tu empresa y cómo contactarte",
         placeholder: "ej., Design Studio Inc.",
         emailLabel: "Email",
-        emailHelp: "Se usará para gestionar la oferta y recibir notificaciones",
+        emailHelp: "No es público. Solo para gestionar la oferta",
         logo: "Logo de la empresa",
       },
       details: {
@@ -930,6 +931,14 @@ export const translations = {
       remote: "Solo remoto",
     },
     form: {
+      contact: {
+        title: "Información de contacto",
+        description: "¿Quién gestiona esta oferta?",
+        name: "Tu nombre",
+        namePlaceholder: "ej., María García",
+        email: "Tu email",
+        gdpr: "Tu nombre y correo electrónico NO se mostrarán públicamente. Solo los utilizaremos para enviarte un correo electrónico de confirmación con los enlaces para gestionar la oferta de empleo.",
+      },
       company: "Nombre de la empresa",
       email: "Email de la empresa",
       details: {
