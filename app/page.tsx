@@ -2,6 +2,7 @@
 import { getSupabase } from "@/lib/supabase";
 import JobListingsClient from "@/components/jobs/cards/job-listings-client";
 import { unstable_noStore as noStore } from "next/cache";
+import { PageTracker } from "@/components/tracking/page-tracker";
 
 export default async function HomePage() {
   noStore();
@@ -43,6 +44,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
+      <PageTracker type="homepage_view" />
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Debug timestamp */}
         <div className="px-4 sm:px-0 flex justify-between">

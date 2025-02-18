@@ -131,3 +131,22 @@ export async function deactivateJob(token: string): Promise<ApiResponse<void>> {
     };
   }
 }
+
+export async function trackJobEvent(jobId: number, eventType: "view" | "apply_click", source?: string) {
+  const supabase = getSupabase();
+
+  try {
+    const { error } = await supabase.from("job_events").insert({
+      job_id: jobId,
+      event_type: eventType,
+      source: source || "direct",
+    });
+
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error) {
+    console.error("Tracking error:", error);
+    return { success: false };
+  }
+}

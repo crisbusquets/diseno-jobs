@@ -7,6 +7,7 @@ import { getSupabase } from "@/lib/supabase";
 import { sendJobConfirmationEmail } from "@/lib/email";
 import { ApiResponse } from "@/types";
 import { SITE_CONFIG } from "@/lib/config/constants";
+import { trackJobEvent } from "@/api/jobs/actions";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
@@ -48,59 +49,84 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
   const supabase = getSupabase();
 
-  // First get the current job data
-  const { data: currentJob, error: fetchError } = await supabase
-    .from("job_listings")
-    .select("*")
-    .eq("id", jobId)
-    .single();
+  try {
+    // Track successful job submission
+    await trackJobEvent(parseInt(jobId), "job_submit");
 
-  if (fetchError || !currentJob) {
-    throw new Error(`Failed to fetch job: ${fetchError?.message}`);
+    // First get the current job data
+    const { data: currentJob, error: fetchError } = await supabase
+      .from("job_listings")
+      .select("*")
+      .eq("id", jobId)
+      .single();
+
+    if (fetchError || !currentJob) {
+      throw new Error(`Failed to fetch job: ${fetchError?.message}`);
+    }
+
+    // Then update while preserving all fields
+    const { data: job, error: updateError } = await supabase
+      .from("job_listings")
+      .update({
+        ...currentJob, // Keep all existing data
+        is_active: true,
+        stripe_payment_id: session.id,
+        activated_at: new Date().toISOString(),
+      })
+      .eq("id", jobId)
+      .select()
+      .single();
+
+    if (updateError) {
+      throw new Error(`Failed to update job: ${updateError.message}`);
+    }
+
+    if (!job) {
+      throw new Error("Job not found after update");
+    }
+
+    // Get the benefits for the email
+    const { data: jobBenefits, error: benefitsError } = await supabase
+      .from("job_benefits")
+      .select("benefit_name, is_custom")
+      .eq("job_id", jobId);
+
+    if (benefitsError) {
+      console.error("Error fetching benefits:", benefitsError);
+    }
+
+    // Transform benefits to the format expected by email
+    const benefits =
+      jobBenefits?.map((benefit) => ({
+        name: benefit.benefit_name,
+        isCustom: benefit.is_custom,
+      })) || [];
+
+    // Send confirmation email
+    const managementUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/manage/${job.management_token}`;
+
+    await sendJobConfirmationEmail({
+      to: job.company_email,
+      jobTitle: job.title,
+      companyName: job.company,
+      companyEmail: job.company_email,
+      companyLogo: job.company_logo,
+      managementUrl,
+      jobType: job.job_type,
+      experienceLevel: job.experience_level,
+      contractType: job.contract_type,
+      location: job.location,
+      salaryMin: job.salary_min,
+      salaryMax: job.salary_max,
+      description: job.description,
+      benefits: benefits,
+      applicationMethod: {
+        type: job.application_method_type,
+        value: job.application_method_value,
+      },
+    });
+  } catch (error) {
+    console.error("Error in checkout completion:", error);
+    throw error;
   }
-
-  // Then update while preserving all fields
-  const { data: job, error: updateError } = await supabase
-    .from("job_listings")
-    .update({
-      ...currentJob, // Keep all existing data
-      is_active: true,
-      stripe_payment_id: session.id,
-      activated_at: new Date().toISOString(),
-    })
-    .eq("id", jobId)
-    .select()
-    .single();
-
-  if (updateError) {
-    throw new Error(`Failed to update job: ${updateError.message}`);
-  }
-
-  if (!job) {
-    throw new Error("Job not found after update");
-  }
-
-  // Send confirmation email
-  const managementUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/manage/${job.management_token}`;
-
-  await sendJobConfirmationEmail({
-    to: job.company_email,
-    jobTitle: job.title,
-    companyName: job.company,
-    companyEmail: job.company_email,
-    companyLogo: job.company_logo,
-    managementUrl,
-    jobType: job.job_type,
-    experienceLevel: job.experience_level,
-    contractType: job.contract_type,
-    location: job.location,
-    salaryMin: job.salary_min,
-    salaryMax: job.salary_max,
-    description: job.description,
-    benefits: job.benefits,
-    applicationMethod: {
-      type: job.application_method_type,
-      value: job.application_method_value,
-    },
-  });
 }

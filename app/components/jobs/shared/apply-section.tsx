@@ -1,3 +1,4 @@
+// components/jobs/shared/apply-section.tsx
 "use client";
 
 import { ArrowRight, Mail, Globe } from "lucide-react";
@@ -6,17 +7,23 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { t } from "@/lib/translations/utils";
+import { trackJobEvent } from "@/api/jobs/actions";
 
 interface ApplySectionProps {
   method: ApplicationMethod;
+  jobId: number;
 }
 
-export function ApplySection({ method }: ApplySectionProps) {
+export function ApplySection({ method, jobId }: ApplySectionProps) {
   const { toast } = useToast();
-  const handleApply = () => {
+
+  const handleApply = async () => {
     if (!method.value) return;
 
     try {
+      // Track the apply click
+      await trackJobEvent(jobId, "apply_click");
+
       if (method.type === "email") {
         window.location.href = `mailto:${method.value}`;
         toast({
@@ -30,7 +37,8 @@ export function ApplySection({ method }: ApplySectionProps) {
         }
         window.open(url, "_blank");
       }
-    } catch {
+    } catch (error) {
+      console.error("Error tracking apply click:", error);
       toast({
         variant: "destructive",
         title: "Error",

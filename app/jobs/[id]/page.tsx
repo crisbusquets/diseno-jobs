@@ -1,9 +1,11 @@
+// app/jobs/[id]/page.tsx
 import { Suspense } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import JobCard from "@/components/jobs/cards/job-card";
 import { formatDate } from "@/lib/utils/formatting";
 import JobLoading from "./loading";
+import { ViewTracker } from "@/components/jobs/tracking/view-tracker";
 
 async function JobContent({ params }: { params: { id: string } }) {
   const supabase = getSupabase();
@@ -39,9 +41,8 @@ async function JobContent({ params }: { params: { id: string } }) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="max-w-3xl mx-auto px-4">
+          <ViewTracker jobId={params.id} />
           <JobCard job={jobWithBenefits} variant="detailed" />
-
-          {/* Publication Info */}
           <div className="mt-4 text-sm text-center text-gray-500">
             <p>Publicado el {formatDate(job.created_at)}</p>
           </div>
@@ -50,7 +51,7 @@ async function JobContent({ params }: { params: { id: string } }) {
     );
   } catch (error) {
     console.error("Error loading job:", error);
-    throw error; // This will trigger the error.tsx component
+    throw error;
   }
 }
 

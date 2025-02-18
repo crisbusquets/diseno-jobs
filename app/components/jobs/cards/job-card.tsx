@@ -42,6 +42,7 @@ export default function JobCard({ job, variant = "list", showApplySection = true
             type: job.application_method_type,
             value: job.application_method_value,
           }}
+          jobId={job.id}
         />
       )}
     </div>
