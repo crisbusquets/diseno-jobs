@@ -1,5 +1,3 @@
-// app/actions/stripe.ts
-
 "use server";
 
 import Stripe from "stripe";
@@ -18,7 +16,7 @@ export async function createPaymentSession(
     const supabase = getSupabase();
 
     // Create job listing first
-    const { data: job, error } = await supabase
+    const { data: job, error: dbError } = await supabase
       .from("job_listings")
       .insert({
         title: data.title,
@@ -40,8 +38,12 @@ export async function createPaymentSession(
       .select()
       .single();
 
-    if (error) {
-      throw new Error(`Database error: ${error.message}`);
+    if (dbError) {
+      console.error("Database error:", dbError);
+      return {
+        success: false,
+        error: `Error al crear la oferta: ${dbError.message}`,
+      };
     }
 
     // Insert benefits if provided
@@ -55,47 +57,63 @@ export async function createPaymentSession(
       );
 
       if (benefitsError) {
-        throw new Error(`Benefits error: ${benefitsError.message}`);
+        // Clean up the job listing if benefits insertion fails
+        await supabase.from("job_listings").delete().eq("id", job.id);
+        return {
+          success: false,
+          error: `Error al guardar los beneficios: ${benefitsError.message}`,
+        };
       }
     }
 
-    // Create Stripe session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "eur",
-            product_data: {
-              name: SITE_CONFIG.title,
-              description: `Oferta: ${data.title} - ${data.company}`,
+    try {
+      // Create Stripe session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "eur",
+              product_data: {
+                name: SITE_CONFIG.title,
+                description: `Oferta: ${data.title} - ${data.company}`,
+              },
+              unit_amount: SITE_CONFIG.jobPrice,
             },
-            unit_amount: SITE_CONFIG.jobPrice,
+            quantity: 1,
           },
-          quantity: 1,
+        ],
+        metadata: {
+          jobId: job.id,
+          managementToken: job.management_token,
         },
-      ],
-      metadata: {
-        jobId: job.id,
-        managementToken: job.management_token,
-      },
-      mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/create`,
-    });
+        mode: "payment",
+        success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/jobs/create`,
+      });
 
-    return {
-      success: true,
-      data: {
-        sessionId: session.id,
-        url: session.url,
-      },
-    };
+      return {
+        success: true,
+        data: {
+          sessionId: session.id,
+          url: session.url,
+        },
+      };
+    } catch (stripeError) {
+      // Clean up job listing and benefits if Stripe session creation fails
+      await supabase.from("job_listings").delete().eq("id", job.id);
+
+      console.error("Stripe error:", stripeError);
+      return {
+        success: false,
+        error: "Error al procesar el pago. Por favor, inténtalo de nuevo.",
+      };
+    }
   } catch (error) {
     console.error("Payment session error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to create payment session",
+      error: error instanceof Error ? error.message : "Error al crear la sesión de pago",
     };
   }
 }
