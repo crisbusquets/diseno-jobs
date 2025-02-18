@@ -2,7 +2,7 @@
 import { getSupabase } from "@/lib/supabase";
 import JobListingsClient from "@/components/jobs/cards/job-listings-client";
 import { unstable_noStore as noStore } from "next/cache";
-import { PageTracker } from "@/components/tracking/page-tracker";
+import { PageTracker } from "@/components/jobs/tracking/page-tracker";
 
 export default async function HomePage() {
   noStore();
