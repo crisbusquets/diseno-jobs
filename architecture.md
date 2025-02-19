@@ -2,6 +2,8 @@ app/
 ├── api/
 │ ├── jobs/
 │ │ └── actions.ts
+│ ├── metrics/
+│ │ └── route.ts              
 │ └── stripe/
 │     ├── actions.ts
 │     └── webhook/
@@ -24,10 +26,13 @@ app/
 │ │ ├── forms/
 │ │ │ └── job-filters.tsx
 │ │ ├── manage-job-form.tsx
-│ │ └── shared/
-│ │     ├── job-benefits.tsx
-│ │     ├── job-header.tsx
-│ │     └── job-metadata.tsx
+│ │ ├── shared/
+│ │ │ ├── job-benefits.tsx
+│ │ │ ├── job-header.tsx
+│ │ │ └── job-metadata.tsx
+│ │ └── tracking/              
+│ │     ├── view-tracker.tsx
+│ │     └── page-tracker.tsx
 │ ├── layout/
 │ │ └── navigation.tsx
 │ └── ui/
@@ -65,6 +70,8 @@ app/
 │ │ └── page.tsx
 │ ├── success/
 │ │ └── page.tsx
+├── metrics/                  
+│ └── page.tsx
 ├── layout.tsx
 ├── lib/
 │ ├── config/
