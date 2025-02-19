@@ -46,7 +46,7 @@ Table that stores all tracking events.
 | Column     | Type        | Required | Description                                 |
 | ---------- | ----------- | -------- | ------------------------------------------- |
 | id         | BIGINT      | Yes      | Primary key, auto-incrementing              |
-| job_id     | BIGINT      | Yes      | Foreign key to job_listings                 |
+| job_id     | BIGINT      | No       | Foreign key to job_listings (nullable)      |
 | event_type | TEXT        | Yes      | Type of event (view, apply_click, etc)      |
 | source     | TEXT        | No       | Source of the event (defaults to 'direct')  |
 | created_at | TIMESTAMPTZ | No       | When the event occurred (defaults to NOW()) |
@@ -94,7 +94,7 @@ Table that stores all tracking events.
 ## Relationships
 
 - `job_benefits.job_id` references `job_listings(id)` with CASCADE delete
-- `job_events.job_id` references `job_listings(id)` with CASCADE delete
+- `job_events.job_id` references `job_listings(id)` with CASCADE delete (allows NULL values)
 
 ## Notes
 
@@ -105,3 +105,4 @@ Table that stores all tracking events.
 5. Company logo is stored as a URL, actual images are in Cloudinary
 6. Events are tracked for analytics purposes with minimal overhead
 7. Event tracking uses a separate table for better performance
+8. General events (like homepage views) are tracked with a NULL job_id

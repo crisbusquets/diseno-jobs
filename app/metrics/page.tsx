@@ -1,25 +1,38 @@
-// app/metrics/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw, TrendingUp, TrendingDown } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { RefreshCcw, TrendingUp, ArrowRight, Target, CheckCircle, Activity } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Metrics {
-  totalEvents: {
+  overview: {
+    totalHomepageViews: number;
+    totalJobViews: number;
+    totalApplyClicks: number;
+    totalJobsPosted: number;
+    activeJobs: number;
+  };
+  weeklyMetrics: {
     homepageViews: number;
-    createJobViews: number;
     jobViews: number;
-    appliesClicked: number;
-    jobsSubmitted: number;
+    jobsPosted: number;
   };
-  activeJobs: number;
+  monthlyMetrics: {
+    homepageViews: number;
+    jobViews: number;
+    jobsPosted: number;
+  };
   conversionRates: {
-    createToSubmit: number;
     viewToApply: number;
+    postingCompletion: number;
   };
-  dailyTrends: any[];
+  growth: {
+    weeklyJobGrowth: number;
+    monthlyJobGrowth: number;
+  };
 }
 
 export default function MetricsPage() {
@@ -33,14 +46,18 @@ export default function MetricsPage() {
       setError(null);
       const response = await fetch("/api/metrics");
       const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json.error || "Failed to fetch metrics");
+      }
+
       if (json.success) {
         setMetrics(json.data);
       } else {
-        setError(json.error);
+        setError(json.error || "Failed to fetch metrics");
       }
-    } catch (error) {
-      setError("Error loading metrics");
-      console.error("Error fetching metrics:", error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error loading metrics");
     } finally {
       setLoading(false);
     }
@@ -81,17 +98,25 @@ export default function MetricsPage() {
   }
 
   if (!metrics) {
-    return <div className="min-h-screen bg-gray-50 p-8">No metrics available</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-7xl mx-auto">
+          <Alert>
+            <AlertDescription>No metrics available</AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
   }
 
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Header */}
+        {/* Header with time selection */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Metrics Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-1">Platform analytics and insights</p>
+            <h1 className="text-3xl font-bold">Growth Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">Platform metrics and trends</p>
           </div>
           <Button variant="outline" size="sm" onClick={fetchMetrics}>
             <RefreshCcw className="h-4 w-4 mr-2" />
@@ -99,118 +124,198 @@ export default function MetricsPage() {
           </Button>
         </div>
 
-        {/* Overview Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Homepage Views</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metrics.totalEvents.homepageViews}</div>
-              <p className="text-xs text-muted-foreground">Total homepage visits</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Job Views</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metrics.totalEvents.jobViews}</div>
-              <p className="text-xs text-muted-foreground">Total job listing views</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Apply Clicks</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metrics.totalEvents.appliesClicked}</div>
-              <p className="text-xs text-muted-foreground">Total apply button clicks</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metrics.activeJobs}</div>
-              <p className="text-xs text-muted-foreground">Currently listed jobs</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Conversion Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Create Form Views</CardTitle>
-              <CardDescription>Job creation form visits</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metrics.totalEvents.createJobViews}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Jobs Posted</CardTitle>
-              <CardDescription>Successfully posted jobs</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metrics.totalEvents.jobsSubmitted}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Conversion Rate</CardTitle>
-              <CardDescription>Form views to posts</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <div className="text-2xl font-bold">{metrics.conversionRates.createToSubmit.toFixed(1)}%</div>
-                {metrics.conversionRates.createToSubmit > 10 ? (
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                ) : (
-                  <TrendingDown className="h-4 w-4 text-red-500" />
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Job Performance */}
-        <Card>
+        {/* New Key Insights section */}
+        <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Job Performance</CardTitle>
-            <CardDescription>View to application conversion</CardDescription>
+            <CardTitle>Key Insights</CardTitle>
+            <CardDescription>Quick summary of platform health</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <div className="flex items-center gap-2">
-                  <div className="text-2xl font-bold">
-                    {(metrics.totalEvents.jobViews / metrics.activeJobs || 0).toFixed(1)}
-                  </div>
-                  <span className="text-sm text-muted-foreground">views per job</span>
+            <div className="space-y-4">
+              {/* Platform Growth */}
+              <div className="flex items-start gap-2">
+                <div
+                  className={cn(
+                    "p-2 rounded-full",
+                    metrics.growth.monthlyJobGrowth > 0 ? "bg-green-100" : "bg-yellow-100"
+                  )}
+                >
+                  {metrics.growth.monthlyJobGrowth > 0 ? (
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <ArrowRight className="h-4 w-4 text-yellow-600" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-medium">Platform Growth</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {metrics.growth.monthlyJobGrowth > 0
+                      ? `Growing ${metrics.growth.monthlyJobGrowth.toFixed(1)}% this month with ${
+                          metrics.monthlyMetrics.jobsPosted
+                        } new jobs`
+                      : "Steady this month - focus on attracting more job postings"}
+                  </p>
                 </div>
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <div className="text-2xl font-bold">{metrics.conversionRates.viewToApply.toFixed(1)}%</div>
-                  <span className="text-sm text-muted-foreground">view to apply rate</span>
+
+              {/* Job Effectiveness */}
+              <div className="flex items-start gap-2">
+                <div
+                  className={cn(
+                    "p-2 rounded-full",
+                    metrics.conversionRates.viewToApply > 10 ? "bg-green-100" : "bg-yellow-100"
+                  )}
+                >
+                  <Target className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Job Effectiveness</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {`${metrics.conversionRates.viewToApply.toFixed(1)}% of job views result in applications`}
+                    {metrics.conversionRates.viewToApply > 10 ? " - performing well" : " - might need improvement"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Posting Process */}
+              <div className="flex items-start gap-2">
+                <div
+                  className={cn(
+                    "p-2 rounded-full",
+                    metrics.conversionRates.postingCompletion > 80 ? "bg-green-100" : "bg-yellow-100"
+                  )}
+                >
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Posting Process</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {`${metrics.conversionRates.postingCompletion.toFixed(1)}% completion rate`}
+                    {metrics.conversionRates.postingCompletion > 80
+                      ? " - process working smoothly"
+                      : " - might need to simplify the process"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Weekly Activity */}
+              <div className="flex items-start gap-2">
+                <div className="p-2 rounded-full bg-blue-100">
+                  <Activity className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Weekly Activity</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {`${metrics.weeklyMetrics.jobViews} job views and ${metrics.weeklyMetrics.jobsPosted} new jobs this week`}
+                  </p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="text-sm text-muted-foreground text-center mt-8">
-          Last updated: {new Date().toLocaleString()}
+        {/* Quick overview cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Jobs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.overview.activeJobs}</div>
+              <p className="text-sm text-muted-foreground">
+                {metrics.growth.monthlyJobGrowth > 0 && (
+                  <span className="text-green-600">+{metrics.growth.monthlyJobGrowth.toFixed(1)}% this month</span>
+                )}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Monthly Job Views</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.monthlyMetrics.jobViews}</div>
+              <p className="text-sm text-muted-foreground">{metrics.weeklyMetrics.jobViews} this week</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Apply Rate</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.conversionRates.viewToApply.toFixed(1)}%</div>
+              <p className="text-sm text-muted-foreground">Of job views convert to applies</p>
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Growth metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Monthly Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="space-y-2">
+                <div className="flex justify-between">
+                  <dt>Homepage Views</dt>
+                  <dd className="font-medium">{metrics.monthlyMetrics.homepageViews}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt>Job Views</dt>
+                  <dd className="font-medium">{metrics.monthlyMetrics.jobViews}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt>New Jobs Posted</dt>
+                  <dd className="font-medium">{metrics.monthlyMetrics.jobsPosted}</dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Key Conversions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="space-y-2">
+                <div className="flex justify-between">
+                  <dt>View to Apply Rate</dt>
+                  <dd className="font-medium">{metrics.conversionRates.viewToApply.toFixed(1)}%</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt>Posting Completion Rate</dt>
+                  <dd className="font-medium">{metrics.conversionRates.postingCompletion.toFixed(1)}%</dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Totals section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>All-Time Statistics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <dt className="text-sm text-muted-foreground">Total Jobs Posted</dt>
+                <dd className="text-2xl font-bold">{metrics.overview.totalJobsPosted}</dd>
+              </div>
+              <div className="space-y-1">
+                <dt className="text-sm text-muted-foreground">Total Job Views</dt>
+                <dd className="text-2xl font-bold">{metrics.overview.totalJobViews}</dd>
+              </div>
+              <div className="space-y-1">
+                <dt className="text-sm text-muted-foreground">Total Apply Clicks</dt>
+                <dd className="text-2xl font-bold">{metrics.overview.totalApplyClicks}</dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
       </div>
     </main>
   );
