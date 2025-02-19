@@ -1,6 +1,6 @@
 // app/jobs/create/page.tsx
 import CreateJobForm from "@/components/jobs/create-job-form";
-import { PageTracker } from "@/components/tracking/page-tracker";
+import { PageTracker } from "@/components/jobs/tracking/page-tracker";
 
 export default function CreateJobPage() {
   return (

@@ -132,7 +132,11 @@ export async function deactivateJob(token: string): Promise<ApiResponse<void>> {
   }
 }
 
-export async function trackJobEvent(jobId: number, eventType: "view" | "apply_click", source?: string) {
+export async function trackJobEvent(
+  jobId: number,
+  eventType: "view" | "apply_click" | "homepage_view" | "create_job_view" | "job_submit",
+  source?: string
+) {
   const supabase = getSupabase();
 
   try {
