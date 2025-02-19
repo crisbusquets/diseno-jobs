@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RefreshCcw, TrendingUp, ArrowRight, Target, CheckCircle, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/translations/utils";
 
 interface Metrics {
   overview: {
@@ -48,16 +49,16 @@ export default function MetricsPage() {
       const json = await response.json();
 
       if (!response.ok) {
-        throw new Error(json.error || "Failed to fetch metrics");
+        throw new Error(json.error || t("dashboard.error.fetch"));
       }
 
       if (json.success) {
         setMetrics(json.data);
       } else {
-        setError(json.error || "Failed to fetch metrics");
+        setError(json.error || t("dashboard.error.fetch"));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error loading metrics");
+      setError(err instanceof Error ? err.message : t("dashboard.error.load"));
     } finally {
       setLoading(false);
     }
@@ -75,7 +76,7 @@ export default function MetricsPage() {
             <div className="animate-spin">
               <RefreshCcw className="h-5 w-5" />
             </div>
-            <p>Loading metrics...</p>
+            <p>{t("common.loading")}</p>
           </div>
         </div>
       </div>
@@ -90,7 +91,7 @@ export default function MetricsPage() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
           <Button onClick={fetchMetrics} className="mt-4">
-            Retry
+            {t("common.retry")}
           </Button>
         </div>
       </div>
@@ -102,7 +103,7 @@ export default function MetricsPage() {
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-7xl mx-auto">
           <Alert>
-            <AlertDescription>No metrics available</AlertDescription>
+            <AlertDescription>{t("dashboard.error.noData")}</AlertDescription>
           </Alert>
         </div>
       </div>
@@ -115,20 +116,20 @@ export default function MetricsPage() {
         {/* Header with time selection */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Growth Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-1">Platform metrics and trends</p>
+            <h1 className="text-3xl font-bold">{t("dashboard.headings.main")}</h1>
+            <p className="text-sm text-muted-foreground mt-1">{t("dashboard.headings.description")}</p>
           </div>
           <Button variant="outline" size="sm" onClick={fetchMetrics}>
             <RefreshCcw className="h-4 w-4 mr-2" />
-            Refresh
+            {t("common.retry")}
           </Button>
         </div>
 
         {/* New Key Insights section */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Key Insights</CardTitle>
-            <CardDescription>Quick summary of platform health</CardDescription>
+            <CardTitle>{t("dashboard.keyInsights.heading")}</CardTitle>
+            <CardDescription>{t("dashboard.keyInsights.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -147,13 +148,13 @@ export default function MetricsPage() {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-medium">Platform Growth</h3>
+                  <h3 className="font-medium">{t("dashboard.keyInsights.growth")}</h3>
                   <p className="text-sm text-muted-foreground">
                     {metrics.growth.monthlyJobGrowth > 0
-                      ? `Growing ${metrics.growth.monthlyJobGrowth.toFixed(1)}% this month with ${
+                      ? `Creciendo ${metrics.growth.monthlyJobGrowth.toFixed(1)}% este mes con ${
                           metrics.monthlyMetrics.jobsPosted
-                        } new jobs`
-                      : "Steady this month - focus on attracting more job postings"}
+                        } nuevas ofertas`
+                      : "Estable este mes - enfócate en atraer más ofertas"}
                   </p>
                 </div>
               </div>
@@ -169,10 +170,10 @@ export default function MetricsPage() {
                   <Target className="h-4 w-4 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Job Effectiveness</h3>
+                  <h3 className="font-medium">{t("dashboard.keyInsights.effectiveness")}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {`${metrics.conversionRates.viewToApply.toFixed(1)}% of job views result in applications`}
-                    {metrics.conversionRates.viewToApply > 10 ? " - performing well" : " - might need improvement"}
+                    {`${metrics.conversionRates.viewToApply.toFixed(1)}% de las vistas acaban en postulación`}
+                    {metrics.conversionRates.viewToApply > 10 ? " - progresa bien" : " - necesita mejora"}
                   </p>
                 </div>
               </div>
@@ -188,12 +189,12 @@ export default function MetricsPage() {
                   <CheckCircle className="h-4 w-4 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Posting Process</h3>
+                  <h3 className="font-medium">{t("dashboard.keyInsights.posting")}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {`${metrics.conversionRates.postingCompletion.toFixed(1)}% completion rate`}
+                    {`${metrics.conversionRates.postingCompletion.toFixed(1)}% tasa de finalización`}
                     {metrics.conversionRates.postingCompletion > 80
-                      ? " - process working smoothly"
-                      : " - might need to simplify the process"}
+                      ? " - el flujo funciona adecuadamente"
+                      : " - quizás hay que simplificar el flujo"}
                   </p>
                 </div>
               </div>
@@ -204,9 +205,9 @@ export default function MetricsPage() {
                   <Activity className="h-4 w-4 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Weekly Activity</h3>
+                  <h3 className="font-medium">{t("dashboard.keyInsights.weekly")}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {`${metrics.weeklyMetrics.jobViews} job views and ${metrics.weeklyMetrics.jobsPosted} new jobs this week`}
+                    {`${metrics.weeklyMetrics.jobViews} vistas de ofertas y ${metrics.weeklyMetrics.jobsPosted} nuevas ofertas esta semana`}
                   </p>
                 </div>
               </div>
@@ -218,13 +219,13 @@ export default function MetricsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card>
             <CardHeader>
-              <CardTitle>Active Jobs</CardTitle>
+              <CardTitle>{t("dashboard.activeJobs")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metrics.overview.activeJobs}</div>
               <p className="text-sm text-muted-foreground">
                 {metrics.growth.monthlyJobGrowth > 0 && (
-                  <span className="text-green-600">+{metrics.growth.monthlyJobGrowth.toFixed(1)}% this month</span>
+                  <span className="text-green-600">+{metrics.growth.monthlyJobGrowth.toFixed(1)}% este mes</span>
                 )}
               </p>
             </CardContent>
@@ -232,21 +233,21 @@ export default function MetricsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Monthly Job Views</CardTitle>
+              <CardTitle>{t("dashboard.jobViews")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metrics.monthlyMetrics.jobViews}</div>
-              <p className="text-sm text-muted-foreground">{metrics.weeklyMetrics.jobViews} this week</p>
+              <p className="text-sm text-muted-foreground">{metrics.weeklyMetrics.jobViews} esta semana</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Apply Rate</CardTitle>
+              <CardTitle>{t("dashboard.applyRate")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metrics.conversionRates.viewToApply.toFixed(1)}%</div>
-              <p className="text-sm text-muted-foreground">Of job views convert to applies</p>
+              <p className="text-sm text-muted-foreground">Ofertas vistas → Solicitud</p>
             </CardContent>
           </Card>
         </div>
@@ -255,20 +256,20 @@ export default function MetricsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <Card>
             <CardHeader>
-              <CardTitle>Monthly Overview</CardTitle>
+              <CardTitle>{t("dashboard.monthlyData.heading")}</CardTitle>
             </CardHeader>
             <CardContent>
               <dl className="space-y-2">
                 <div className="flex justify-between">
-                  <dt>Homepage Views</dt>
+                  <dt>{t("dashboard.monthlyData.homepage")}</dt>
                   <dd className="font-medium">{metrics.monthlyMetrics.homepageViews}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt>Job Views</dt>
+                  <dt>{t("dashboard.monthlyData.jobs")}</dt>
                   <dd className="font-medium">{metrics.monthlyMetrics.jobViews}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt>New Jobs Posted</dt>
+                  <dt>{t("dashboard.monthlyData.post")}</dt>
                   <dd className="font-medium">{metrics.monthlyMetrics.jobsPosted}</dd>
                 </div>
               </dl>
@@ -277,16 +278,16 @@ export default function MetricsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Key Conversions</CardTitle>
+              <CardTitle>{t("dashboard.keyCR.heading")}</CardTitle>
             </CardHeader>
             <CardContent>
               <dl className="space-y-2">
                 <div className="flex justify-between">
-                  <dt>View to Apply Rate</dt>
+                  <dt>{t("dashboard.keyCR.viewApply")}</dt>
                   <dd className="font-medium">{metrics.conversionRates.viewToApply.toFixed(1)}%</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt>Posting Completion Rate</dt>
+                  <dt>{t("dashboard.keyCR.postForm")}</dt>
                   <dd className="font-medium">{metrics.conversionRates.postingCompletion.toFixed(1)}%</dd>
                 </div>
               </dl>
@@ -296,13 +297,13 @@ export default function MetricsPage() {
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Análisis de Roles de Diseño</CardTitle>
-            <CardDescription>Distribución de roles y niveles de experiencia</CardDescription>
+            <CardTitle>{t("dashboard.roleAnalysis.heading")}</CardTitle>
+            <CardDescription>{t("dashboard.roleAnalysis.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <h3 className="text-sm font-medium mb-4">Tipos de Roles</h3>
+                <h3 className="text-sm font-medium mb-4">{t("dashboard.roleAnalysis.type")}</h3>
                 <dl className="space-y-3">
                   <div className="flex items-center justify-between">
                     <dt>UX Design</dt>
@@ -344,7 +345,7 @@ export default function MetricsPage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-medium mb-4">Niveles de Experiencia</h3>
+                <h3 className="text-sm font-medium mb-4">{t("dashboard.roleAnalysis.experience")}</h3>
                 <dl className="space-y-3">
                   <div className="flex items-center justify-between">
                     <dt>Junior</dt>
@@ -391,20 +392,20 @@ export default function MetricsPage() {
         {/* Totals section */}
         <Card>
           <CardHeader>
-            <CardTitle>All-Time Statistics</CardTitle>
+            <CardTitle>{t("dashboard.allTime.heading")}</CardTitle>
           </CardHeader>
           <CardContent>
             <dl className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1">
-                <dt className="text-sm text-muted-foreground">Total Jobs Posted</dt>
+                <dt className="text-sm text-muted-foreground">{t("dashboard.allTime.totalPostings")}</dt>
                 <dd className="text-2xl font-bold">{metrics.overview.totalJobsPosted}</dd>
               </div>
               <div className="space-y-1">
-                <dt className="text-sm text-muted-foreground">Total Job Views</dt>
+                <dt className="text-sm text-muted-foreground">{t("dashboard.allTime.totalViews")}</dt>
                 <dd className="text-2xl font-bold">{metrics.overview.totalJobViews}</dd>
               </div>
               <div className="space-y-1">
-                <dt className="text-sm text-muted-foreground">Total Apply Clicks</dt>
+                <dt className="text-sm text-muted-foreground">{t("dashboard.allTime.totalApply")}</dt>
                 <dd className="text-2xl font-bold">{metrics.overview.totalApplyClicks}</dd>
               </div>
             </dl>

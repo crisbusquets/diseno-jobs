@@ -1,3 +1,6 @@
+import { Description } from "@radix-ui/react-toast";
+import { error } from "console";
+
 export const BENEFITS_PRESETS = {
   healthInsurance: {
     id: "health",
@@ -839,9 +842,55 @@ export const translations = {
     delete: "Eliminar",
     copy: "Copiar",
     copied: "Copiado",
+    retry: "Reintentar",
   },
   benefits: {
     presets: BENEFITS_PRESETS,
+  },
+  dashboard: {
+    error: {
+      fetch: "Error recuperando los datos",
+      load: "Error cargando los datos",
+      noData: "No hay datos",
+    },
+    headings: {
+      main: "Estadísticas en abierto",
+      description: "Datos y tendencias de jobsFromMars",
+    },
+    keyInsights: {
+      heading: "Datos clave",
+      description: "Resumen de la salud de la plataforma",
+      growth: "Crecimiento",
+      effectiveness: "Efectividad de las ofertas",
+      posting: "Flujo de envío de ofertas",
+      weekly: "Actividad semanal",
+    },
+    activeJobs: "Ofertas activas",
+    jobViews: "Ofertas vistas al mes",
+    applyRate: "Tasa de solicitud",
+    monthlyData: {
+      heading: "Datos mensuales",
+      homepage: "Visitas en la home",
+      jobs: "Visitas en ofertas",
+      post: "Nuevos empleos añadidos",
+    },
+    keyCR: {
+      heading: "Conversiones clave",
+      viewApply: "Ratio de Vista → Solicitud",
+      postForm: "Envíos con éxito",
+    },
+    roleAnalysis: {
+      heading: "Análisis de roles de diseño",
+      description: "Distribución de roles y niveles de experiencia",
+      type: "Tipos de roles",
+      experience: "Nivel de experiencia",
+    },
+    allTime: {
+      heading: "Estadísticas globales",
+      totalPostings: "Total de ofertas publicadas",
+      totalViews: "Total de ofertas vistas",
+      totalApply: "Total de postulaciones",
+    },
   },
   locations: {
     regions: REGIONS,
