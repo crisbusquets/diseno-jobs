@@ -294,6 +294,100 @@ export default function MetricsPage() {
           </Card>
         </div>
 
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Análisis de Roles de Diseño</CardTitle>
+            <CardDescription>Distribución de roles y niveles de experiencia</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-sm font-medium mb-4">Tipos de Roles</h3>
+                <dl className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <dt>UX Design</dt>
+                    <dd className="font-medium">
+                      {metrics.jobInsights.designRoles.ux} ofertas
+                      <span className="text-sm text-muted-foreground ml-2">
+                        ({Math.round((metrics.jobInsights.designRoles.ux / metrics.overview.activeJobs) * 100)}%)
+                      </span>
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt>UI Design</dt>
+                    <dd className="font-medium">
+                      {metrics.jobInsights.designRoles.ui} ofertas
+                      <span className="text-sm text-muted-foreground ml-2">
+                        ({Math.round((metrics.jobInsights.designRoles.ui / metrics.overview.activeJobs) * 100)}%)
+                      </span>
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt>Product Design</dt>
+                    <dd className="font-medium">
+                      {metrics.jobInsights.designRoles.product} ofertas
+                      <span className="text-sm text-muted-foreground ml-2">
+                        ({Math.round((metrics.jobInsights.designRoles.product / metrics.overview.activeJobs) * 100)}%)
+                      </span>
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt>UX Research</dt>
+                    <dd className="font-medium">
+                      {metrics.jobInsights.designRoles.research} ofertas
+                      <span className="text-sm text-muted-foreground ml-2">
+                        ({Math.round((metrics.jobInsights.designRoles.research / metrics.overview.activeJobs) * 100)}%)
+                      </span>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-medium mb-4">Niveles de Experiencia</h3>
+                <dl className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <dt>Junior</dt>
+                    <dd className="font-medium">
+                      {metrics.jobInsights.experienceBreakdown.junior} ofertas
+                      <span className="text-sm text-muted-foreground ml-2">
+                        (
+                        {Math.round(
+                          (metrics.jobInsights.experienceBreakdown.junior / metrics.overview.activeJobs) * 100
+                        )}
+                        %)
+                      </span>
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt>Mid-Level</dt>
+                    <dd className="font-medium">
+                      {metrics.jobInsights.experienceBreakdown.mid} ofertas
+                      <span className="text-sm text-muted-foreground ml-2">
+                        ({Math.round((metrics.jobInsights.experienceBreakdown.mid / metrics.overview.activeJobs) * 100)}
+                        %)
+                      </span>
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt>Senior</dt>
+                    <dd className="font-medium">
+                      {metrics.jobInsights.experienceBreakdown.senior} ofertas
+                      <span className="text-sm text-muted-foreground ml-2">
+                        (
+                        {Math.round(
+                          (metrics.jobInsights.experienceBreakdown.senior / metrics.overview.activeJobs) * 100
+                        )}
+                        %)
+                      </span>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Totals section */}
         <Card>
           <CardHeader>
