@@ -32,7 +32,7 @@ export async function GET() {
       supabase.from("job_events").select("*", { count: "exact", head: true }).eq("event_type", "homepage_view"),
       supabase.from("job_events").select("*", { count: "exact", head: true }).eq("event_type", "view"),
       supabase.from("job_events").select("*", { count: "exact", head: true }).eq("event_type", "apply_click"),
-      supabase.from("job_events").select("*", { count: "exact", head: true }).eq("event_type", "job_submit"),
+      supabase.from("job_listings").select("*", { count: "exact", head: true }).not("activated_at", "is", null),
       supabase.from("job_listings").select("*", { count: "exact", head: true }).eq("is_active", true),
 
       // Time-based metrics
@@ -51,6 +51,25 @@ export async function GET() {
       supabase.from("job_listings").select("title").eq("is_active", true),
       supabase.from("job_listings").select("experience_level").eq("is_active", true),
     ]);
+
+    // Check for any Supabase errors
+    const hasError = [
+      homepageViews,
+      jobViews,
+      applyClicks,
+      jobsSubmitted,
+      activeJobs,
+      weeklyJobs,
+      monthlyJobs,
+      jobLocations,
+      jobTypes,
+      jobTitles,
+      experienceLevels,
+    ].some((result) => result.error);
+
+    if (hasError) {
+      throw new Error("Database query error");
+    }
 
     // Calculate growth and rates
     const monthlyJobGrowth = activeJobs.count ? ((monthlyJobs.count || 0) / activeJobs.count) * 100 : 0;
