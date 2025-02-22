@@ -1,0 +1,17 @@
+name: Run Job Scraper
+
+on:
+  schedule:
+    - cron: "0 8,20 * * *" # Runs twice daily at 8 AM and 8 PM UTC
+  workflow_dispatch: # Allows manual triggers
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger scraper endpoint
+        run: |
+          curl -X POST \
+            -H "x-api-key: ${{ secrets.SCRAPER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            ${{ secrets.SCRAPER_ENDPOINT_URL }}
