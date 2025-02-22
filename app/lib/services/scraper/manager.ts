@@ -4,18 +4,50 @@ import { DomestikaScraper } from "./platforms/domestika";
 // Configuration for job filtering
 const SCRAPER_CONFIG = {
   roles: [
+    // English roles
     "ux",
     "ui",
     "user experience",
     "user interface",
     "product designer",
-    "diseñador",
-    "diseñadora",
+    "product design",
+    "interaction designer",
+    "interaction design",
+    "ux/ui",
+    "ui/ux",
+    // Spanish roles
+    "diseñador de producto",
+    "diseñador ux",
+    "diseñador ui",
     "experiencia de usuario",
-    "interfaz",
-    "producto",
+    "interfaz de usuario",
+    "diseño de producto",
+    "diseñador de experiencia",
+    "diseñador de interfaz",
+    "diseñador digital",
+    "diseño de aplicaciones",
+    "diseño web",
   ],
-  locations: ["españa", "spain", "madrid", "barcelona", "valencia", "sevilla", "bilbao", "remote", "remoto"],
+  locations: [
+    // Countries
+    "españa",
+    "spain",
+    "remote",
+    "remoto",
+    // Cities
+    "madrid",
+    "barcelona",
+    "valencia",
+    "sevilla",
+    "bilbao",
+    "málaga",
+    "zaragoza",
+    // Work types
+    "híbrido",
+    "hybrid",
+    "teletrabajo",
+    "en remoto",
+  ],
   allowRemote: true,
 };
 

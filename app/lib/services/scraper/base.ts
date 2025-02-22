@@ -26,6 +26,7 @@ export interface ScrapedJob {
 export abstract class BaseJobScraper {
   protected abstract name: string;
   protected abstract baseUrl: string;
+  protected abstract getCurrentCategory(): string;
   protected pageDelay = 2000; // Delay between pages in ms
 
   constructor(
@@ -60,8 +61,15 @@ export abstract class BaseJobScraper {
 
   // Common validation for job listings
   protected validateJob(job: Partial<ScrapedJob>): boolean {
-    // Basic required fields
+    // Required fields check
     if (!job.title || !job.company || !job.description || !job.application_url) {
+      console.log("Missing required fields");
+      return false;
+    }
+
+    // Description length check
+    if (job.description.length < 100) {
+      console.log("Description too short");
       return false;
     }
 
@@ -70,19 +78,41 @@ export abstract class BaseJobScraper {
     const matchesRole = this.filterConfig.roles.some((role) => titleLower.includes(role.toLowerCase()));
 
     if (!matchesRole) {
+      console.log("Job title doesn't match target roles");
       return false;
+    }
+
+    // Location check
+    if (job.location) {
+      const locationLower = job.location.toLowerCase();
+      const matchesLocation =
+        (this.filterConfig.allowRemote && (locationLower.includes("remote") || locationLower.includes("remoto"))) ||
+        this.filterConfig.locations.some((loc) => locationLower.includes(loc.toLowerCase()));
+
+      if (!matchesLocation) {
+        console.log("Location doesn't match filters");
+        return false;
+      }
     }
 
     return true;
   }
 
   // Save jobs to database
-  protected async saveJobs(jobs: ScrapedJob[]): Promise<void> {
+  protected async saveJobs(jobs: ScrapedJob[]): Promise<ScrapedJob[]> {
     const supabase = getSupabase();
+    const savedJobs: ScrapedJob[] = [];
 
-    for (const job of jobs) {
+    // Deduplicate jobs before saving
+    const uniqueJobs = jobs.filter(
+      (job, index, self) => index === self.findIndex((j) => j.source_url === job.source_url)
+    );
+
+    console.log(`\nSaving ${uniqueJobs.length} unique jobs (filtered from ${jobs.length} total)`);
+
+    for (const job of uniqueJobs) {
       try {
-        // Check for duplicates
+        // Check for existing job
         const { data: existingJob } = await supabase
           .from("job_listings")
           .select("id")
@@ -120,24 +150,95 @@ export abstract class BaseJobScraper {
           .single();
 
         if (jobError) throw jobError;
-        console.log(`✓ Saved job: ${job.title} from ${job.company}`);
+        console.log(`✓ Saved new job: ${job.title} from ${job.company}`);
+        savedJobs.push(job);
       } catch (error) {
         console.error(`Error saving job ${job.title}:`, error);
+      }
+    }
+
+    return savedJobs;
+  }
+
+  // Log scraper run results
+  protected async logScraperRun(results: { category: string; jobsFound: number; jobsSaved: number; errors: number }) {
+    const supabase = getSupabase();
+
+    try {
+      console.log("\n=== Logging Scraper Run ===");
+      const logData = {
+        source_platform: this.name,
+        category: results.category,
+        jobs_found: results.jobsFound,
+        jobs_saved: results.jobsSaved,
+        errors: results.errors,
+        // created_at will be set by default
+      };
+
+      console.log("Attempting to log:", logData);
+
+      const { data, error } = await supabase.from("scraper_logs").insert(logData).select();
+
+      if (error) {
+        console.error("Database error logging scraper run:", error);
+        // Log the full error details
+        console.error("Full error:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+      } else {
+        console.log("✓ Successfully logged to database. Response:", data);
+      }
+    } catch (error) {
+      console.error("Error in logScraperRun:", error);
+      if (error instanceof Error) {
+        console.error("Error details:", error.message);
+        console.error("Stack:", error.stack);
       }
     }
   }
 
   // Main execution method
   async run(): Promise<void> {
+    console.log("Testing Supabase before anything...");
+    console.log(getSupabase());
+    console.log(this.name);
+    console.log("\n=== Starting Base Run ===");
+    const results = {
+      category: "",
+      jobsFound: 0,
+      jobsSaved: 0,
+      errors: 0,
+    };
+
     try {
       console.log(`\n🔍 Starting ${this.name} scraper...`);
       const jobs = await this.scrapeJobs();
+      console.log("\nGot jobs from scraper:", jobs.length); // Debug
+
       const validJobs = jobs.filter((job) => this.validateJob(job));
-      console.log(`\n📊 Found ${jobs.length} jobs, ${validJobs.length} valid`);
-      await this.saveJobs(validJobs);
+      console.log("Valid jobs:", validJobs.length); // Debug
+
+      results.jobsFound = jobs.length;
+
+      // Save jobs and count successes
+      const savedJobs = await this.saveJobs(validJobs);
+      console.log("Saved jobs:", savedJobs.length); // Debug
+
+      results.jobsSaved = savedJobs.length;
+      results.errors = jobs.length - savedJobs.length;
+
+      console.log("\nFinal results to log:", results); // Debug
+      await this.logScraperRun(results);
+
       console.log(`\n✅ ${this.name} scraper finished successfully\n`);
     } catch (error) {
-      console.error(`\n❌ Error in ${this.name} scraper:`, error);
+      console.error(`\n❌ Error in ${this.name || "Unknown"} scraper:`, error);
+      console.error("Error type:", error instanceof Error ? error.message : error);
+      console.error("Current environment variables:", process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+      results.errors++;
+      await this.logScraperRun(results);
     }
   }
 }
