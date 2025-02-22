@@ -73,17 +73,6 @@ export abstract class BaseJobScraper {
       return false;
     }
 
-    // Location validation
-    if (job.location) {
-      const locationLower = job.location.toLowerCase();
-      const matchesLocation = this.filterConfig.locations.some((loc) => locationLower.includes(loc.toLowerCase()));
-
-      // If it's not remote and doesn't match our locations, skip it
-      if (!matchesLocation && job.job_type !== "remote") {
-        return false;
-      }
-    }
-
     return true;
   }
 
@@ -131,20 +120,6 @@ export abstract class BaseJobScraper {
           .single();
 
         if (jobError) throw jobError;
-
-        // Insert benefits if any
-        if (job.benefits?.length) {
-          const { error: benefitsError } = await supabase.from("job_benefits").insert(
-            job.benefits.map((benefit) => ({
-              job_id: newJob.id,
-              benefit_name: benefit,
-              is_custom: true,
-            }))
-          );
-
-          if (benefitsError) throw benefitsError;
-        }
-
         console.log(`✓ Saved job: ${job.title} from ${job.company}`);
       } catch (error) {
         console.error(`Error saving job ${job.title}:`, error);

@@ -1,14 +1,13 @@
 // lib/services/scraper/platforms/domestika.ts
 import { BaseJobScraper, ScrapedJob } from "../base";
 import { JSDOM } from "jsdom";
-import { JobType, ExperienceLevel, ContractType } from "@/types";
 
 export class DomestikaScraper extends BaseJobScraper {
   protected name = "Domestika";
   protected baseUrl = "https://www.domestika.org/es/jobs";
 
   // Helper to determine job type from location text
-  private determineJobType(locationText: string): JobType {
+  private determineJobType(locationText: string): "remote" | "hybrid" | "onsite" {
     const lower = locationText.toLowerCase();
     if (lower.includes("remoto") || lower.includes("remote")) return "remote";
     if (lower.includes("híbrido") || lower.includes("hybrid")) return "hybrid";
@@ -16,7 +15,7 @@ export class DomestikaScraper extends BaseJobScraper {
   }
 
   // Helper to determine experience level from title and description
-  private determineExperienceLevel(title: string, description: string): ExperienceLevel {
+  private determineExperienceLevel(title: string, description: string) {
     const text = `${title} ${description}`.toLowerCase();
 
     if (text.includes("senior") || text.includes("sr.")) return "senior";
@@ -47,26 +46,16 @@ export class DomestikaScraper extends BaseJobScraper {
       const jobPage = await this.fetchPage(applyUrl);
       const description = jobPage.window.document.querySelector(".job-description")?.textContent?.trim() || "";
 
-      // Extract salary if present
-      const salaryText = jobPage.window.document.querySelector(".job-salary")?.textContent?.trim();
-
-      // Extract benefits
-      const benefits = Array.from(jobPage.window.document.querySelectorAll(".job-benefits li"))
-        .map((b) => b.textContent?.trim())
-        .filter((b): b is string => !!b);
-
       return {
         title: titleEl.textContent?.trim() || "",
         company: companyEl.textContent?.trim() || "",
         location: locationEl?.textContent?.trim(),
         description,
-        salary_range: salaryText || undefined,
         company_logo: logoEl?.getAttribute("src"),
         job_type: this.determineJobType(locationEl?.textContent || ""),
         experience_level: this.determineExperienceLevel(titleEl.textContent || "", description),
         contract_type: "fulltime", // Default to fulltime as Domestika rarely specifies
         application_url: applyUrl,
-        benefits,
         source_platform: this.name,
         source_url: applyUrl,
       };
