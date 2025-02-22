@@ -4,7 +4,14 @@ import { JSDOM } from "jsdom";
 
 export class DomestikaScraper extends BaseJobScraper {
   protected name = "Domestika";
-  protected baseUrl = "https://www.domestika.org/es/jobs";
+  protected baseUrl = "https://www.domestika.org/es/jobs/area";
+
+  // List of categories (can be expanded dynamically)
+  private categories = [
+    { id: "223", name: "Diseño de Producto Digital" },
+    { id: "10", name: "UX/UI" },
+    { id: "56", name: "Diseño Web" },
+  ];
 
   // Helper to determine job type from location text
   private determineJobType(locationText: string): "remote" | "hybrid" | "onsite" {
@@ -24,21 +31,31 @@ export class DomestikaScraper extends BaseJobScraper {
     return "mid"; // Default to mid-level
   }
 
+  // Get job listings from the page
   protected getJobListings(dom: JSDOM): Element[] {
     return Array.from(dom.window.document.querySelectorAll(".job-item"));
   }
 
+  // Extract job data from a job listing element
   protected async extractJobData(element: Element): Promise<Partial<ScrapedJob>> {
+    console.log("Raw job listing HTML:", element.outerHTML);
     try {
       // Get basic elements
       const titleEl = element.querySelector(".job-item__title");
       const companyEl = element.querySelector(".job-item__company");
-      const locationEl = element.querySelector(".job-item__location");
-      const applyUrl = element.querySelector("a.job-item__title")?.getAttribute("href");
-      const logoEl = element.querySelector(".job-item__logo img");
+      const locationEl = element.querySelector(".job-item__city");
+      const applyUrl = element.querySelector(".job-title")?.getAttribute("href");
+      const logoEl =
+        element.querySelector(".job-item__logo img")?.getAttribute("data-src") ||
+        element.querySelector(".job-item__logo img")?.getAttribute("src");
 
       // If we don't have required fields, skip
       if (!titleEl || !companyEl || !applyUrl) {
+        console.log("Missing fields:", {
+          title: titleEl?.textContent?.trim(),
+          company: companyEl?.textContent?.trim(),
+          applyUrl,
+        });
         throw new Error("Missing required fields");
       }
 
@@ -51,10 +68,10 @@ export class DomestikaScraper extends BaseJobScraper {
         company: companyEl.textContent?.trim() || "",
         location: locationEl?.textContent?.trim(),
         description,
-        company_logo: logoEl?.getAttribute("src"),
+        company_logo: logoEl,
         job_type: this.determineJobType(locationEl?.textContent || ""),
         experience_level: this.determineExperienceLevel(titleEl.textContent || "", description),
-        contract_type: "fulltime", // Default to fulltime as Domestika rarely specifies
+        contract_type: "fulltime",
         application_url: applyUrl,
         source_platform: this.name,
         source_url: applyUrl,
@@ -65,13 +82,14 @@ export class DomestikaScraper extends BaseJobScraper {
     }
   }
 
-  async scrapeJobs(): Promise<ScrapedJob[]> {
+  // Scrape jobs for a specific category
+  async scrapeJobsForCategory(categoryId: string): Promise<ScrapedJob[]> {
     const jobs: ScrapedJob[] = [];
 
     try {
-      // Scrape first 2 pages for MVP
+      // Scrape first 2 pages for each category
       for (let page = 1; page <= 2; page++) {
-        const url = `${this.baseUrl}?page=${page}&category=design-ux`;
+        const url = `${this.baseUrl}/${categoryId}?page=${page}`;
         console.log(`\nScraping ${url}`);
 
         const dom = await this.fetchPage(url);
@@ -94,5 +112,18 @@ export class DomestikaScraper extends BaseJobScraper {
     }
 
     return jobs;
+  }
+
+  // Scrape jobs across multiple categories
+  async scrapeJobs(): Promise<ScrapedJob[]> {
+    const allJobs: ScrapedJob[] = [];
+
+    for (const category of this.categories) {
+      console.log(`\nScraping category: ${category.name}`);
+      const jobs = await this.scrapeJobsForCategory(category.id);
+      allJobs.push(...jobs);
+    }
+
+    return allJobs;
   }
 }
