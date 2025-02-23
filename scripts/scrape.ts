@@ -1,16 +1,16 @@
 // scripts/scrape.ts
-import { runScrapers } from "../app/lib/services/scraper/manager";
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+
+import { scrapeJobs } from "../app/lib/services/scraper/scraper";
 
 async function main() {
-  console.log("🤖 Starting local scraper...\n");
-
   try {
-    await runScrapers();
-    console.log("\n✅ Scraping completed successfully");
+    const result = await scrapeJobs();
+    console.log("\nScraping completed:", result);
   } catch (error) {
-    console.error("\n❌ Scraping failed:", error);
-    process.exit(1);
+    console.error("Failed to scrape:", error);
   }
 }
 
-main().catch(console.error);
+main();

@@ -2,12 +2,13 @@
   "name": "diseno-jobs",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "scrape": "NODE_PATH=. tsx --tsconfig tsconfig.scripts.json -r tsconfig-paths/register scripts/scrape.ts"
+    "scrape": "node scripts/scrape.js"
   },
   "dependencies": {
     "@cloudinary/react": "^1.13.1",
@@ -36,6 +37,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^16.4.7",
     "firebase": "^11.0.1",
     "jsdom": "^26.0.0",
     "lucide-react": "^0.454.0",
