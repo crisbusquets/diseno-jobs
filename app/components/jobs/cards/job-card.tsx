@@ -13,6 +13,7 @@ interface JobCardProps {
   className?: string;
 }
 
+// components/jobs/cards/job-card.tsx
 export default function JobCard({ job, variant = "list", showApplySection = true, className }: JobCardProps) {
   return (
     <div className="space-y-6">
@@ -24,8 +25,12 @@ export default function JobCard({ job, variant = "list", showApplySection = true
         <CardContent className="space-y-4">
           <JobMetadata job={job} variant={variant === "detailed" ? "detailed" : "compact"} />
 
-          <div className="prose max-w-none text-muted-foreground">
-            {variant === "detailed" ? job.description : <p className="line-clamp-2">{job.description}</p>}
+          <div className="prose max-w-none text-muted-foreground [&>p]:mb-4 [&>p:last-child]:mb-0">
+            {variant === "detailed" ? (
+              <div dangerouslySetInnerHTML={{ __html: job.description }} />
+            ) : (
+              <div dangerouslySetInnerHTML={{ __html: job.description }} className="line-clamp-2" />
+            )}
           </div>
         </CardContent>
 
